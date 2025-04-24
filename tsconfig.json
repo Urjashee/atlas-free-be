@@ -1,12 +1,27 @@
 {
   "compilerOptions": {
-    "target": "es2016",
     "module": "commonjs",
+    "target": "ES2016",
+    "outDir": "./dist",
+    //    "baseUrl": "./",
+    "strict": false,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "skipLibCheck": true,
-    "outDir": "dist"
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "types": ["node", "express"]
   },
-  "include": ["src"]
+  "include": [
+    "src/**/*",
+    "./src/types",
+    "./node_modules/@types",
+    "src/views/**/*",
+    "node_modules/@types/node/globals.d.ts",
+    "node_modules/@types/node/globals.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }
