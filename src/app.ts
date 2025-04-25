@@ -24,7 +24,7 @@ useExpressServer(app, {
     controllers: [controllerPath],
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 
 AppDataSource.initialize()
     .then(() => {

@@ -1,0 +1,894 @@
+{
+  "Primary purpose": [
+    {
+      "id": 1,
+      "name": "Victim Service Provider"
+    },
+    {
+      "id": 2,
+      "name": "Homelessness Service Provider"
+    },
+    {
+      "id": 3,
+      "name": "Sexual Assault Service Provider"
+    },
+    {
+      "id": 4,
+      "name": "Domestic Violence Service Provider"
+    },
+    {
+      "id": 5,
+      "name": "Runaway-Homeless Youth Provider"
+    },
+    {
+      "id": 6,
+      "name": "Mental-Health Provider"
+    },
+    {
+      "id": 7,
+      "name": "Substance Use Disorder Service Provider"
+    },
+    {
+      "id": 8,
+      "name": "Medical Service Provider"
+    },
+    {
+      "id": 9,
+      "name": "Educational or Vocational Training Provider"
+    },
+    {
+      "id": 10,
+      "name": "Legal Advocacy Provider"
+    },
+    {
+      "id": 11,
+      "name": "Information and Referral Provider"
+    },
+    {
+      "id": 12,
+      "name": "Other"
+    }
+  ],
+  "Platform purpose": [
+    {
+      "id": 13,
+      "name": "Provide services for survivors of human trafficking"
+    },
+    {
+      "id": 14,
+      "name": "Seek services for survivors of human trafficking"
+    }
+  ],
+  "Affiliation and Licenses": [
+    {
+      "id": 15,
+      "name": "Atlas Free Network"
+    },
+    {
+      "id": 16,
+      "name": "Evangelical Council for Financial Accountability (ECFA) Accredited"
+    },
+    {
+      "id": 17,
+      "name": "Better Business Bureau (BBB) Accredited"
+    },
+    {
+      "id": 18,
+      "name": "Office for Victims of Crime grantee"
+    },
+    {
+      "id": 19,
+      "name": "Office for Violence Against Women grantee"
+    },
+    {
+      "id": 20,
+      "name": "VOCA grantee"
+    },
+    {
+      "id": 21,
+      "name": "Licensed to provide residential care to minors"
+    },
+    {
+      "id": 22,
+      "name": "Other (should be able to add multiple others while we get more intel on possible affiliations)"
+    }
+  ],
+  "Service type": [
+    {
+      "id": 1,
+      "name": "Advocacy/Case Management"
+    },
+    {
+      "id": 2,
+      "name": "Educational/Vocational Service"
+    },
+    {
+      "id": 3,
+      "name": "Housing, Long-Term (3+ months)"
+    },
+    {
+      "id": 4,
+      "name": "Housing, Short-Term (24 hours up to 3 months)"
+    },
+    {
+      "id": 5,
+      "name": "Legal Advocacy"
+    },
+    {
+      "id": 6,
+      "name": "Mental Health Service"
+    },
+    {
+      "id": 7,
+      "name": "Substance-Use Disorder Service"
+    }
+  ],
+  "Slot beds": [
+    {
+      "id": 8,
+      "name": "Total beds"
+    },
+    {
+      "id": 9,
+      "name": "Total slots"
+    }
+  ],
+  "Genders served": [
+    {
+      "id": 10,
+      "name": "All Genders (automatically selects all below)"
+    },
+    {
+      "id": 11,
+      "name": "Female"
+    },
+    {
+      "id": 12,
+      "name": "Male"
+    },
+    {
+      "id": 13,
+      "name": "Non-Binary"
+    },
+    {
+      "id": 14,
+      "name": "Transgender"
+    },
+    {
+      "id": 15,
+      "name": "Two-Spirit"
+    }
+  ],
+  "Served to": [
+    {
+      "id": 16,
+      "name": "Single Individuals"
+    },
+    {
+      "id": 17,
+      "name": "Pregnant Individuals"
+    },
+    {
+      "id": 18,
+      "name": "Parenting Individuals"
+    },
+    {
+      "id": 19,
+      "name": "Married Couples"
+    },
+    {
+      "id": 20,
+      "name": "Parenting Couples"
+    }
+  ],
+  "Citizenship requirements": [
+    {
+      "id": 21,
+      "name": "We accept US citizens"
+    },
+    {
+      "id": 22,
+      "name": "We accept documented foreign nationals"
+    },
+    {
+      "id": 23,
+      "name": "We accept undocumented foreign nationals"
+    }
+  ],
+  "Language": [
+    {
+      "id": 24,
+      "name": "English-speaking"
+    },
+    {
+      "id": 25,
+      "name": "Limited English-speaking ability"
+    },
+    {
+      "id": 26,
+      "name": "No English-speaking ability"
+    }
+  ],
+  "Traffic status": [
+    {
+      "id": 27,
+      "name": "Sex Trafficking"
+    },
+    {
+      "id": 28,
+      "name": "Labor Trafficking"
+    },
+    {
+      "id": 29,
+      "name": "Prostitution"
+    },
+    {
+      "id": 30,
+      "name": "Survival Sex"
+    },
+    {
+      "id": 31,
+      "name": "Other forms of commercial sex"
+    }
+  ],
+  "Legal": [
+    {
+      "id": 32,
+      "name": "have an abuser actively looking for them"
+    },
+    {
+      "id": 33,
+      "name": "have outstanding warrants or legal obligations"
+    },
+    {
+      "id": 34,
+      "name": "are involved in open or pending investigations or cases"
+    },
+    {
+      "id": 35,
+      "name": "are currently incarcerated"
+    },
+    {
+      "id": 36,
+      "name": "were recently incarcerated"
+    },
+    {
+      "id": 37,
+      "name": "will be on parole or probation"
+    },
+    {
+      "id": 38,
+      "name": "are part of a diversion program with court requirements"
+    },
+    {
+      "id": 39,
+      "name": "have a history of criminal charges"
+    },
+    {
+      "id": 40,
+      "name": "are registered sex offenders"
+    }
+  ],
+  "Health needs": [
+    {
+      "id": 41,
+      "name": "are currently taking prescribed medication for mental illness"
+    },
+    {
+      "id": 42,
+      "name": "are currently taking prescribed medication for opioid treatment"
+    },
+    {
+      "id": 43,
+      "name": "experience episodes of psychosis"
+    },
+    {
+      "id": 44,
+      "name": "have a certified service animal"
+    },
+    {
+      "id": 45,
+      "name": "have an emotional support animal"
+    },
+    {
+      "id": 46,
+      "name": "have immediate health concerns"
+    },
+    {
+      "id": 47,
+      "name": "have physical disabilities"
+    },
+    {
+      "id": 48,
+      "name": "have reported self-injuring"
+    },
+    {
+      "id": 49,
+      "name": "have reported suicide ideation"
+    },
+    {
+      "id": 50,
+      "name": "have used illegal substances in the last 30 days"
+    },
+    {
+      "id": 51,
+      "name": "have used illegal substances in the last 7 days"
+    },
+    {
+      "id": 52,
+      "name": "use alcohol"
+    },
+    {
+      "id": 53,
+      "name": "use marijuana"
+    },
+    {
+      "id": 54,
+      "name": "use tobacco products"
+    }
+  ],
+  "Medications": [
+    {
+      "id": 55,
+      "name": "Not taking any medications"
+    },
+    {
+      "id": 56,
+      "name": "Stimulants (Adderall, Ritalin, Vyvanse, etc)"
+    },
+    {
+      "id": 57,
+      "name": "Mood Stabilizers (Lithium, Abilify, Saphris, Vraylar, etc)"
+    },
+    {
+      "id": 58,
+      "name": "Antipsychotic (Risperdal, Seroquel, Ziprasidone, etc)"
+    },
+    {
+      "id": 59,
+      "name": "Injectables (insulin, etc)"
+    },
+    {
+      "id": 60,
+      "name": "Anti-Anxiety (Xanax, Klonopin, Valium, Ativan, etc)"
+    },
+    {
+      "id": 61,
+      "name": "Anti-Depressants/SSRI’s (Prozac, Seroxat, Lustral, Cipramil, etc)"
+    },
+    {
+      "id": 62,
+      "name": "Methadone"
+    },
+    {
+      "id": 63,
+      "name": "Suboxone"
+    },
+    {
+      "id": 64,
+      "name": "Narcotics (Vicodin, OxyContin, Percocet)"
+    },
+    {
+      "id": 65,
+      "name": "Nerve Pain/Anticonvulsant (Gabapentin, Lyrica)"
+    },
+    {
+      "id": 66,
+      "name": "Medical Marijuana"
+    },
+    {
+      "id": 67,
+      "name": "Other"
+    }
+  ],
+  "Mental health diagnoses": [
+    {
+      "id": 68,
+      "name": "Anxiety"
+    },
+    {
+      "id": 69,
+      "name": "Bipolar"
+    },
+    {
+      "id": 70,
+      "name": "Borderline Personality Disorder"
+    },
+    {
+      "id": 71,
+      "name": "PTSD"
+    },
+    {
+      "id": 72,
+      "name": "Depression"
+    },
+    {
+      "id": 73,
+      "name": "Dissociative Identity Disorder"
+    },
+    {
+      "id": 74,
+      "name": "Schizophrenia"
+    },
+    {
+      "id": 75,
+      "name": "Self-injuring"
+    },
+    {
+      "id": 76,
+      "name": "Suicide ideation/Suicide Risk"
+    },
+    {
+      "id": 77,
+      "name": "Eating Disorder"
+    },
+    {
+      "id": 78,
+      "name": "None"
+    },
+    {
+      "id": 79,
+      "name": "Other (fill in option)"
+    }
+  ],
+  "Physical accommodation": [
+    {
+      "id": 80,
+      "name": "Wheelchair accessibility"
+    },
+    {
+      "id": 81,
+      "name": "Ramp access"
+    },
+    {
+      "id": 82,
+      "name": "Assistance with mobility (e.g., walking, getting to/from locations)"
+    },
+    {
+      "id": 83,
+      "name": "Visual assistance (e.g., large print, screen reader support)"
+    },
+    {
+      "id": 84,
+      "name": "Hearing assistance (e.g., sign language interpreter, hearing loop)"
+    },
+    {
+      "id": 85,
+      "name": "Seating with support (e.g., back support, specific seating arrangement)"
+    },
+    {
+      "id": 86,
+      "name": "Specialized equipment (e.g., adjustable tables, assistive technology)"
+    },
+    {
+      "id": 87,
+      "name": "None"
+    }
+  ],
+  "Smoking allowed": [
+    {
+      "id": 88,
+      "name": "Cigarettes"
+    },
+    {
+      "id": 89,
+      "name": "Recreational Marijuana"
+    },
+    {
+      "id": 90,
+      "name": "Vapes"
+    },
+    {
+      "id": 91,
+      "name": "None"
+    }
+  ],
+  "Entry requirement": [
+    {
+      "id": 92,
+      "name": "Verified as a victim/survivor of human trafficking"
+    },
+    {
+      "id": 93,
+      "name": "Must be clean/sober for a certain number of days"
+    },
+    {
+      "id": 94,
+      "name": "Must have a clean Urine Analysis (U/A)"
+    },
+    {
+      "id": 95,
+      "name": "None of the above"
+    }
+  ],
+  "Service model": [
+    {
+      "id": 96,
+      "name": "Person-Centered/Individualized"
+    },
+    {
+      "id": 97,
+      "name": "Survivor-Informed"
+    },
+    {
+      "id": 98,
+      "name": "Program-Centered/curriculum-based"
+    },
+    {
+      "id": 99,
+      "name": "Faith-based"
+    },
+    {
+      "id": 100,
+      "name": "Trauma-Informed"
+    },
+    {
+      "id": 101,
+      "name": "Clean and sober"
+    },
+    {
+      "id": 102,
+      "name": "Evidence-Based"
+    },
+    {
+      "id": 103,
+      "name": "Harm Reduction"
+    },
+    {
+      "id": 104,
+      "name": "Strengths-Based"
+    },
+    {
+      "id": 105,
+      "name": "Recovery-Focused"
+    },
+    {
+      "id": 106,
+      "name": "Survivor-Led"
+    }
+  ],
+  "Faith engagement": [
+    {
+      "id": 107,
+      "name": "None"
+    },
+    {
+      "id": 108,
+      "name": "Voluntary"
+    },
+    {
+      "id": 109,
+      "name": "Expected attendance, but not mandatory participation"
+    },
+    {
+      "id": 110,
+      "name": "Mandatory participation"
+    }
+  ],
+  "Service structure": [
+    {
+      "id": 111,
+      "name": "High structure (very limited free time)"
+    },
+    {
+      "id": 112,
+      "name": "Moderate structure (some free time)"
+    },
+    {
+      "id": 113,
+      "name": "Low structure (majority free time)"
+    }
+  ],
+  "Sleeping arrangement": [
+    {
+      "id": 114,
+      "name": "Independent housing (live alone)"
+    },
+    {
+      "id": 115,
+      "name": "Shared housing (private bedrooms)"
+    },
+    {
+      "id": 116,
+      "name": "Shared housing (shared bedrooms)"
+    }
+  ],
+  "Staffing level": [
+    {
+      "id": 117,
+      "name": "24/7 staffing"
+    },
+    {
+      "id": 118,
+      "name": "Staff on-site sometimes"
+    },
+    {
+      "id": 119,
+      "name": "No staff on-site"
+    }
+  ],
+  "Team diversity": [
+    {
+      "id": 120,
+      "name": "Survivor(s) or Lived Experience Experts from the Commercial Sex Trade"
+    },
+    {
+      "id": 121,
+      "name": "Bilingual or Multilingual"
+    },
+    {
+      "id": 122,
+      "name": "Black, Indigenous, or People of Color"
+    },
+    {
+      "id": 123,
+      "name": "Gender and sexual minorities"
+    },
+    {
+      "id": 124,
+      "name": "People with disabilities"
+    },
+    {
+      "id": 125,
+      "name": "Religious minorities"
+    }
+  ],
+  "Service guideline": [
+    {
+      "id": 126,
+      "name": "Daily curfew (must be in by a certain time each night)"
+    },
+    {
+      "id": 127,
+      "name": "Initial blackout period (no phone, no Internet, etc)"
+    },
+    {
+      "id": 128,
+      "name": "No unapproved visitors"
+    },
+    {
+      "id": 129,
+      "name": "None of the above"
+    }
+  ],
+  "Support provided": [
+    {
+      "id": 130,
+      "name": "Case Management"
+    },
+    {
+      "id": 131,
+      "name": "Education"
+    },
+    {
+      "id": 132,
+      "name": "Employment Placement"
+    },
+    {
+      "id": 133,
+      "name": "Employment Preparation"
+    },
+    {
+      "id": 134,
+      "name": "Equine/Animal Therapy"
+    },
+    {
+      "id": 135,
+      "name": "Financial Assistance"
+    },
+    {
+      "id": 136,
+      "name": "Food/Groceries"
+    },
+    {
+      "id": 137,
+      "name": "Goal-planning"
+    },
+    {
+      "id": 138,
+      "name": "Housing advocacy/navigation"
+    },
+    {
+      "id": 139,
+      "name": "Hygiene Supplies"
+    },
+    {
+      "id": 140,
+      "name": "Immigration Support"
+    },
+    {
+      "id": 141,
+      "name": "Information and Referral"
+    },
+    {
+      "id": 142,
+      "name": "Life Coaching"
+    },
+    {
+      "id": 143,
+      "name": "Life Skills"
+    },
+    {
+      "id": 144,
+      "name": "Medical Consultation"
+    },
+    {
+      "id": 145,
+      "name": "Medical Service"
+    },
+    {
+      "id": 146,
+      "name": "Mental Health Counseling/Trauma therapy (licensed)"
+    },
+    {
+      "id": 147,
+      "name": "Mentorship"
+    },
+    {
+      "id": 148,
+      "name": "Personal Advocacy"
+    },
+    {
+      "id": 149,
+      "name": "Personal ID & Documentation Support"
+    },
+    {
+      "id": 150,
+      "name": "Substance Use Services (licensed)"
+    },
+    {
+      "id": 151,
+      "name": "Support Groups"
+    }
+  ],
+  "Support offered": [
+    {
+      "id": 152,
+      "name": "Case Management"
+    },
+    {
+      "id": 153,
+      "name": "Education"
+    },
+    {
+      "id": 154,
+      "name": "Employment Placement"
+    },
+    {
+      "id": 155,
+      "name": "Employment Preparation"
+    },
+    {
+      "id": 156,
+      "name": "Equine/Animal Therapy"
+    },
+    {
+      "id": 157,
+      "name": "Financial Assistance"
+    },
+    {
+      "id": 158,
+      "name": "Food/Groceries"
+    },
+    {
+      "id": 159,
+      "name": "Housing advocacy/navigation"
+    },
+    {
+      "id": 160,
+      "name": "Immigration Support"
+    },
+    {
+      "id": 161,
+      "name": "Life Coaching"
+    },
+    {
+      "id": 162,
+      "name": "Life Skills"
+    },
+    {
+      "id": 163,
+      "name": "Medical Consultation"
+    },
+    {
+      "id": 164,
+      "name": "Medical Service"
+    },
+    {
+      "id": 165,
+      "name": "Mental Health Counseling/Trauma therapy (licensed)"
+    },
+    {
+      "id": 166,
+      "name": "Mentorship"
+    },
+    {
+      "id": 167,
+      "name": "Personal ID & Documentation Support"
+    },
+    {
+      "id": 168,
+      "name": "Substance Use Services (licensed)"
+    },
+    {
+      "id": 169,
+      "name": "Support Groups"
+    }
+  ],
+  "Speaking ability": [
+    {
+      "id": 1,
+      "name": "Fluent"
+    },
+    {
+      "id": 2,
+      "name": "Limited"
+    },
+    {
+      "id": 3,
+      "name": "None"
+    }
+  ],
+  "Race ethnicity": [
+    {
+      "id": 4,
+      "name": "Asian (Far East, Southeast Asia, or the Indian subcontinent. India, China, the Philippine Islands, Japan, Korea, or Vietnam, Asian Indian, Chinese, Filipino, Korean, Japanese, Vietnamese, Other Asian, Pakistani, Cambodian, Hmong, Thai, Bengali, Mien, etc."
+    },
+    {
+      "id": 5,
+      "name": "Native Hawaiian and Other Pacific Islander (Hawaii, Guam, Samoa, Pacific Islands, Native Hawaiian, Chamorro, Samoan, Other Pacific Islander, Pacific Islander, Palauan, Tahitian, Chuukese, Pohnpeian, Saipanese, Yapese, etc.)"
+    },
+    {
+      "id": 6,
+      "name": "American Indian and Alaska Native (North and South America, race as \"American Indian or Alaska Native\", Navajo Nation, Blackfeet Tribe, Mayan, Aztec, Native Village of Barrow Inupiat, or Nome Eskimo Community.)"
+    },
+    {
+      "id": 7,
+      "name": "Black or African American (Black racial groups of Africa. Such as African American, Jamaican, Haitian, Nigerian, Ethiopian, or Somali, Ghanaian, South African, Barbadian, Kenyan, Liberian, Bahamian, etc.)"
+    },
+    {
+      "id": 8,
+      "name": "White (Europe, the Middle East, or North Africa, German, Irish, English, Italian, Lebanese, Egyptian, Polish, French, Iranian, Slavic, Cajun, Chaldean, etc.)"
+    },
+    {
+      "id": 9,
+      "name": "prefer(s) not to say"
+    }
+  ],
+  "Citizenship status": [
+    {
+      "id": 10,
+      "name": "US Citizen"
+    },
+    {
+      "id": 11,
+      "name": "Documented foreign national"
+    },
+    {
+      "id": 12,
+      "name": "Undocumented foreign national"
+    }
+  ],
+  "Birthdate status": [
+    {
+      "id": 13,
+      "name": "Emancipated"
+    },
+    {
+      "id": 14,
+      "name": "Ward of the State"
+    },
+    {
+      "id": 15,
+      "name": "About to age-out"
+    },
+    {
+      "id": 16,
+      "name": "Parent or guardian consent"
+    },
+    {
+      "id": 17,
+      "name": "Determination in Process"
+    }
+  ]
+}

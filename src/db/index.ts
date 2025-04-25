@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import {ServiceHeadings} from "../entity/ServiceHeadings";
 import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions";
+import {AdvocateService} from "../entity/AdvocateService";
+import {RegistrationOption} from "../entity/RegistrationOption";
 
 dotenv.config();
 
@@ -50,8 +52,8 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 5, name: 'Legal Advocacy', type: "service_type",serviceHeading: heading_general_details},
     {id: 6, name: 'Mental Health Service', type: "service_type",serviceHeading: heading_general_details},
     {id: 7, name: 'Substance-Use Disorder Service', type: "service_type",serviceHeading: heading_general_details},
-    {id: 8, name: 'Substance-Use Disorder Service', type: "slots_beds",serviceHeading: heading_general_details},
-    {id: 9, name: 'Substance-Use Disorder Service', type: "slots_beds",serviceHeading: heading_general_details},
+    {id: 8, name: 'Total beds', type: "slots_beds",serviceHeading: heading_general_details},
+    {id: 9, name: 'Total slots', type: "slots_beds",serviceHeading: heading_general_details},
     {id: 10, name: 'All Genders (automatically selects all below)', type: "genders_served",serviceHeading: heading_demographics},
     {id: 11, name: 'Female', type: "genders_served",serviceHeading: heading_demographics},
     {id: 12, name: 'Male', type: "genders_served",serviceHeading: heading_demographics},
@@ -213,6 +215,49 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 168, name: 'Substance Use Services (licensed)', type: 'support_offered', serviceHeading: heading_offerings},
     {id: 169, name: 'Support Groups', type: 'support_offered', serviceHeading: heading_offerings},
 ];
+const advocate_service: AdvocateService[] = [
+    {id: 1, name: 'Fluent', type: 'speaking_ability'},
+    {id: 2, name: 'Limited', type: 'speaking_ability'},
+    {id: 3, name: 'None', type: 'speaking_ability'},
+    {id: 4, name: 'Asian (Far East, Southeast Asia, or the Indian subcontinent. India, China, the Philippine Islands, Japan, Korea, or Vietnam, Asian Indian, Chinese, Filipino, Korean, Japanese, Vietnamese, Other Asian, Pakistani, Cambodian, Hmong, Thai, Bengali, Mien, etc.)', type: 'race_ethinicity'},
+    {id: 5, name: 'Native Hawaiian and Other Pacific Islander (Hawaii, Guam, Samoa, Pacific Islands, Native Hawaiian, Chamorro, Samoan, Other Pacific Islander, Pacific Islander, Palauan, Tahitian, Chuukese, Pohnpeian, Saipanese, Yapese, etc.)', type: 'race_ethinicity'},
+    {id: 6, name: 'American Indian and Alaska Native (North and South America, race as "American Indian or Alaska Native", Navajo Nation, Blackfeet Tribe, Mayan, Aztec, Native Village of Barrow Inupiat, or Nome Eskimo Community.)', type: 'race_ethinicity'},
+    {id: 7, name: 'Black or African American (Black racial groups of Africa. Such as African American, Jamaican, Haitian, Nigerian, Ethiopian, or Somali, Ghanaian, South African, Barbadian, Kenyan, Liberian, Bahamian, etc.)', type: 'race_ethinicity'},
+    {id: 8, name: 'White (Europe, the Middle East, or North Africa, German, Irish, English, Italian, Lebanese, Egyptian, Polish, French, Iranian, Slavic, Cajun, Chaldean, etc.)', type: 'race_ethinicity'},
+    {id: 9, name: 'prefer(s) not to say', type: 'race_ethinicity'},
+    {id: 10, name: 'US Citizen', type: 'citizenship_status'},
+    {id: 11, name: 'Documented foreign national', type: 'citizenship_status'},
+    {id: 12, name: 'Undocumented foreign national', type: 'citizenship_status'},
+    {id: 13, name: 'Emancipated', type: 'birthdate_status'},
+    {id: 14, name: 'Ward of the State', type: 'birthdate_status'},
+    {id: 15, name: 'About to age-out', type: 'birthdate_status'},
+    {id: 16, name: 'Parent or guardian consent', type: 'birthdate_status'},
+    {id: 17, name: 'Determination in Process', type: 'birthdate_status'},
+];
+const registration_option: RegistrationOption[] = [
+    {id: 1, name: 'Victim Service Provider', type: 'primary_purpose'},
+    {id: 2, name: 'Homelessness Service Provider', type: 'primary_purpose'},
+    {id: 3, name: 'Sexual Assault Service Provider', type: 'primary_purpose'},
+    {id: 4, name: 'Domestic Violence Service Provider', type: 'primary_purpose'},
+    {id: 5, name: 'Runaway-Homeless Youth Provider', type: 'primary_purpose'},
+    {id: 6, name: 'Mental-Health Provider', type: 'primary_purpose'},
+    {id: 7, name: 'Substance Use Disorder Service Provider', type: 'primary_purpose'},
+    {id: 8, name: 'Medical Service Provider', type: 'primary_purpose'},
+    {id: 9, name: 'Educational or Vocational Training Provider', type: 'primary_purpose'},
+    {id: 10, name: 'Legal Advocacy Provider', type: 'primary_purpose'},
+    {id: 11, name: 'Information and Referral Provider', type: 'primary_purpose'},
+    {id: 12, name: 'Other', type: 'primary_purpose'},
+    {id: 13, name: 'Provide services for survivors of human trafficking', type: 'platform_purpose'},
+    {id: 14, name: 'Seek services for survivors of human trafficking', type: 'platform_purpose'},
+    {id: 15, name: 'Atlas Free Network', type: 'affiliations_licenses'},
+    {id: 16, name: 'Evangelical Council for Financial Accountability (ECFA) Accredited', type: 'affiliations_licenses'},
+    {id: 17, name: 'Better Business Bureau (BBB) Accredited', type: 'affiliations_licenses'},
+    {id: 18, name: 'Office for Victims of Crime grantee', type: 'affiliations_licenses'},
+    {id: 19, name: 'Office for Violence Against Women grantee', type: 'affiliations_licenses'},
+    {id: 20, name: 'VOCA grantee', type: 'affiliations_licenses'},
+    {id: 21, name: 'Licensed to provide residential care to minors', type: 'affiliations_licenses'},
+    {id: 22, name: 'Other (should be able to add multiple others while we get more intel on possible affiliations)', type: 'affiliations_licenses'},
+];
 
 async function seedRoles() {
     await new Promise<void>((resolve, reject) => {
@@ -232,6 +277,60 @@ async function seedRoles() {
             connection.query(query, [data.id, data.name], (err) => {
                 if (err) {
                     console.error('Error inserting role data:', err);
+                    reject(err);
+                    return;
+                }
+                console.log('Data inserted:', data.id);
+                resolve();
+            });
+        });
+    }
+}
+async function seedAdvocateServices() {
+    await new Promise<void>((resolve, reject) => {
+        connection.query('TRUNCATE TABLE advocate_service', (err) => {
+            if (err) {
+                console.error('Error truncating advocate_service table:', err);
+                reject(err);
+                return;
+            }
+            console.log('advocate_service table truncated');
+            resolve();
+        });
+    });
+    for (const data of advocate_service) {
+        const query = 'INSERT INTO advocate_service (id, name, type) VALUES (?, ?, ?)';
+        await new Promise<void>((resolve, reject) => {
+            connection.query(query, [data.id, data.name, data.type], (err) => {
+                if (err) {
+                    console.error('Error inserting Advocate service data:', err);
+                    reject(err);
+                    return;
+                }
+                console.log('Data inserted:', data.id);
+                resolve();
+            });
+        });
+    }
+}
+async function seedRegistrationOption() {
+    await new Promise<void>((resolve, reject) => {
+        connection.query('TRUNCATE TABLE registration_option', (err) => {
+            if (err) {
+                console.error('Error truncating registration_option table:', err);
+                reject(err);
+                return;
+            }
+            console.log('registration_option table truncated');
+            resolve();
+        });
+    });
+    for (const data of registration_option) {
+        const query = 'INSERT INTO registration_option (id, name, type) VALUES (?, ?, ?)';
+        await new Promise<void>((resolve, reject) => {
+            connection.query(query, [data.id, data.name, data.type], (err) => {
+                if (err) {
+                    console.error('Error inserting Registration Option data:', err);
                     reject(err);
                     return;
                 }
@@ -329,6 +428,8 @@ connection.connect((err) => {
     seedRoles()
         .then(seedServiceTypes)
         .then(seedGeneralDetails)
+        .then(seedAdvocateServices)
+        .then(seedRegistrationOption)
         .finally(() => {
             connection.end((err) => {
                 if (err) {
