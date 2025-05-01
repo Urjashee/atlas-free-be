@@ -8,7 +8,7 @@ export class JwtHelper {
             return jwt.sign({
                 id: user.id,
                 email: user.email,
-                role: user.role,
+                role: user.role.id,
                 isActive: user.is_active,
                 isStatus: user.is_status,
                 isProfile: user.is_profile,

@@ -13,7 +13,7 @@ export const adminMiddleware = async (req: Request, res: Response, next: NextFun
     try {
         const ADVISOR_ROLE_ID: number = Constants.ROLE_ADMIN;
         const decoded = jwt.decode(token) as JwtPayload | null;
-        if (!decoded || decoded.roleId !== ADVISOR_ROLE_ID) {
+        if (!decoded || decoded.role !== ADVISOR_ROLE_ID) {
             return ResponseFormatter.unauthorizedResponse(res, 'Not an admin');
         }
         next()
