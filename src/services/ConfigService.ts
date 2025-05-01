@@ -1,11 +1,9 @@
 import AppDataSource from "../../ormconfig";
-import {ServiceHeadings} from "../entity/ServiceHeadings";
 import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions";
 import {RegistrationOption} from "../entity/RegistrationOption";
 import {AdvocateService} from "../entity/AdvocateService";
 
 export class ConfigService {
-    private serviceHeadingRepository = AppDataSource.getRepository(ServiceHeadings);
     private serviceDetailOptionRepository = AppDataSource.getRepository(ServiceDetailsOptions);
     private registrationOptionRepository = AppDataSource.getRepository(RegistrationOption);
     private advocateServiceRepository = AppDataSource.getRepository(AdvocateService);

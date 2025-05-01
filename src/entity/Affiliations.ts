@@ -1,0 +1,28 @@
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    ManyToOne,
+    JoinColumn, OneToOne, OneToMany
+} from "typeorm";
+import {Users} from "./Users";
+import {RegistrationOption} from "./RegistrationOption";
+
+@Entity()
+export class Affiliations {
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @ManyToOne(() => Users, { eager: true })
+    @JoinColumn({ name: 'user_id' })
+    user!: Users;
+
+    @ManyToOne(() => RegistrationOption, { eager: true })
+    @JoinColumn({ name: 'affiliation_id' })
+    affiliation!: RegistrationOption;
+
+    @Column({nullable: true})
+    affiliation_file!: string
+}

@@ -17,7 +17,7 @@ export class Profiles {
     @Column()
     address!: string;
 
-    @Column({default: true})
+    @Column({default: false})
     disclose_address!: boolean;
 
     @Column()
@@ -33,7 +33,7 @@ export class Profiles {
     tax_exemption!: boolean;
 
     @Column()
-    ein!: boolean
+    ein!: number
 
     @Column({ type: "simple-array", nullable: true })
     primary_purpose!: number
@@ -41,11 +41,11 @@ export class Profiles {
     @Column()
     platform_purpose!: number
 
-    @Column()
-    affiliation!: number
-
-    @Column()
-    affiliation_file!: string
+    // @Column()
+    // affiliation!: number
+    //
+    // @Column({nullable: true})
+    // affiliation_file!: string
 
     @OneToOne(() => Users, user => user.profile, { eager: true })
     @JoinColumn({ name: 'user_id' })

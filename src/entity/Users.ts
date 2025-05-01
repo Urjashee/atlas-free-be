@@ -5,26 +5,27 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
-    JoinColumn, OneToOne
+    JoinColumn, OneToOne, OneToMany
 } from "typeorm";
 import {UserRole} from "./UserRole";
 import {Profiles} from "./Profiles";
+import {Affiliations} from "./Affiliations";
 
 @Entity()
 export class Users {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({ nullable: true })
     user_name!: string;
 
-    @Column()
+    @Column({ nullable: true })
     first_name!: string;
 
-    @Column()
+    @Column({ nullable: true })
     last_name!: string;
 
-    @Column()
+    @Column({ nullable: true })
     title!: string;
 
     @Column({
@@ -34,10 +35,10 @@ export class Users {
     })
     email!: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     country_code!: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     mobile!: string;
 
     @Column({ default: 0 })
@@ -55,15 +56,18 @@ export class Users {
     @Column({ nullable: true, type: 'timestamp'})
     mobileVerifiedAt!: Date | null;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     password!: string;
 
     @ManyToOne(() => UserRole, { eager: true })
     @JoinColumn({ name: 'role_id' })
     role!: UserRole;
 
-    @OneToOne(() => Profiles, profile => profile.user, { cascade: true }) // Add the one-to-one relationship here
+    @OneToOne(() => Profiles, profile => profile.user, { cascade: true })
     profile!: Profiles;
+
+    @OneToMany(() => Affiliations, affiliation => affiliation.user)
+    affiliations!: Affiliations[];
 
     @CreateDateColumn()
     created_at!: Date;

@@ -2,6 +2,7 @@ import { Get, JsonController, Req, Res } from "routing-controllers";
 import { Request, Response } from "express";
 import { ConfigService } from "../services/ConfigService";
 import { ResponseFormatter } from "@inquitickets/response";
+import {Constants, roleMap} from "../helper/Constants";
 
 @JsonController("/api")
 export class ConfigController {
@@ -37,6 +38,7 @@ export class ConfigController {
         const supportOffered = await this.configService.getServiceOptions("support_offered");
         const advocateService = await this.configService.getAdvocateService();
 
+        const rolesArray = Object.entries(roleMap).map(([name, id]) => ({ id, name }));
         const primaryPurposeArray = primaryPurpose.map((item) => {
             return {
                 id: item.id,
@@ -227,6 +229,7 @@ export class ConfigController {
         }).filter(Boolean);
 
         const customResponse = {
+            "Roles": rolesArray,
             "Primary purpose": primaryPurposeArray,
             "Platform purpose": platformPurposeArray,
             "Affiliation and Licenses": affiliationLicensesArray,

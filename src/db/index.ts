@@ -5,6 +5,8 @@ import {ServiceHeadings} from "../entity/ServiceHeadings";
 import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions";
 import {AdvocateService} from "../entity/AdvocateService";
 import {RegistrationOption} from "../entity/RegistrationOption";
+import {Users} from "../entity/Users";
+import {UserRole} from "../entity/UserRole";
 
 dotenv.config();
 
@@ -27,6 +29,18 @@ const service_headings: ServiceHeadings[] = [
     {id: 3, name: 'Eligibility'},
     {id: 4, name: 'Service Model'},
     {id: 5, name: 'Offerings / Intake'},
+];
+
+const users_data = [
+    {
+        id: 2,
+        email: "urja@simpalm.com",
+        is_active: true,
+        is_status: true,
+        is_profile: true,
+        password: "Goblin123", // Use plain password initially; will hash later
+        role: 1
+    },
 ];
 
 const heading_general_details = new ServiceHeadings();
@@ -261,6 +275,13 @@ const registration_option: RegistrationOption[] = [
 
 async function seedRoles() {
     await new Promise<void>((resolve, reject) => {
+        connection.query('SET FOREIGN_KEY_CHECKS = 0', (err) => {
+            if (err) {
+                console.error('Error disabling foreign key checks:', err);
+                reject(err);
+                return;
+            }
+        })
         connection.query('TRUNCATE TABLE user_role', (err) => {
             if (err) {
                 console.error('Error truncating user_role table:', err);
@@ -270,6 +291,13 @@ async function seedRoles() {
             console.log('user_role table truncated');
             resolve();
         });
+        connection.query('SET FOREIGN_KEY_CHECKS = 1', (err) => {
+            if (err) {
+                console.error('Error disabling foreign key checks:', err);
+                reject(err);
+                return;
+            }
+        })
     });
     for (const data of roles) {
         const query = 'INSERT INTO user_role (id, name) VALUES (?, ?)';
@@ -284,6 +312,43 @@ async function seedRoles() {
                 resolve();
             });
         });
+    }
+}
+async function seedUsers() {
+    for (const user of users_data) {
+        try {
+            // Hash the password before inserting
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+            const query = `
+                INSERT INTO users 
+                (id, email, is_active, is_status, is_profile, password, role_id, emailVerifiedAt) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            const values = [
+                user.id,
+                user.email,
+                user.is_active,
+                user.is_status,
+                user.is_profile,
+                hashedPassword,
+                user.role,
+                new Date()
+            ];
+
+            await new Promise<void>((resolve, reject) => {
+                connection.query(query, values, (err) => {
+                    if (err) {
+                        console.error('Error inserting user data:', err);
+                        reject(err);
+                        return;
+                    }
+                    console.log('User data inserted:', user.email);
+                    resolve();
+                });
+            });
+        } catch (error) {
+            console.error('Error hashing password:', error);
+        }
     }
 }
 async function seedAdvocateServices() {
@@ -426,6 +491,7 @@ connection.connect((err) => {
     console.log('Connected to MySQL!');
 
     seedRoles()
+        .then(seedUsers)
         .then(seedServiceTypes)
         .then(seedGeneralDetails)
         .then(seedAdvocateServices)
