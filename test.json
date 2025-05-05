@@ -1,0 +1,116 @@
+{
+  "status": "OK",
+  "message": "Organization list",
+  "data": [
+    {
+      "id": 9,
+      "address": "Address 123",
+      "disclose_address": false,
+      "zipcode": "10005",
+      "year": "2012",
+      "website": "www.org.com",
+      "tax_exemption": false,
+      "ein": 3456877,
+      "primary_purpose": [
+        "2",
+        "3"
+      ],
+      "platform_purpose": 14,
+      "created_at": "2025-04-29T09:52:21.510Z",
+      "updated_at": "2025-04-29T09:52:21.510Z",
+      "user": {
+        "id": 10,
+        "user_name": "organization 1",
+        "first_name": null,
+        "last_name": null,
+        "title": null,
+        "email": "urja+2@simpalm.com",
+        "country_code": "+91",
+        "mobile": null,
+        "is_active": false,
+        "is_status": true,
+        "is_profile": true,
+        "emailVerifiedAt": null,
+        "mobileVerifiedAt": null,
+        "password": null,
+        "created_at": "2025-04-29T09:52:21.494Z",
+        "updated_at": "2025-04-29T09:52:21.494Z"
+      },
+      "affiliation": [
+        {
+          "id": 3,
+          "affiliation_file": "https://atlas-free.s3.amazonaws.com/affiliation_file/1745920333383-09f0550e-4578-4503-88e4-6d46e26c077a-Form11Revised.pdf",
+          "affiliation": {
+            "id": 15,
+            "name": "Atlas Free Network",
+            "type": "affiliations_licenses"
+          }
+        },
+        {
+          "id": 4,
+          "affiliation_file": "https://atlas-free.s3.amazonaws.com/affiliation_file/1745920338113-9e7c2199-812f-4bb8-855c-c712021bf1f2-HostsMan%20License.pdf",
+          "affiliation": {
+            "id": 16,
+            "name": "Evangelical Council for Financial Accountability (ECFA) Accredited",
+            "type": "affiliations_licenses"
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "address": "Address 123",
+      "disclose_address": false,
+      "zipcode": "10005",
+      "year": "2015",
+      "website": "www.organization.com",
+      "tax_exemption": false,
+      "ein": 3456877,
+      "primary_purpose": [
+        "2",
+        "3"
+      ],
+      "platform_purpose": 14,
+      "created_at": "2025-04-29T10:28:24.262Z",
+      "updated_at": "2025-04-29T10:28:24.262Z",
+      "user": {
+        "id": 11,
+        "user_name": "organization 2",
+        "first_name": null,
+        "last_name": null,
+        "title": null,
+        "email": "urja+3@simpalm.com",
+        "country_code": "+91",
+        "mobile": null,
+        "is_active": false,
+        "is_status": true,
+        "is_profile": true,
+        "emailVerifiedAt": null,
+        "mobileVerifiedAt": null,
+        "password": null,
+        "created_at": "2025-04-29T10:28:24.244Z",
+        "updated_at": "2025-04-29T10:28:24.244Z"
+      },
+      "affiliation": [
+        {
+          "id": 5,
+          "affiliation_file": "https://atlas-free.s3.amazonaws.com/affiliation_file/1745922501355-0d202059-a759-44a4-9ff7-b43e24643bb6-Form11Revised.pdf",
+          "affiliation": {
+            "id": 15,
+            "name": "Atlas Free Network",
+            "type": "affiliations_licenses"
+          }
+        },
+        {
+          "id": 6,
+          "affiliation_file": "https://atlas-free.s3.amazonaws.com/affiliation_file/1745922502909-6591bd9a-84e2-4734-bd75-c6741c5f146a-HostsMan%20License.pdf",
+          "affiliation": {
+            "id": 16,
+            "name": "Evangelical Council for Financial Accountability (ECFA) Accredited",
+            "type": "affiliations_licenses"
+          }
+        }
+      ]
+    }
+  ]
+}

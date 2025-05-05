@@ -2,6 +2,7 @@ import AppDataSource from "../../ormconfig";
 import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions";
 import {RegistrationOption} from "../entity/RegistrationOption";
 import {AdvocateService} from "../entity/AdvocateService";
+import {In} from "typeorm";
 
 export class ConfigService {
     private serviceDetailOptionRepository = AppDataSource.getRepository(ServiceDetailsOptions);
@@ -42,5 +43,13 @@ export class ConfigService {
 
     async getAdvocateService() {
         return await this.advocateServiceRepository.find()
+    }
+
+    async getPrimaryPurposeById(ids: number[]) {
+        return await this.registrationOptionRepository.find({
+            where: {
+                id: In(ids),
+            }
+        })
     }
 }

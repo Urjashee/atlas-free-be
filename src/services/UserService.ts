@@ -25,7 +25,7 @@ export class UserService {
             email: body.email,
             user_name: body.user_name,
             country_code: body.country_code,
-            mobile: body.phone_number,
+            mobile: body.phone_no,
             is_profile: true,
             is_status: true,
             role: {id: role},
