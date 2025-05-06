@@ -5,7 +5,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
-    JoinColumn, OneToOne, OneToMany
+    JoinColumn
 } from "typeorm";
 import {Users} from "./Users";
 import {RegistrationOption} from "./RegistrationOption";
@@ -25,4 +25,10 @@ export class Affiliations {
 
     @Column({nullable: true})
     affiliation_file!: string
+
+    @CreateDateColumn()
+    created_at!: Date;
+
+    @UpdateDateColumn()
+    updated_at!: Date;
 }

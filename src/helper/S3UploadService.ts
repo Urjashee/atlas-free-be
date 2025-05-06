@@ -15,12 +15,32 @@ class S3UploadService {
         this.s3 = new AWS.S3();
     }
 
-    public async uploadFile(file: Express.Multer.File, folder: string): Promise<unknown> {
+    public async uploadFile(file: Express.Multer.File | any, folder: string): Promise<unknown> {
         const uniqueFileName = `${folder}/${Date.now()}-${uuidv4()}-${file.originalname}`;
         const params = {
             Bucket: process.env.AWS_BUCKET!,
             Key: uniqueFileName, // Unique file name
             Body: file.buffer,
+            ContentType: file.mimetype,
+        };
+
+        return new Promise((resolve, reject) => {
+            this.s3.upload(params, (err, data) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data.Location);
+                }
+            });
+        });
+    }
+
+    public async uploadPdfFile(file: Express.Multer.File | any, folder: string): Promise<unknown> {
+        const uniqueFileName = `${folder}/${Date.now()}-${uuidv4()}`;
+        const params = {
+            Bucket: process.env.AWS_BUCKET!,
+            Key: `${uniqueFileName}.pdf`, // Unique file name
+            Body: file,
             ContentType: file.mimetype,
         };
 

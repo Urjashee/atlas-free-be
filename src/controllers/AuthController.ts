@@ -24,7 +24,8 @@ const registrationOrganizationSchema = Joi.object({
     ein: Joi.string().min(5).max(30).required(),
     primary_purpose: Joi.array().items(Joi.number()).required(),
     platform_purpose: Joi.number().required(),
-    affiliation_license: Joi.array().items(Joi.number()).required(),
+    // affiliation_license: Joi.array().items(Joi.number()).required(),
+    affiliations: Joi.string().required(),
 });
 const loginSchema = Joi.object({
     email: Joi.string().pattern(/^\S+$/).required(),
@@ -42,9 +43,6 @@ export class AuthController {
     @Post("/organization/register")
     @UseBefore(upload.array("affiliation_files", 10))
     async registerOrganization(@Req() req: Request, @Res() res: Response) {
-        let affiliationFiles = [];
-        const files = req.files as Express.Multer.File[];
-        console.log("Request headers:", req.headers);
         try {
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
@@ -58,14 +56,14 @@ export class AuthController {
                 return ResponseFormatter.errorResponse(res, 'Email already in use');
             }
             const roleId = Constants.ROLE_ORGANIZATION
-            if (files && files.length > 0) {
-                console.log("files: ",files[0])
-                for (const file of files) {
-                    const uploadedFile = await this.s3UploadService.uploadFile(file, "affiliation_file");
-                    affiliationFiles.push(uploadedFile);
-                }
-            }
-            const user = await this.userService.createUser(req.body, roleId, affiliationFiles);
+            // if (files && files.length > 0) {
+            //     console.log("files: ",files[0])
+            //     for (const file of files) {
+            //         const uploadedFile = await this.s3UploadService.uploadFile(file, "affiliation_file");
+            //         affiliationFiles.push(uploadedFile);
+            //     }
+            // }
+            const user = await this.userService.createUser(req.body, roleId,);
             if (user)
                 return ResponseFormatter.successResponse(res, 'User created')
             return ResponseFormatter.successResponse(res, 'User created')
