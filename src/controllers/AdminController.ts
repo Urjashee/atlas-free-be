@@ -1,4 +1,4 @@
-import {Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
 import {authMiddleware} from "../middleware/authMiddleware";
 import {adminMiddleware} from "../middleware/adminMiddleware";
 import {ResponseFormatter} from "../helper/ResponseFormatter";
@@ -12,8 +12,6 @@ import {UserService} from "../services/UserService";
 
 const adminOrgEditSchema = Joi.object({
     id: Joi.number().required(),
-    user_name: Joi.string().min(3).max(150).required(),
-    email: Joi.string().email().pattern(/^\S+$/).required(),
     country_code: Joi.string().min(2).max(5).required(),
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
     address: Joi.string().min(3).max(1600).required(),
@@ -23,7 +21,7 @@ const adminOrgEditSchema = Joi.object({
     website: Joi.string().min(4).max(100).required(),
     tax_exemption: Joi.number().min(0).max(1).required(),
     primary_purpose: Joi.array().items(Joi.number()).required(),
-    affiliation_license: Joi.array().items(Joi.number()).required(),
+    affiliations: Joi.string().required(),
 });
 
 @JsonController("/api/admin")
@@ -71,14 +69,12 @@ export class AdminController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
-    @Post("/organization/list/:filter")
+    @Post("/organization/edit")
     @UseBefore(authMiddleware)
     @UseBefore(adminMiddleware)
     @UseBefore(upload.array("affiliation_files", 10))
     async updateOrganizationDetails(@Req() req: Request, @Res() res: Response) {
         try {
-            let affiliationFiles = [];
-            const files = req.files as Express.Multer.File[];
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
@@ -86,15 +82,25 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const existingUser = await this.userService.findByEmail(req.body.email);
-            if (existingUser) {
-                return ResponseFormatter.errorResponse(res, 'Email already in use');
-            }
             const user = await this.userService.updateUser(req.body.id, req.body);
-            const affiliation = await this.userService.updateAffiliations(req.body.id, req.body);
             if (!user)
                 return ResponseFormatter.successResponse(res, 'User not updated')
             return ResponseFormatter.successResponse(res, 'User updated')
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Patch("/organization/status/:id")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async updateOrganizationStatus(@Req() req: Request, @Res() res: Response, @Param("id") organization_id: number) {
+        try {
+            const organization = await this.organizationService.updateStatus(organization_id)
+            if (!organization)
+                return ResponseFormatter.errorResponse(res, 'Not an organization')
+            return ResponseFormatter.successResponse(res, 'Status updated')
 
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

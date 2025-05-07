@@ -1,4 +1,4 @@
-import {Get, HttpCode, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Body, Get, HttpCode, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
 import {Request, Response} from "express";
 import {ResponseFormatter} from "../helper/ResponseFormatter";
 import dotenv from "dotenv";
@@ -8,6 +8,9 @@ import {UserService} from "../services/UserService";
 import {Constants, roleMap} from "../helper/Constants";
 import S3UploadService from "../helper/S3UploadService";
 import { JwtHelper } from "../helper/JwtHelper";
+import {randomBytes} from "crypto";
+import {EmailService} from "../services/EmailService";
+import {PasswordResetEmail} from "../helper/Emails";
 
 dotenv.config();
 const registrationOrganizationSchema = Joi.object({
@@ -34,11 +37,32 @@ const loginSchema = Joi.object({
     device_type: Joi.string().required(),
 });
 
+const forgotPasswordSchema = Joi.object({
+    email: Joi.string().email().pattern(/^\S+$/).required(),
+});
+const logoutSchema = Joi.object({
+    device_token: Joi.string(),
+});
+const updatePasswordSchema = Joi.object({
+    token: Joi.string().required(),
+    type: Joi.number().required(),
+    password: Joi.string()
+        .min(8) // At least 8 characters
+        .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$')) // At least one uppercase, one lowercase, one number
+        .required()
+        .messages({
+            'string.min': 'Password must be at least 8 characters long.',
+            'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number.',
+            'any.required': 'Password is required.',
+        }),
+});
+
 @JsonController("/api/auth")
 export class AuthController {
     private userService = new UserService();
     private s3UploadService = new S3UploadService();
     private jwtHelper = new JwtHelper();
+    private mailerService = new EmailService();
 
     @Post("/organization/register")
     @UseBefore(upload.array("affiliation_files", 10))
@@ -56,13 +80,6 @@ export class AuthController {
                 return ResponseFormatter.errorResponse(res, 'Email already in use');
             }
             const roleId = Constants.ROLE_ORGANIZATION
-            // if (files && files.length > 0) {
-            //     console.log("files: ",files[0])
-            //     for (const file of files) {
-            //         const uploadedFile = await this.s3UploadService.uploadFile(file, "affiliation_file");
-            //         affiliationFiles.push(uploadedFile);
-            //     }
-            // }
             const user = await this.userService.createUser(req.body, roleId,);
             if (user)
                 return ResponseFormatter.successResponse(res, 'User created')
@@ -102,6 +119,64 @@ export class AuthController {
             if (!updateToken)
                 return ResponseFormatter.errorResponse(res, "Can't login right now");
             return ResponseFormatter.successResponse(res, 'Login success', token);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+    @Post("/forgot-password")
+    async forgotPassword(@Req() req: Request, @Res() res: Response, @Body() body: { email: string }) {
+        try {
+            const {error} = forgotPasswordSchema.validate(body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {email} = body;
+            const existingUser = await this.userService.findByEmail(email);
+            if (!existingUser)
+                return ResponseFormatter.errorResponse(res, 'Email address is unverified or does not exist');
+            if (existingUser) {
+                const type = Constants.FORGOT_PASSWORD
+                const checkEmailExpiry = await this.userService.checkEmailExpiry(email, type)
+                if (checkEmailExpiry) {
+                    return ResponseFormatter.errorResponse(res, 'Password reset link already sent. You can send a new reset password link only after 5 minutes');
+                }
+                const token = randomBytes(32).toString('hex');
+                const sendRequest = await this.userService.sendPasswordResetRequest(email, type, token)
+                if (sendRequest) {
+                    const emailContent = PasswordResetEmail(email, token, type, existingUser.role.id);
+                    const mailOptions = {
+                        from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                        to: email,
+                        subject: "Email from Atlas free!",
+                        html: emailContent
+                    };
+                    await this.mailerService.sendEmail(mailOptions);
+                    return ResponseFormatter.successResponse(res, "Reset request sent successfully")
+                }
+            } else {
+                return ResponseFormatter.errorResponse(res, 'Email address is unverified or does not exist');
+            }
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/create-password")
+    async createPassword(@Req() req: Request, @Res() res: Response) {
+        try {
+            const {error} = updatePasswordSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {token, password, type} = req.body;
+            const passwordResetToken = await this.userService.findByToken(token);
+            if (!passwordResetToken)
+                return ResponseFormatter.errorResponse(res, 'Token not found');
+
+            const createPassword = await this.userService.createPassword(passwordResetToken.email, password, type, passwordResetToken)
+            if (!createPassword)
+                return ResponseFormatter.errorResponse(res, "Password couldn't be created. Try again later");
+            return ResponseFormatter.successResponse(res, "Password created successfully!")
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

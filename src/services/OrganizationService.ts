@@ -1,11 +1,19 @@
 import AppDataSource from "../../ormconfig";
 import {Users} from "../entity/Users";
 import {Profiles} from "../entity/Profiles";
-import {getRepository} from "typeorm";
+import {Constants} from "../helper/Constants";
+import {randomBytes} from "crypto";
+import {PasswordReset} from "../entity/PasswordReset";
+import {ActivateOrganization, CreatePassword} from "../helper/Emails";
+import {type} from "node:os";
+import {EmailService} from "./EmailService";
+import {IsNull, Not} from "typeorm";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
     private profileRepository = AppDataSource.getRepository(Profiles);
+    private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
+    private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
         if (filter === "all") {
@@ -33,6 +41,62 @@ export class OrganizationService {
                     .leftJoinAndSelect("affiliation.affiliation", "registrationOption")
                     .where("user.id IN (:...ids)", { ids: orgIds })
                     .getMany()
+            }
+        }
+    }
+
+    async updateStatus(organization_id: number) {
+        const organization = await this.userRepository.findOne({
+            where: {
+                id: organization_id,
+                role: {id: Constants.ROLE_ORGANIZATION}
+            }
+        })
+        if (organization) {
+            if (organization.is_active == true) {
+                organization.is_active = false
+                return await this.userRepository.save(organization)
+            }
+            if (organization.is_active == false) {
+                organization.is_active = true
+                const token = randomBytes(32).toString('hex');
+                if (organization.emailVerifiedAt === null) {
+                    const password_reset_request = this.passwordResetRepository.create({
+                        email: organization.email,
+                        token,
+                        type: Constants.CREATE_PASSWORD,
+                        user: {id: organization_id}
+                    })
+                    const emailContent = CreatePassword(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD);
+                    const mailOptions = {
+                        from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                        to: organization.email,
+                        subject: "Email from Atlas free!",
+                        html: emailContent
+                    };
+                    await this.mailerService.sendEmail(mailOptions);
+                    await this.passwordResetRepository.save(password_reset_request);
+
+                } else if (organization.emailVerifiedAt) {
+                    organization.is_status = true
+                    const password_reset_request = this.passwordResetRepository.create({
+                        email: organization.email,
+                        token,
+                        type: Constants.CREATE_PASSWORD,
+                        user: {id: organization_id}
+                    })
+                    const emailContent = ActivateOrganization(organization.user_name, organization.email, token, Constants.ACTIVATE_ORGANIZATION);
+                    const mailOptions = {
+                        from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                        to: organization.email,
+                        subject: "Email from Atlas free!",
+                        html: emailContent
+                    };
+                    await this.mailerService.sendEmail(mailOptions);
+                    await this.passwordResetRepository.save(password_reset_request);
+
+                }
+                return await this.userRepository.save(organization)
             }
         }
     }

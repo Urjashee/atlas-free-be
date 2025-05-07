@@ -6,12 +6,15 @@ import {DeviceToken} from "../entity/DeviceToken";
 import {Constants} from "../helper/Constants";
 import {Affiliations} from "../entity/Affiliations";
 import s3UploadService from "../helper/S3UploadService";
+import {PasswordReset} from "../entity/PasswordReset";
+import {IsNull, MoreThan, Not} from "typeorm";
 
 export class UserService {
     private userRepository = AppDataSource.getRepository(Users);
     private profileRepository = AppDataSource.getRepository(Profiles);
     private deviceTokenRepository = AppDataSource.getRepository(DeviceToken);
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
+    private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private s3UploadService = new s3UploadService
 
     async findByEmail(email: string): Promise<Users> {
@@ -50,24 +53,26 @@ export class UserService {
         for (const affiliation of affiliations) {
             const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
             const buffer = Buffer.from(base64Data, 'base64');
-            const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file")
+            const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
             if (uploadedFile) {
-
+                const addAffiliation = await this.affiliationRepository.create({
+                    user: {id: savedUser.id},
+                    affiliation: {id: affiliation.id},
+                    affiliation_file: uploadedFile as string,
+                });
+                await this.affiliationRepository.save(addAffiliation);
             }
-
         }
         return savedUser
     }
 
-    async updateUser(user_id: number, body: any): Promise<Users> {
+    async updateUser(user_id: number, body: any){
         const user = await this.userRepository.findOne({
             where: {
                 id: user_id,
             }
         })
         if (user) {
-            user.email = body.email
-            user.user_name = body.user_name
             user.country_code = body.country_code
             user.mobile = body.mobile
             await this.userRepository.save(user)
@@ -87,11 +92,56 @@ export class UserService {
             profile.primary_purpose = body.primary_purpose
             await this.profileRepository.save(profile)
         }
-        return user
-    }
+        const currentAffiliations = await this.affiliationRepository.find({
+            where: {
+                user: {id: user_id}
+            },
+        })
 
-    async updateAffiliations(user_id: number, body: any) {
+        const oldIds = currentAffiliations.map(affiliation => affiliation.affiliation.id)
+        const affiliations = JSON.parse(body.affiliations);
+        const newIds = affiliations.map(a => a.id);
 
+        console.log("oldIds3: ",oldIds)
+        console.log("newIds3: ",newIds)
+
+        const toRemove = currentAffiliations.filter(a => !newIds.includes(a.affiliation.id));
+
+        if (toRemove.length) {
+            await this.affiliationRepository.remove(toRemove);
+        }
+        for (const affiliation of affiliations) {
+            console.log("affiliation: ",affiliation.id)
+            const affiliationData = await this.affiliationRepository.findOne({
+                where: {
+                    user: { id: user_id },
+                    affiliation: { id: affiliation.id },
+                },
+            });
+
+            if (affiliationData) {
+                const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
+                const buffer = Buffer.from(base64Data, 'base64');
+                const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
+                if (uploadedFile) {
+                    affiliationData.affiliation_file = uploadedFile as string
+                    await this.affiliationRepository.save(affiliationData)
+                }
+            } else {
+                const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
+                const buffer = Buffer.from(base64Data, 'base64');
+                const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
+                if (uploadedFile) {
+                    const addAffiliation = await this.affiliationRepository.create({
+                        user: {id: user_id},
+                        affiliation: {id: affiliation.id},
+                        affiliation_file: uploadedFile as string,
+                    });
+                    await this.affiliationRepository.save(addAffiliation);
+                }
+            }
+        }
+        return true
     }
 
     async checkIfEmail(email: string) {
@@ -145,5 +195,93 @@ export class UserService {
                 role: {id: role},
             }
         })
+    }
+
+    async checkEmailExpiry(email: string, type: number): Promise<Users | boolean> {
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const verifyUser = await this.passwordResetRepository.findOne({
+            where:
+                {email, type, active: true, createdAt: MoreThan(fiveMinutesAgo)}
+        });
+        if (verifyUser) {
+            return true
+        } else {
+            return false
+        }
+    }
+    async sendPasswordResetRequest(email: string, type: number, token: string, user_id?: number) {
+        const user = await this.userRepository.findOne({where: {email}});
+        if (user) {
+            const password_reset_request = this.passwordResetRepository.create({
+                email, token, type, user: {id: user_id}
+            })
+            return await this.passwordResetRepository.save(password_reset_request);
+        }
+    }
+
+    async findByToken(token: string): Promise<PasswordReset | null> {
+        return this.passwordResetRepository.findOne({where: {token, active: true}});
+    }
+
+    async checkPasswordExpiry(token: string): Promise<boolean> {
+        const getToken = await this.passwordResetRepository.findOne({
+            where: {token},
+        });
+
+        if (getToken) {
+            const expiryTime = new Date(getToken.createdAt);
+            expiryTime.setHours(expiryTime.getHours() + 2);
+
+            const currentTime = new Date();
+
+            if (currentTime > expiryTime) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    async updatePassword(email: string, password: string, passwordResetToken) {
+        const user = await this.userRepository.findOne({
+            where: {
+                email,
+                emailVerifiedAt: Not(IsNull()),
+                mobileVerifiedAt: Not(IsNull())
+            }
+        });
+        if (user) {
+            user.password = await bcrypt.hash(password, 10)
+            passwordResetToken.active = true
+            await this.passwordResetRepository.save(passwordResetToken);
+            return await this.userRepository.save(user);
+        }
+    }
+
+    async createPassword(email: string, password: string, type: number, passwordResetToken: PasswordReset) {
+        const user = await this.userRepository.findOne({
+            where: {
+                email,
+            }
+        });
+        if (user) {
+            user.password = await bcrypt.hash(password, 10)
+            user.is_active = true
+            user.emailVerifiedAt = new Date()
+            passwordResetToken.active = false
+            await this.passwordResetRepository.save(passwordResetToken);
+            const resetPasswords = await this.passwordResetRepository.find({
+                where: {
+                    email,
+                    type: Constants.CREATE_PASSWORD
+                }
+            })
+            for (const reset of resetPasswords) {
+                reset.active = false
+                await this.passwordResetRepository.save(reset);
+            }
+            return await this.userRepository.save(user);
+        }
     }
 }

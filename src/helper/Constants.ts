@@ -4,6 +4,11 @@ export class Constants {
     static ROLE_SERVICE_MANAGER = 3
     static ROLE_ADVOCATE = 4
     static ROLE_SURVIVOR = 5
+
+    static CREATE_PASSWORD = 1
+    static EMAIL_PASSWORD_REST = 2
+    static ACTIVATE_ORGANIZATION = 3
+    static FORGOT_PASSWORD = 4
 }
 
 export const roleMap: { [key: string]: number } = {
