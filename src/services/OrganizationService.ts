@@ -9,6 +9,7 @@ import {type} from "node:os";
 import {EmailService} from "./EmailService";
 import {IsNull, Not} from "typeorm";
 import {OrganizationServiceEntity} from "../entity/OrganizationServiceEntity";
+import Joi from "joi";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -127,6 +128,29 @@ export class OrganizationService {
             citizenship_requirement: body.citizenship_requirement,
             language_requirement: body.language_requirement,
             out_of_state_relocation: body.out_of_state_relocation === true || body.out_of_state_relocation === 'true',
+            trafficking_status: body.trafficking_status,
+            legal: body.legal,
+            health_needs: body.health_needs,
+            medications: body.medications,
+            mental_health_diagnoses: body.mental_health_diagnoses,
+            physical_accommodations: body.physical_accommodations,
+            smoking_allowed: body.smoking_allowed,
+            entry_requirement: body.entry_requirement,
+            days_sober: body.days_sober,
+            service_model: body.service_model,
+            faith_engagement: body.faith_engagement,
+            faith_engagement_practice: body.faith_engagement_practice,
+            service_structure: body.service_structure,
+            sleeping_arrangement: body.sleeping_arrangement,
+            staffing_level: body.staffing_level,
+            teams_diversity: body.teams_diversity,
+            service_guidelines: body.service_guidelines,
+            support_provided: body.support_provided,
+            support_offered: body.support_offered,
+            intake_process: body.intake_process,
+            additional_requirements: body.additional_requirements,
+            reason_for_removal: body.reason_for_removal,
+            is_submitted: body.is_submitted === true || body.is_submitted === 'true'
         })
         return await this.organizationServiceRepository.save(addService)
     }
@@ -150,6 +174,7 @@ export class OrganizationService {
             getService.extension = body.extension === true || body.extension === 'true';
             getService.waitlist = body.waitlist === true || body.waitlist === 'true';
             getService.service_description = body.service_description
+
             getService.minimum_age = body.minimum_age
             getService.maximum_age = body.maximum_age
             getService.genders_served = body.genders_served
@@ -160,6 +185,32 @@ export class OrganizationService {
             getService.citizenship_requirement = body.citizenship_requirement
             getService.language_requirement = body.language_requirement
             getService.out_of_state_relocation = body.out_of_state_relocation === true || body.out_of_state_relocation === 'true'
+
+            getService.trafficking_status = body.trafficking_status
+            getService.legal = body.legal
+            getService.health_needs = body.health_needs
+            getService.medications = body.medications
+            getService.mental_health_diagnoses = body.mental_health_diagnoses
+            getService.physical_accommodations = body.physical_accommodations
+            getService.smoking_allowed = body.smoking_allowed
+            getService.entry_requirement = body.entry_requirement
+            getService.days_sober = body.days_sober
+
+            getService.service_model = body.service_model
+            getService.faith_engagement = body.faith_engagement
+            getService.faith_engagement_practice = body.faith_engagement_practice
+            getService.service_structure = body.service_structure
+            getService.sleeping_arrangement = body.sleeping_arrangement
+            getService.staffing_level = body.staffing_level
+            getService.teams_diversity = body.teams_diversity
+            getService.service_guidelines = body.service_guidelines
+
+            getService.support_provided = body.support_provided
+            getService.support_offered = body.support_offered
+            getService.intake_process = body.intake_process
+            getService.additional_requirements = body.additional_requirements
+            getService.reason_for_removal = body.reason_for_removal
+            getService.is_submitted = body.is_submitted === true || body.is_submitted === 'true';
             return await this.organizationServiceRepository.save(getService)
         }
         return false

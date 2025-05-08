@@ -23,6 +23,8 @@ export class OrganizationServiceEntity {
     @JoinColumn({ name: 'organization_id' })
     organization!: Users;
 
+    // -------------------------------    General    -----------------------------------
+
     @Column({nullable: false})
     name!: string
 
@@ -56,6 +58,8 @@ export class OrganizationServiceEntity {
     @Column({type: "longtext", nullable: true})
     service_description!: string
 
+    // -------------------------------    Demographics    -----------------------------------
+
     @Column({nullable: true})
     minimum_age!: number
 
@@ -85,6 +89,81 @@ export class OrganizationServiceEntity {
 
     @Column({nullable: true, default: true})
     out_of_state_relocation!: boolean
+
+    // -------------------------------    Eligibility    -----------------------------------
+
+    @Column({ type: "simple-array", nullable: true })
+    trafficking_status!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    legal!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    health_needs!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    medications!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    mental_health_diagnoses!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    physical_accommodations!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    smoking_allowed!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    entry_requirement!: number[];
+
+    @Column({ nullable: true })
+    days_sober!: string;
+
+    // -------------------------------    Service Model    -----------------------------------
+
+    @Column({ type: "simple-array", nullable: true })
+    service_model!: number[];
+
+    @Column({ nullable: true })
+    faith_engagement!: number;
+
+    @Column({ nullable: true })
+    faith_engagement_practice!: string;
+
+    @Column({ nullable: true })
+    service_structure!: number;
+
+    @Column({ nullable: true })
+    sleeping_arrangement!: number;
+
+    @Column({ nullable: true })
+    staffing_level!: number;
+
+    @Column({ type: "simple-array", nullable: true })
+    teams_diversity!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    service_guidelines!: number[];
+
+    // -------------------------------    Offerings Intake    -----------------------------------
+
+    @Column({ type: "simple-array", nullable: true })
+    support_provided!: number[];
+
+    @Column({ type: "simple-array", nullable: true })
+    support_offered!: number[];
+
+    @Column({ type: "longtext", nullable: true })
+    intake_process!: string;
+
+    @Column({ type: "longtext", nullable: true })
+    additional_requirements!: string;
+
+    @Column({ type: "longtext", nullable: true })
+    reason_for_removal!: string;
+
+    @Column({ nullable: true, default: false })
+    is_submitted!: boolean;
 
     @CreateDateColumn()
     created_at!: Date;
