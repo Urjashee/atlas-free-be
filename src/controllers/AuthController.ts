@@ -56,6 +56,24 @@ const updatePasswordSchema = Joi.object({
             'any.required': 'Password is required.',
         }),
 });
+const createPasswordSchema = Joi.object({
+    token: Joi.string().required(),
+    first_name: Joi.string().required(),
+    last_name: Joi.string().required(),
+    title: Joi.string().required(),
+    type: Joi.number().required(),
+    country_code: Joi.string().min(2).max(5).required(),
+    phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
+    password: Joi.string()
+        .min(8) // At least 8 characters
+        .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$')) // At least one uppercase, one lowercase, one number
+        .required()
+        .messages({
+            'string.min': 'Password must be at least 8 characters long.',
+            'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number.',
+            'any.required': 'Password is required.',
+        }),
+});
 
 @JsonController("/api/auth")
 export class AuthController {
@@ -98,6 +116,8 @@ export class AuthController {
             return ResponseFormatter.errorResponse(res, error.details[0].message);
         }
         const roleId = roleMap[user_type]
+        console.log("user_type: ", user_type)
+        console.log("roleId: ", roleId)
         const checkIfAdmin = await this.userService.checkIfValidRole(req.body.email, roleId);
         if (!checkIfAdmin)
             return ResponseFormatter.errorResponse(res, `Not an ${user_type} user`);
@@ -164,7 +184,7 @@ export class AuthController {
     @Post("/create-password")
     async createPassword(@Req() req: Request, @Res() res: Response) {
         try {
-            const {error} = updatePasswordSchema.validate(req.body);
+            const {error} = createPasswordSchema.validate(req.body);
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
@@ -173,7 +193,7 @@ export class AuthController {
             if (!passwordResetToken)
                 return ResponseFormatter.errorResponse(res, 'Token not found');
 
-            const createPassword = await this.userService.createPassword(passwordResetToken.email, password, type, passwordResetToken)
+            const createPassword = await this.userService.createPassword(passwordResetToken.email, password, type, passwordResetToken, req.body)
             if (!createPassword)
                 return ResponseFormatter.errorResponse(res, "Password couldn't be created. Try again later");
             return ResponseFormatter.successResponse(res, "Password created successfully!")

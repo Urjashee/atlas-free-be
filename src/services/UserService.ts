@@ -259,7 +259,7 @@ export class UserService {
         }
     }
 
-    async createPassword(email: string, password: string, type: number, passwordResetToken: PasswordReset) {
+    async createPassword(email: string, password: string, type: number, passwordResetToken: PasswordReset, body: any) {
         const user = await this.userRepository.findOne({
             where: {
                 email,
@@ -267,6 +267,11 @@ export class UserService {
         });
         if (user) {
             user.password = await bcrypt.hash(password, 10)
+            user.first_name = body.first_name;
+            user.last_name = body.last_name;
+            user.title = body.title;
+            user.country_code = body.country_code;
+            user.mobile = body.phone_no;
             user.is_active = true
             user.emailVerifiedAt = new Date()
             passwordResetToken.active = false

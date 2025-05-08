@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { ConfigService } from "../services/ConfigService";
 import { ResponseFormatter } from "@inquitickets/response";
 import {Constants, roleMap} from "../helper/Constants";
+import {TimePeriod} from "../entity/OrganizationServiceEntity";
 
 @JsonController("/api")
 export class ConfigController {
@@ -10,6 +11,14 @@ export class ConfigController {
 
     @Get("/config")
     async config(@Req() req: Request, @Res() res: Response) {
+
+        const timePeriodArray = Object.keys(TimePeriod)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: TimePeriod[key as keyof typeof TimePeriod],
+                name: key
+            }));
+
         const primaryPurpose = await this.configService.getPrimaryPurpose();
         const platformPurpose = await this.configService.getPlatformPurpose();
         const affiliationLicenses = await this.configService.getAffiliationLicenses();
@@ -235,6 +244,7 @@ export class ConfigController {
             "Affiliation and Licenses": affiliationLicensesArray,
             "Service type": serviceTypeArray,
             "Slot beds": slotsBedsArray,
+            "Time Period": timePeriodArray,
             "Genders served": gendersServedArray,
             "Served to": servedToArray,
             "Citizenship requirements": citizenshipArray,

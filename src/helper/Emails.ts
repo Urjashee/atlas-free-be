@@ -47,7 +47,7 @@ export const CreatePassword = (name: string, email: string, token: string, type:
             <p>Thank you for your patience</p>
             <p>Please click the button below to create a password for your account to login</p>
             <button type="button" class="button">
-            <a href='${process.env.SITE_NAME}/create-password?token=${token}&type=${type}' 
+            <a href='${process.env.SITE_NAME}/create-password?token=${token}&type=${type}&email=${email}' 
                     style="text-decoration:none;color: #2954FF;">
                 Create Password</a></button>
         </div>

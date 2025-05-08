@@ -10,6 +10,8 @@ import {
 import {UserRole} from "./UserRole";
 import {Profiles} from "./Profiles";
 import {Affiliations} from "./Affiliations";
+import {OrganizationService} from "../services/OrganizationService";
+import {OrganizationServiceEntity} from "./OrganizationServiceEntity";
 
 @Entity()
 export class Users {
@@ -65,6 +67,9 @@ export class Users {
 
     @OneToOne(() => Profiles, profile => profile.user, { cascade: true })
     profile!: Profiles;
+
+    @OneToMany(() => OrganizationServiceEntity, organization_service => organization_service.organization, { cascade: true })
+    organizationService!: OrganizationServiceEntity[];
 
     @OneToMany(() => Affiliations, affiliation => affiliation.user)
     affiliations!: Affiliations[];
