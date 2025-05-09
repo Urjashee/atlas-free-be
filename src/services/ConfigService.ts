@@ -41,6 +41,14 @@ export class ConfigService {
         })
     }
 
+    async getServiceOptionsById(id: number) {
+        return await this.serviceDetailOptionRepository.findOne({
+            where: {
+                id: id
+            }
+        })
+    }
+
     async getAdvocateService() {
         return await this.advocateServiceRepository.find()
     }

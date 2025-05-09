@@ -15,7 +15,7 @@ export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
     private profileRepository = AppDataSource.getRepository(Profiles);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
-    private organizationServiceRepository = AppDataSource.getRepository(OrganizationDetails);
+    private organizationDetailsRepository = AppDataSource.getRepository(OrganizationDetails);
     private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
@@ -105,11 +105,12 @@ export class OrganizationService {
     }
 
     async addOrganizationSettings(organization_id: number, body: any) {
-        const addService = await this.organizationServiceRepository.create({
+        const addService = await this.organizationDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
             service_type: body.service_type,
             client_slots: body.client_slots,
+            client_slots_available: body.client_slots,
             slots_beds: body.slots_beds,
             start_day_of_service: body.start_day_of_service,
             service_limited: body.service_limited === true || body.service_limited === 'true',
@@ -156,11 +157,11 @@ export class OrganizationService {
             reason_for_removal: body.reason_for_removal,
             is_submitted: body.is_submitted === true || body.is_submitted === 'true'
         })
-        return await this.organizationServiceRepository.save(addService)
+        return await this.organizationDetailsRepository.save(addService)
     }
 
     async editOrganizationSettings(id: number, organization_id: number, body: any) {
-        const getService = await this.organizationServiceRepository.findOne({
+        const getService = await this.organizationDetailsRepository.findOne({
             where: {
                 id: id,
                 organization: {id: organization_id},
@@ -215,19 +216,24 @@ export class OrganizationService {
             getService.additional_requirements = body.additional_requirements
             getService.reason_for_removal = body.reason_for_removal
             getService.is_submitted = body.is_submitted === true || body.is_submitted === 'true';
-            return await this.organizationServiceRepository.save(getService)
+            return await this.organizationDetailsRepository.save(getService)
         }
         return false
     }
 
     async checkIfValidOrganization(id: number, organization_id: number) {
-        return await this.organizationServiceRepository.findOne({
+        return await this.organizationDetailsRepository.findOne({
             where: {
                 id: id,
                 organization: {id: organization_id}
             }
         })
     }
-
-
+    async getOrganizationsService(organization: number) {
+        return await this.organizationDetailsRepository.find({
+            where: {
+                organization: {id: organization}
+            }
+        })
+    }
 }

@@ -37,6 +37,9 @@ export class OrganizationDetails {
     @Column({nullable: true})
     slots_beds!: number
 
+    @Column({nullable: true})
+    client_slots_available!: number
+
     @Column({ type: 'timestamp', nullable: true })
     start_day_of_service!: Date | null
 
