@@ -1,8 +1,8 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn} from "typeorm";
-import {ServiceHeadings} from "./ServiceHeadings";
+import {ServiceHeadings} from "./ServiceHeadings.entity";
 
 @Entity()
-export class ServiceDetailsOptions {
+export class AdvocateService {
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -11,7 +11,4 @@ export class ServiceDetailsOptions {
 
     @Column()
     type!: string;
-
-    @ManyToOne(() => ServiceHeadings, { eager: true })
-    serviceHeading!: ServiceHeadings;
 }

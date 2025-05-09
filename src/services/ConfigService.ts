@@ -1,7 +1,7 @@
 import AppDataSource from "../../ormconfig";
-import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions";
-import {RegistrationOption} from "../entity/RegistrationOption";
-import {AdvocateService} from "../entity/AdvocateService";
+import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions.entity";
+import {RegistrationOption} from "../entity/RegistrationOption.entity";
+import {AdvocateService} from "../entity/AdvocateService.entity";
 import {In} from "typeorm";
 
 export class ConfigService {

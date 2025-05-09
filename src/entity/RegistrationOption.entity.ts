@@ -1,5 +1,5 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn} from "typeorm";
-import {ServiceHeadings} from "./ServiceHeadings";
+import {ServiceHeadings} from "./ServiceHeadings.entity";
 
 @Entity()
 export class RegistrationOption {

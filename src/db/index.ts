@@ -1,12 +1,12 @@
 import mysql, {Connection} from 'mysql2';
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import {ServiceHeadings} from "../entity/ServiceHeadings";
-import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions";
-import {AdvocateService} from "../entity/AdvocateService";
-import {RegistrationOption} from "../entity/RegistrationOption";
-import {Users} from "../entity/Users";
-import {UserRole} from "../entity/UserRole";
+import {ServiceHeadings} from "../entity/ServiceHeadings.entity";
+import {ServiceDetailsOptions} from "../entity/ServiceDetailsOptions.entity";
+import {AdvocateService} from "../entity/AdvocateService.entity";
+import {RegistrationOption} from "../entity/RegistrationOption.entity";
+import {Users} from "../entity/Users.entity";
+import {UserRole} from "../entity/UserRole.entity";
 
 dotenv.config();
 

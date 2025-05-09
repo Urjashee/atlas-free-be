@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import {ResponseFormatter} from "@inquitickets/response"
 import AppDataSource from "../../ormconfig";
-import {DeviceToken} from "../entity/DeviceToken";
+import {DeviceToken} from "../entity/DeviceToken.entity";
 dotenv.config();
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {

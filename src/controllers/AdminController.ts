@@ -4,7 +4,7 @@ import {adminMiddleware} from "../middleware/adminMiddleware";
 import {ResponseFormatter} from "../helper/ResponseFormatter";
 import {Response, Request} from "express";
 import {OrganizationService} from "../services/OrganizationService";
-import {Users} from "../entity/Users";
+import {Users} from "../entity/Users.entity";
 import {ConfigService} from "../services/ConfigService";
 import {upload} from "../helper/MulterConfig";
 import Joi from "joi";

@@ -7,8 +7,8 @@ import {
     ManyToOne,
     JoinColumn
 } from "typeorm";
-import {Users} from "./Users";
-import {RegistrationOption} from "./RegistrationOption";
+import {Users} from "./Users.entity";
+import {RegistrationOption} from "./RegistrationOption.entity";
 
 @Entity()
 export class Affiliations {

@@ -7,7 +7,7 @@ import {
     ManyToOne,
     JoinColumn, OneToOne
 } from "typeorm";
-import {Users} from "./Users";
+import {Users} from "./Users.entity";
 
 export enum TimePeriod {
     "Days" = 1,
@@ -15,7 +15,7 @@ export enum TimePeriod {
     "Years" = 3,
 }
 @Entity()
-export class OrganizationServiceEntity {
+export class OrganizationDetails {
     @PrimaryGeneratedColumn()
     id!: number;
 

@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { ConfigService } from "../services/ConfigService";
 import { ResponseFormatter } from "@inquitickets/response";
 import {Constants, roleMap} from "../helper/Constants";
-import {TimePeriod} from "../entity/OrganizationServiceEntity";
+import {TimePeriod} from "../entity/OrganizationDetails.entity";
 
 @JsonController("/api")
 export class ConfigController {

@@ -1,21 +1,21 @@
 import AppDataSource from "../../ormconfig";
-import {Users} from "../entity/Users";
-import {Profiles} from "../entity/Profiles";
+import {Users} from "../entity/Users.entity";
+import {Profiles} from "../entity/Profiles.entity";
 import {Constants} from "../helper/Constants";
 import {randomBytes} from "crypto";
-import {PasswordReset} from "../entity/PasswordReset";
+import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ActivateOrganization, CreatePassword} from "../helper/Emails";
 import {type} from "node:os";
 import {EmailService} from "./EmailService";
 import {IsNull, Not} from "typeorm";
-import {OrganizationServiceEntity} from "../entity/OrganizationServiceEntity";
+import {OrganizationDetails} from "../entity/OrganizationDetails.entity";
 import Joi from "joi";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
     private profileRepository = AppDataSource.getRepository(Profiles);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
-    private organizationServiceRepository = AppDataSource.getRepository(OrganizationServiceEntity);
+    private organizationServiceRepository = AppDataSource.getRepository(OrganizationDetails);
     private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
@@ -118,6 +118,7 @@ export class OrganizationService {
             extension: body.extension === true || body.extension === 'true',
             waitlist: body.waitlist === true || body.waitlist === 'true',
             service_description: body.service_description,
+
             minimum_age: body.minimum_age,
             maximum_age: body.maximum_age,
             genders_served: body.genders_served,
@@ -128,6 +129,7 @@ export class OrganizationService {
             citizenship_requirement: body.citizenship_requirement,
             language_requirement: body.language_requirement,
             out_of_state_relocation: body.out_of_state_relocation === true || body.out_of_state_relocation === 'true',
+
             trafficking_status: body.trafficking_status,
             legal: body.legal,
             health_needs: body.health_needs,
@@ -137,6 +139,7 @@ export class OrganizationService {
             smoking_allowed: body.smoking_allowed,
             entry_requirement: body.entry_requirement,
             days_sober: body.days_sober,
+
             service_model: body.service_model,
             faith_engagement: body.faith_engagement,
             faith_engagement_practice: body.faith_engagement_practice,
@@ -145,6 +148,7 @@ export class OrganizationService {
             staffing_level: body.staffing_level,
             teams_diversity: body.teams_diversity,
             service_guidelines: body.service_guidelines,
+
             support_provided: body.support_provided,
             support_offered: body.support_offered,
             intake_process: body.intake_process,

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import {Users} from "../entity/Users";
+import {Users} from "../entity/Users.entity";
 import {Constants} from "./Constants";
 
 export class JwtHelper {

@@ -7,11 +7,11 @@ import {
     ManyToOne,
     JoinColumn, OneToOne, OneToMany
 } from "typeorm";
-import {UserRole} from "./UserRole";
-import {Profiles} from "./Profiles";
-import {Affiliations} from "./Affiliations";
+import {UserRole} from "./UserRole.entity";
+import {Profiles} from "./Profiles.entity";
+import {Affiliations} from "./Affiliations.entity";
 import {OrganizationService} from "../services/OrganizationService";
-import {OrganizationServiceEntity} from "./OrganizationServiceEntity";
+import {OrganizationDetails} from "./OrganizationDetails.entity";
 
 @Entity()
 export class Users {
@@ -68,8 +68,8 @@ export class Users {
     @OneToOne(() => Profiles, profile => profile.user, { cascade: true })
     profile!: Profiles;
 
-    @OneToMany(() => OrganizationServiceEntity, organization_service => organization_service.organization, { cascade: true })
-    organizationService!: OrganizationServiceEntity[];
+    @OneToMany(() => OrganizationDetails, organization_service => organization_service.organization, { cascade: true })
+    organizationService!: OrganizationDetails[];
 
     @OneToMany(() => Affiliations, affiliation => affiliation.user)
     affiliations!: Affiliations[];

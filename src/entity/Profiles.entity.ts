@@ -7,7 +7,7 @@ import {
     ManyToOne,
     JoinColumn, OneToOne
 } from "typeorm";
-import {Users} from "./Users";
+import {Users} from "./Users.entity";
 
 @Entity()
 export class Profiles {

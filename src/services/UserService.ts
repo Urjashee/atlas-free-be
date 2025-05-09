@@ -1,12 +1,12 @@
 import AppDataSource from "../../ormconfig";
-import {Users} from "../entity/Users";
-import {Profiles} from "../entity/Profiles";
+import {Users} from "../entity/Users.entity";
+import {Profiles} from "../entity/Profiles.entity";
 import bcrypt from "bcryptjs";
-import {DeviceToken} from "../entity/DeviceToken";
+import {DeviceToken} from "../entity/DeviceToken.entity";
 import {Constants} from "../helper/Constants";
-import {Affiliations} from "../entity/Affiliations";
+import {Affiliations} from "../entity/Affiliations.entity";
 import s3UploadService from "../helper/S3UploadService";
-import {PasswordReset} from "../entity/PasswordReset";
+import {PasswordReset} from "../entity/PasswordReset.entity";
 import {IsNull, MoreThan, Not} from "typeorm";
 
 export class UserService {
