@@ -11,7 +11,7 @@ import Joi from "joi";
 import {UserService} from "../services/UserService";
 
 const adminOrgEditSchema = Joi.object({
-    id: Joi.number().required(),
+    organization_id: Joi.number().required(),
     country_code: Joi.string().min(2).max(5).required(),
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
     address: Joi.string().min(3).max(1600).required(),
@@ -39,24 +39,24 @@ export class AdminController {
             const organizations = await this.organizationService.getOrganizations(filter)
             const customResponse =await Promise.all(
                 organizations.map(async organization => {
-                    const ids = (organization as any).primary_purpose.map(id => Number(id));
+                    const ids = organization.organization.primary_purpose.map(id => Number(id));
                     const purposes = await this.configService.getPrimaryPurposeById(ids);
                     return {
-                        id: (organization.user as Users).id,
-                        name: (organization.user as Users).user_name,
-                        email: (organization.user as Users).email,
-                        country_code: (organization.user as Users).country_code,
-                        phone_no: (organization.user as Users).mobile,
-                        zipcode: organization.zipcode,
-                        website: organization.website,
-                        year: organization.year,
-                        address: organization.address,
+                        id: organization.organization.id,
+                        name: organization.organization.name,
+                        email: organization.email,
+                        country_code: organization.country_code,
+                        phone_no: organization.mobile,
+                        zipcode: organization.organization.zipcode,
+                        website: organization.organization.website,
+                        year: organization.organization.year,
+                        address: organization.organization.address,
                         primary_purpose: purposes.map(purpose => ({
                             id: purpose.id,
                             name: purpose.name,
                         })),
-                        tax_status: organization.tax_exemption == false ? "No" : "Yes",
-                        affiliation: (organization as any).affiliation.map(a => ({
+                        tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
+                        affiliation: organization.organization.affiliations.map(a => ({
                             id: a.affiliation.id,
                             name: a.affiliation.name,
                             file: a.affiliation_file
@@ -82,7 +82,7 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const user = await this.userService.updateUser(req.body.id, req.body);
+            const user = await this.userService.updateUser(req.body.organization_id, req.body);
             if (!user)
                 return ResponseFormatter.successResponse(res, 'User not updated')
             return ResponseFormatter.successResponse(res, 'User updated')
@@ -92,10 +92,10 @@ export class AdminController {
         }
     }
 
-    @Patch("/organization/status/:id")
+    @Patch("/organization/status/:organization_id")
     @UseBefore(authMiddleware)
     @UseBefore(adminMiddleware)
-    async updateOrganizationStatus(@Req() req: Request, @Res() res: Response, @Param("id") organization_id: number) {
+    async updateOrganizationStatus(@Req() req: Request, @Res() res: Response, @Param("organization_id") organization_id: number) {
         try {
             const organization = await this.organizationService.updateStatus(organization_id)
             if (!organization)

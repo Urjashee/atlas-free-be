@@ -14,7 +14,7 @@ import {PasswordResetEmail} from "../helper/Emails";
 
 dotenv.config();
 const registrationOrganizationSchema = Joi.object({
-    user_name: Joi.string().min(3).max(150).required(),
+    name: Joi.string().min(3).max(150).required(),
     email: Joi.string().email().pattern(/^\S+$/).required(),
     country_code: Joi.string().min(2).max(5).required(),
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
@@ -134,7 +134,8 @@ export class AuthController {
             const user = await this.userService.findUserByCredentials(req.body.email, req.body.password);
             if (!user)
                 return ResponseFormatter.errorResponse(res, 'Your credentials are wrong', user);
-            const token = await this.jwtHelper.jwtSign(user);
+
+            const token = await this.jwtHelper.jwtSign(user, user.organization);
             const updateToken = await this.userService.addToken(user, token, req.body)
             if (!updateToken)
                 return ResponseFormatter.errorResponse(res, "Can't login right now");

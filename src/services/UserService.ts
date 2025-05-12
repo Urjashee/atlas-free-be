@@ -1,6 +1,5 @@
 import AppDataSource from "../../ormconfig";
 import {Users} from "../entity/Users.entity";
-import {Profiles} from "../entity/Profiles.entity";
 import bcrypt from "bcryptjs";
 import {DeviceToken} from "../entity/DeviceToken.entity";
 import {Constants} from "../helper/Constants";
@@ -8,10 +7,11 @@ import {Affiliations} from "../entity/Affiliations.entity";
 import s3UploadService from "../helper/S3UploadService";
 import {PasswordReset} from "../entity/PasswordReset.entity";
 import {IsNull, MoreThan, Not} from "typeorm";
+import {Organization} from "../entity/Organization.entity";
 
 export class UserService {
     private userRepository = AppDataSource.getRepository(Users);
-    private profileRepository = AppDataSource.getRepository(Profiles);
+    private organizationRepository = AppDataSource.getRepository(Organization);
     private deviceTokenRepository = AppDataSource.getRepository(DeviceToken);
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
@@ -26,19 +26,9 @@ export class UserService {
     }
 
     async createUser(body: any, role: number): Promise<Users> {
-        const user = await this.userRepository.create({
-            email: body.email,
-            user_name: body.user_name,
-            country_code: body.country_code,
-            mobile: body.phone_no,
-            is_profile: true,
-            is_status: true,
-            role: {id: role},
-        })
-        const savedUser = await this.userRepository.save(user)
-        const profile = await Promise.all([this.profileRepository.create({
-            user: {id: savedUser.id},
+        const profile = await this.organizationRepository.create({
             address: body.address,
+            name: body.name,
             disclose_address: body.disclose_address,
             zipcode: body.zipcode,
             year: body.year,
@@ -47,8 +37,19 @@ export class UserService {
             ein: body.ein,
             primary_purpose: body.primary_purpose,
             platform_purpose: body.platform_purpose,
-        })])
-        await this.profileRepository.save(profile)
+        })
+        const org = await this.organizationRepository.save(profile)
+        const user = await this.userRepository.create({
+            email: body.email,
+            country_code: body.country_code,
+            mobile: body.phone_no,
+            is_profile: true,
+            is_status: true,
+            role: {id: role},
+            organization: {id: org.id},
+        })
+        const savedUser = await this.userRepository.save(user)
+
         const affiliations = JSON.parse(body.affiliations);
         for (const affiliation of affiliations) {
             const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
@@ -56,7 +57,7 @@ export class UserService {
             const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
             if (uploadedFile) {
                 const addAffiliation = await this.affiliationRepository.create({
-                    user: {id: savedUser.id},
+                    organization: {id: org.id},
                     affiliation: {id: affiliation.id},
                     affiliation_file: uploadedFile as string,
                 });
@@ -66,10 +67,10 @@ export class UserService {
         return savedUser
     }
 
-    async updateUser(user_id: number, body: any){
+    async updateUser(organization_id: number, body: any){
         const user = await this.userRepository.findOne({
             where: {
-                id: user_id,
+                organization: {id: organization_id},
             }
         })
         if (user) {
@@ -77,24 +78,24 @@ export class UserService {
             user.mobile = body.mobile
             await this.userRepository.save(user)
         }
-        const profile = await this.profileRepository.findOne({
+        const organization = await this.organizationRepository.findOne({
             where: {
-                user: {id: user_id}
+                id: organization_id
             }
         })
-        if (profile) {
-            profile.address = body.address
-            profile.disclose_address = body.disclose_address
-            profile.zipcode = body.zipcode
-            profile.year = body.year
-            profile.website = body.website
-            profile.tax_exemption = body.tax_exemption
-            profile.primary_purpose = body.primary_purpose
-            await this.profileRepository.save(profile)
+        if (organization) {
+            organization.address = body.address
+            organization.disclose_address = body.disclose_address
+            organization.zipcode = body.zipcode
+            organization.year = body.year
+            organization.website = body.website
+            organization.tax_exemption = body.tax_exemption
+            organization.primary_purpose = body.primary_purpose
+            await this.organizationRepository.save(organization)
         }
         const currentAffiliations = await this.affiliationRepository.find({
             where: {
-                user: {id: user_id}
+                organization: {id: organization_id}
             },
         })
 
@@ -114,7 +115,7 @@ export class UserService {
             console.log("affiliation: ",affiliation.id)
             const affiliationData = await this.affiliationRepository.findOne({
                 where: {
-                    user: { id: user_id },
+                    organization: { id: organization_id },
                     affiliation: { id: affiliation.id },
                 },
             });
@@ -133,7 +134,7 @@ export class UserService {
                 const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
                 if (uploadedFile) {
                     const addAffiliation = await this.affiliationRepository.create({
-                        user: {id: user_id},
+                        organization: {id: organization_id},
                         affiliation: {id: affiliation.id},
                         affiliation_file: uploadedFile as string,
                     });
@@ -171,7 +172,11 @@ export class UserService {
     }
 
     async findUserByCredentials(email: string, password: string) {
-        const user = await this.userRepository.findOneBy({email});
+        const user = await this.userRepository.findOne({
+            where: {
+                email,
+            }, relations: ["organization"]
+        });
         if (user && await bcrypt.compare(password, user.password)) {
             return user;
         }

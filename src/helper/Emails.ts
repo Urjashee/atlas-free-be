@@ -53,7 +53,7 @@ export const CreatePassword = (name: string, email: string, token: string, type:
         </div>
         <div class="footer">
             <p>Best Regards,</p>
-            <p>The Rekki Team</p>
+            <p>Team Atlas Free</p>
         </div>
     </div>
 </body>
@@ -169,7 +169,6 @@ export const ActivateOrganization = (name: string, email: string, token: string,
             <p>Dear ${name},</p>
             <p>Thank you for your patience</p>
             <p>Your account is active you can login now</p>
-            <button type="button" class="button">
            
         </div>
         <div class="footer">

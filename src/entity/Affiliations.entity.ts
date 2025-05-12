@@ -9,15 +9,16 @@ import {
 } from "typeorm";
 import {Users} from "./Users.entity";
 import {RegistrationOption} from "./RegistrationOption.entity";
+import {Organization} from "./Organization.entity";
 
 @Entity()
 export class Affiliations {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @ManyToOne(() => Users, { eager: true })
-    @JoinColumn({ name: 'user_id' })
-    user!: Users;
+    @ManyToOne(() => Organization, { eager: true })
+    @JoinColumn({ name: 'organization_id' })
+    organization!: Organization;
 
     @ManyToOne(() => RegistrationOption, { eager: true })
     @JoinColumn({ name: 'affiliation_id' })

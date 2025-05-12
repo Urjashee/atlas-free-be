@@ -5,14 +5,19 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
-    JoinColumn, OneToOne
+    JoinColumn, OneToOne, OneToMany
 } from "typeorm";
 import {Users} from "./Users.entity";
+import {OrganizationDetails} from "./OrganizationDetails.entity";
+import {Affiliations} from "./Affiliations.entity";
 
 @Entity()
-export class Profiles {
+export class Organization {
     @PrimaryGeneratedColumn()
     id!: number;
+
+    @Column({ nullable: false })
+    name!: string;
 
     @Column()
     address!: string;
@@ -36,24 +41,26 @@ export class Profiles {
     ein!: number
 
     @Column({ type: "simple-array", nullable: true })
-    primary_purpose!: number
+    primary_purpose!: number[]
+
+    @Column({ default: 0 })
+    is_active!: boolean;
 
     @Column()
     platform_purpose!: number
-
-    // @Column()
-    // affiliation!: number
-    //
-    // @Column({nullable: true})
-    // affiliation_file!: string
-
-    @OneToOne(() => Users, user => user.profile, { eager: true })
-    @JoinColumn({ name: 'user_id' })
-    user!: Users | number;
 
     @CreateDateColumn()
     created_at!: Date;
 
     @UpdateDateColumn()
     updated_at!: Date;
+
+    @OneToMany(() => OrganizationDetails, organization_service => organization_service.organization, { cascade: true })
+    organizationService!: OrganizationDetails[];
+
+    @OneToMany(() => Affiliations, affiliation => affiliation.organization)
+    affiliations!: Affiliations[];
+
+    @OneToMany(() => Users, user => user.organization)
+    users!: Users[];
 }

@@ -1,6 +1,5 @@
 import AppDataSource from "../../ormconfig";
 import {Users} from "../entity/Users.entity";
-import {Profiles} from "../entity/Profiles.entity";
 import {Constants} from "../helper/Constants";
 import {randomBytes} from "crypto";
 import {PasswordReset} from "../entity/PasswordReset.entity";
@@ -10,10 +9,11 @@ import {EmailService} from "./EmailService";
 import {IsNull, Not} from "typeorm";
 import {OrganizationDetails} from "../entity/OrganizationDetails.entity";
 import Joi from "joi";
+import {Organization} from "../entity/Organization.entity";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
-    private profileRepository = AppDataSource.getRepository(Profiles);
+    private organizationRepository = AppDataSource.getRepository(Organization);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private organizationDetailsRepository = AppDataSource.getRepository(OrganizationDetails);
     private mailerService = new EmailService();
@@ -23,45 +23,33 @@ export class OrganizationService {
 
         }
         if (filter === "pending") {
-            const organizations = await this.userRepository.find({
+            return await this.userRepository.find({
                 where: {
                     is_active: false,
-                    is_status: true
-                }
-            })
-            if (organizations.length > 0) {
-                const orgIds = organizations.map(org => org.id);
-
-                return await this.profileRepository
-                    .createQueryBuilder("profile")
-                    .leftJoinAndSelect("profile.user", "user")
-                    .leftJoinAndMapMany(
-                        "profile.affiliation",
-                        "Affiliations",
-                        "affiliation",
-                        "affiliation.user.id = user.id"
-                    )
-                    .leftJoinAndSelect("affiliation.affiliation", "registrationOption")
-                    .where("user.id IN (:...ids)", {ids: orgIds})
-                    .getMany()
-            }
+                    is_status: true,
+                    role: { id: Constants.ROLE_ORGANIZATION }
+                },
+                relations: ['organization', 'organization.affiliations']
+            });
         }
     }
 
     async updateStatus(organization_id: number) {
         const organization = await this.userRepository.findOne({
             where: {
-                id: organization_id,
+                organization: {id: organization_id},
                 role: {id: Constants.ROLE_ORGANIZATION}
-            }
+            },
+            relations: ['organization']
         })
         if (organization) {
-            if (organization.is_active == true) {
-                organization.is_active = false
-                return await this.userRepository.save(organization)
+            if (organization.organization.is_active == true) {
+                organization.organization.is_active = false
+                await this.organizationRepository.save(organization.organization);
+                return organization.organization;
             }
-            if (organization.is_active == false) {
-                organization.is_active = true
+            if (organization.organization.is_active == false) {
+                organization.organization.is_active = true
                 const token = randomBytes(32).toString('hex');
                 if (organization.emailVerifiedAt === null) {
                     const password_reset_request = this.passwordResetRepository.create({
@@ -99,7 +87,8 @@ export class OrganizationService {
                     await this.passwordResetRepository.save(password_reset_request);
 
                 }
-                return await this.userRepository.save(organization)
+                await this.organizationRepository.save(organization.organization);
+                return organization.organization;
             }
         }
     }
@@ -233,6 +222,13 @@ export class OrganizationService {
         return await this.organizationDetailsRepository.find({
             where: {
                 organization: {id: organization}
+            }
+        })
+    }
+    async getOrganizationsServiceById(id: number) {
+        return await this.organizationDetailsRepository.find({
+            where: {
+                id: id
             }
         })
     }

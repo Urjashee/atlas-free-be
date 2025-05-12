@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 import {Users} from "../entity/Users.entity";
 import {Constants} from "./Constants";
+import {Organization} from "../entity/Organization.entity";
 
 export class JwtHelper {
-    async jwtSign(user: Users): Promise<string> {
+    async jwtSign(user: Users, organization?: Organization): Promise<string> {
         if (user.role.id == Constants.ROLE_ADMIN) {
             return jwt.sign({
                 id: user.id,
@@ -25,6 +26,8 @@ export class JwtHelper {
                 title: user.title,
                 first_name: user.first_name,
                 last_name: user.last_name,
+                organization_id: organization.id,
+                organization_name: organization.name,
                 isActive: user.is_active,
                 isStatus: user.is_status,
                 isProfile: user.is_profile,

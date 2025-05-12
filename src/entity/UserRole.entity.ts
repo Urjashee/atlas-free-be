@@ -7,10 +7,4 @@ export class UserRole {
 
     @Column()
     name!: string;
-
-    // @CreateDateColumn()
-    // created_at!: Date;
-    //
-    // @UpdateDateColumn()
-    // updated_at!: Date;
 }

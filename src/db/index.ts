@@ -39,7 +39,7 @@ const users_data = [
         is_status: true,
         is_profile: true,
         password: "Goblin123", // Use plain password initially; will hash later
-        role: 1
+        role: 1,
     },
 ];
 
@@ -314,6 +314,7 @@ async function seedRoles() {
         });
     }
 }
+
 async function seedUsers() {
     for (const user of users_data) {
         try {
@@ -351,6 +352,7 @@ async function seedUsers() {
         }
     }
 }
+
 async function seedAdvocateServices() {
     await new Promise<void>((resolve, reject) => {
         connection.query('TRUNCATE TABLE advocate_service', (err) => {
@@ -378,8 +380,16 @@ async function seedAdvocateServices() {
         });
     }
 }
+
 async function seedRegistrationOption() {
     await new Promise<void>((resolve, reject) => {
+        connection.query('SET FOREIGN_KEY_CHECKS = 0', (err) => {
+            if (err) {
+                console.error('Error disabling foreign key checks:', err);
+                reject(err);
+                return;
+            }
+        })
         connection.query('TRUNCATE TABLE registration_option', (err) => {
             if (err) {
                 console.error('Error truncating registration_option table:', err);
@@ -389,6 +399,13 @@ async function seedRegistrationOption() {
             console.log('registration_option table truncated');
             resolve();
         });
+        connection.query('SET FOREIGN_KEY_CHECKS = 1', (err) => {
+            if (err) {
+                console.error('Error disabling foreign key checks:', err);
+                reject(err);
+                return;
+            }
+        })
     });
     for (const data of registration_option) {
         const query = 'INSERT INTO registration_option (id, name, type) VALUES (?, ?, ?)';

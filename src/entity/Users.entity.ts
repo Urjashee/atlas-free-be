@@ -8,10 +8,7 @@ import {
     JoinColumn, OneToOne, OneToMany
 } from "typeorm";
 import {UserRole} from "./UserRole.entity";
-import {Profiles} from "./Profiles.entity";
-import {Affiliations} from "./Affiliations.entity";
-import {OrganizationService} from "../services/OrganizationService";
-import {OrganizationDetails} from "./OrganizationDetails.entity";
+import {Organization} from "./Organization.entity";
 
 @Entity()
 export class Users {
@@ -65,14 +62,9 @@ export class Users {
     @JoinColumn({ name: 'role_id' })
     role!: UserRole;
 
-    @OneToOne(() => Profiles, profile => profile.user, { cascade: true })
-    profile!: Profiles;
-
-    @OneToMany(() => OrganizationDetails, organization_service => organization_service.organization, { cascade: true })
-    organizationService!: OrganizationDetails[];
-
-    @OneToMany(() => Affiliations, affiliation => affiliation.user)
-    affiliations!: Affiliations[];
+    @ManyToOne(() => Organization, organization => organization.users)
+    @JoinColumn({ name: 'organization_id' })
+    organization!: Organization;
 
     @CreateDateColumn()
     created_at!: Date;
