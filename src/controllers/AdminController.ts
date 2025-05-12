@@ -9,6 +9,7 @@ import {ConfigService} from "../services/ConfigService";
 import {upload} from "../helper/MulterConfig";
 import Joi from "joi";
 import {UserService} from "../services/UserService";
+import {getOrganizationsDetails} from "../util/Organization.util";
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -35,33 +36,10 @@ export class AdminController {
     @UseBefore(adminMiddleware)
     async getOrganizationList(@Req() req: Request, @Res() res: Response, @Param("filter") filter: string) {
         try {
-
             const organizations = await this.organizationService.getOrganizations(filter)
-            const customResponse =await Promise.all(
-                organizations.map(async organization => {
-                    const ids = organization.organization.primary_purpose.map(id => Number(id));
-                    const purposes = await this.configService.getPrimaryPurposeById(ids);
-                    return {
-                        id: organization.organization.id,
-                        name: organization.organization.name,
-                        email: organization.email,
-                        country_code: organization.country_code,
-                        phone_no: organization.mobile,
-                        zipcode: organization.organization.zipcode,
-                        website: organization.organization.website,
-                        year: organization.organization.year,
-                        address: organization.organization.address,
-                        primary_purpose: purposes.map(purpose => ({
-                            id: purpose.id,
-                            name: purpose.name,
-                        })),
-                        tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
-                        affiliation: organization.organization.affiliations.map(a => ({
-                            id: a.affiliation.id,
-                            name: a.affiliation.name,
-                            file: a.affiliation_file
-                        }))
-                    }
+            const customResponse = await Promise.all(
+                organizations.map(async (organization: any) => {
+                    return await getOrganizationsDetails(organization);
                 })
             )
             return ResponseFormatter.successResponse(res, "Organization list", customResponse)
@@ -82,7 +60,7 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const user = await this.userService.updateUser(req.body.organization_id, req.body);
+            const user = await this.userService.updateUser(req.body.organization_id, req.body, req.user.role);
             if (!user)
                 return ResponseFormatter.successResponse(res, 'User not updated')
             return ResponseFormatter.successResponse(res, 'User updated')

@@ -3,13 +3,14 @@ import {Users} from "../entity/Users.entity";
 import {Constants} from "../helper/Constants";
 import {randomBytes} from "crypto";
 import {PasswordReset} from "../entity/PasswordReset.entity";
-import {ActivateOrganization, CreatePassword} from "../helper/Emails";
+import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails";
 import {type} from "node:os";
 import {EmailService} from "./EmailService";
 import {IsNull, Not} from "typeorm";
 import {OrganizationDetails} from "../entity/OrganizationDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
+import {ResponseFormatter} from "../helper/ResponseFormatter";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -20,17 +21,24 @@ export class OrganizationService {
 
     async getOrganizations(filter: string) {
         if (filter === "all") {
-
+            return await this.userRepository
+                .createQueryBuilder('user')
+                .leftJoinAndSelect('user.organization', 'organization')
+                .leftJoinAndSelect('organization.affiliations', 'affiliations')
+                .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION })
+                .andWhere('organization.is_active = :orgActive', { orgActive: true })
+                .getMany();
         }
         if (filter === "pending") {
-            return await this.userRepository.find({
-                where: {
-                    is_active: false,
-                    is_status: true,
-                    role: { id: Constants.ROLE_ORGANIZATION }
-                },
-                relations: ['organization', 'organization.affiliations']
-            });
+            return await this.userRepository
+                .createQueryBuilder('user')
+                .leftJoinAndSelect('user.organization', 'organization')
+                .leftJoinAndSelect('organization.affiliations', 'affiliations')
+                .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION })
+                .andWhere('organization.is_active = :orgActive', { orgActive: false })
+                .getMany();
         }
     }
 
@@ -218,6 +226,7 @@ export class OrganizationService {
             }
         })
     }
+
     async getOrganizationsService(organization: number) {
         return await this.organizationDetailsRepository.find({
             where: {
@@ -225,11 +234,93 @@ export class OrganizationService {
             }
         })
     }
+
     async getOrganizationsServiceById(id: number) {
         return await this.organizationDetailsRepository.find({
             where: {
                 id: id
             }
+        })
+    }
+
+    async getOrganizationsById(id: number) {
+        return await this.userRepository
+            .createQueryBuilder('user')
+            .leftJoinAndSelect('user.organization', 'organization')
+            .leftJoinAndSelect('organization.affiliations', 'affiliations')
+            .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+            .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION })
+            .andWhere('organization.id = :orgId', { orgId: id })
+            .getOne();
+    }
+
+    async checkIfEmailAlreadyInUse(email: string) {
+        return await this.userRepository.findOne({
+            where: {
+                email
+            }
+        })
+
+    }
+
+    async sendInvitation(email: string, role: number, organization_id: number, organization_name: string) {
+        const sendInvitation = await this.userRepository.create({
+            email: email,
+            role: {id: role},
+            organization: {id: organization_id},
+        })
+        const token = randomBytes(32).toString('hex');
+        const invitation = await this.userRepository.save(sendInvitation)
+        const password_reset_request = this.passwordResetRepository.create({
+            email: email,
+            token,
+            type: Constants.SEND_INVITATION,
+            user: {id: sendInvitation.id}
+        })
+        await this.passwordResetRepository.save(password_reset_request)
+        if (invitation) {
+            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name);
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: email,
+                subject: "Email from Atlas free!",
+                html: emailContent
+            };
+            await this.mailerService.sendEmail(mailOptions);
+        }
+        return invitation
+    }
+
+    async resendInvitation(user_id: number, email: string, role: number, organization_id: number, organization_name: string) {
+        const token = randomBytes(32).toString('hex');
+        const password_reset_request = this.passwordResetRepository.create({
+            email: email,
+            token,
+            type: Constants.SEND_INVITATION,
+            user: {id: user_id}
+        })
+        const password_resets = await this.passwordResetRepository.save(password_reset_request)
+        if (password_resets) {
+            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name);
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: email,
+                subject: "Email from Atlas free!",
+                html: emailContent
+            };
+            await this.mailerService.sendEmail(mailOptions);
+        }
+        return password_resets
+    }
+
+    async getOrgUsers(organization_id: number) {
+        return await this.userRepository.find({
+            where: {
+                organization: {id: organization_id},
+                is_active: true,
+                is_status: true
+            },
+            order: {created_at: "DESC"}
         })
     }
 }

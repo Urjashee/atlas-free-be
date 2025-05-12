@@ -67,7 +67,7 @@ export class UserService {
         return savedUser
     }
 
-    async updateUser(organization_id: number, body: any){
+    async updateUser(organization_id: number, body: any, role?:number){
         const user = await this.userRepository.findOne({
             where: {
                 organization: {id: organization_id},
@@ -140,6 +140,10 @@ export class UserService {
                     });
                     await this.affiliationRepository.save(addAffiliation);
                 }
+            }
+            if (role === Constants.ROLE_ORGANIZATION) {
+                organization.is_active = false
+                await this.organizationRepository.save(organization)
             }
         }
         return true

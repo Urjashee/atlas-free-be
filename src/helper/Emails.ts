@@ -168,12 +168,74 @@ export const ActivateOrganization = (name: string, email: string, token: string,
         <div class="content">
             <p>Dear ${name},</p>
             <p>Thank you for your patience</p>
-            <p>Your account is active you can login now</p>
+            <p>Your organization was successfully verified!</p>
            
         </div>
         <div class="footer">
             <p>Best Regards,</p>
-            <p>The Rekki Team</p>
+            <p>Team Atlas free</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+export const SendInvitationEmail = (email: string, token: string, type: number, role: number, organization_name: string) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: "Google Sans", sans-serif;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #f7f7f7;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .content {
+            margin-top: 20px;
+            font-family: "Google Sans", sans-serif;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: grey;
+            font-family: "Google Sans", sans-serif;
+        }
+        .button {
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+        </div>
+        <div class="content">
+            <p>Dear ${email},</p>
+            <p>You have received an invitation from ${organization_name}</p>
+            <p>Please click the button below to set up your account</p>
+            <button type="button" class="button">
+            <a href='${process.env.SITE_NAME}/user-invitation?token=${token}&type=${type}&role=${role}' 
+                    style="text-decoration:none;color: #2954FF;">
+                Create Password</a></button>
+        </div>
+        <div class="footer">
+            <p>Best Regards,</p>
+            <p>Team Atlas free</p>
         </div>
     </div>
 </body>

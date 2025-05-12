@@ -15,12 +15,14 @@ export async function getOrganizationsServiceDetails(getOrganizationServices: an
                 name: service.name,
                 service_type_id: service.service_type,
                 service_type: (await configService.getServiceOptionsById(service.service_type)).name,
+                slots_beds_id: service.slots_beds,
                 slots_beds: (await configService.getServiceOptionsById(service.slots_beds)).name,
                 client_slots: service.client_slots,
                 client_slots_available: service.client_slots_available,
                 start_day_of_service: new Date(service.start_day_of_service).toISOString().split('T')[0],
                 service_limited: service.service_limited,
-                enrollment_type: TimePeriod[service.enrollment_type], // Get data from enum
+                enrollment_type_id: service.enrollment_type,
+                enrollment_type: TimePeriod[service.enrollment_type],
                 enrollment_period: service.enrollment_period,
                 extension: service.extension,
                 waitlist: service.waitlist,
@@ -110,10 +112,14 @@ export async function getOrganizationsServiceDetails(getOrganizationServices: an
                         name: (await configService.getServiceOptionsById(item)).name
                     }
                 })),
+                faith_engagement_id: service.faith_engagement,
                 "faith_engagement": (await configService.getServiceOptionsById(service.faith_engagement)).name,
                 "faith_engagement_practice": service.faith_engagement_practice,
+                service_structure_id: service.service_structure,
                 "service_structure": (await configService.getServiceOptionsById(service.service_structure)).name,
+                sleeping_arrangement_id: service.sleeping_arrangement,
                 "sleeping_arrangement": (await configService.getServiceOptionsById(service.sleeping_arrangement)).name,
+                staffing_level_id: service.staffing_level,
                 "staffing_level": (await configService.getServiceOptionsById(service.staffing_level)).name,
                 "teams_diversity": await Promise.all(service.teams_diversity.map(async (item) => {
                     return {
@@ -146,4 +152,30 @@ export async function getOrganizationsServiceDetails(getOrganizationServices: an
             };
         })
     );
+}
+export async function getOrganizationsDetails(organization: any) {
+    const ids = organization.organization.primary_purpose.map(id => Number(id));
+    const purposes = await configService.getPrimaryPurposeById(ids);
+    return {
+        id: organization.organization.id,
+        is_active: organization.organization.is_active,
+        name: organization.organization.name,
+        email: organization.email,
+        country_code: organization.country_code,
+        phone_no: organization.mobile,
+        zipcode: organization.organization.zipcode,
+        website: organization.organization.website,
+        year: organization.organization.year,
+        address: organization.organization.address,
+        primary_purpose: purposes.map(purpose => ({
+            id: purpose.id,
+            name: purpose.name,
+        })),
+        tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
+        affiliation: organization.organization.affiliations.map(a => ({
+            id: a.affiliation.id,
+            name: a.affiliation.name,
+            file: a.affiliation_file
+        }))
+    }
 }
