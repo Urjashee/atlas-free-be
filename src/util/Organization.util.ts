@@ -1,6 +1,6 @@
-import {UserService} from "../services/UserService";
-import {OrganizationService} from "../services/OrganizationService";
-import {ConfigService} from "../services/ConfigService";
+import {UserService} from "../services/User.service";
+import {OrganizationService} from "../services/Organization.service";
+import {ConfigService} from "../services/Config.service";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
 
 const userService = new UserService();

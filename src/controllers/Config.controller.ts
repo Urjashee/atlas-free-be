@@ -1,8 +1,8 @@
 import { Get, JsonController, Req, Res } from "routing-controllers";
 import { Request, Response } from "express";
-import { ConfigService } from "../services/ConfigService";
+import { ConfigService } from "../services/Config.service";
 import { ResponseFormatter } from "@inquitickets/response";
-import {Constants, roleMap} from "../helper/Constants";
+import {Constants, roleMap} from "../helper/Constants.helper";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
 
 @JsonController("/api")

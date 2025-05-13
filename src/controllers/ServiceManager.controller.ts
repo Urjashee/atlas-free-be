@@ -1,14 +1,14 @@
 import {Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
-import {authMiddleware} from "../middleware/authMiddleware";
-import {organizationMiddleware} from "../middleware/organizationMiddleware";
+import {authMiddleware} from "../middleware/Auth.middleware";
+import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {Request, Response} from "express";
-import {ResponseFormatter} from "../helper/ResponseFormatter";
-import {UserService} from "../services/UserService";
-import {OrganizationService} from "../services/OrganizationService";
-import {ConfigService} from "../services/ConfigService";
-import {serviceManagerMiddleware} from "../middleware/serviceManagerMiddleware";
-import {ServiceManagerService} from "../services/ServiceManagerService";
-import {servicesSchema} from "../schema/services.schema";
+import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
+import {UserService} from "../services/User.service";
+import {OrganizationService} from "../services/Organization.service";
+import {ConfigService} from "../services/Config.service";
+import {serviceManagerMiddleware} from "../middleware/ServiceManager.middleware";
+import {ServiceManagerService} from "../services/ServiceManager.service";
+import {servicesSchema} from "../schema/Services.schema";
 import {getOrganizationsServiceDetails} from "../util/Organization.util";
 
 @JsonController("/api/service-manager")

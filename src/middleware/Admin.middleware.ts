@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import {ResponseFormatter} from "@inquitickets/response"
 import jwt, {JwtPayload} from "jsonwebtoken";
-import {Constants} from "../helper/Constants";
+import {Constants} from "../helper/Constants.helper";
 dotenv.config();
 
 export const adminMiddleware = async (req: Request, res: Response, next: NextFunction) => {

@@ -4,7 +4,7 @@ import {Organization} from "../entity/Organization.entity";
 import {DeviceToken} from "../entity/DeviceToken.entity";
 import {Affiliations} from "../entity/Affiliations.entity";
 import {PasswordReset} from "../entity/PasswordReset.entity";
-import s3UploadService from "../helper/S3UploadService";
+import s3UploadService from "../helper/S3UploadService.helper";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 
 export class ServiceManagerService {

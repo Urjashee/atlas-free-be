@@ -1,16 +1,16 @@
 import {Body, Get, HttpCode, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
 import {Request, Response} from "express";
-import {ResponseFormatter} from "../helper/ResponseFormatter";
+import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import dotenv from "dotenv";
 import Joi from "joi";
-import {upload} from "../helper/MulterConfig";
-import {UserService} from "../services/UserService";
-import {Constants, roleMap} from "../helper/Constants";
-import S3UploadService from "../helper/S3UploadService";
-import { JwtHelper } from "../helper/JwtHelper";
+import {upload} from "../helper/MulterConfig.helper";
+import {UserService} from "../services/User.service";
+import {Constants, roleMap} from "../helper/Constants.helper";
+import S3UploadService from "../helper/S3UploadService.helper";
+import { JwtHelper } from "../helper/Jwt.helper";
 import {randomBytes} from "crypto";
-import {EmailService} from "../services/EmailService";
-import {PasswordResetEmail} from "../helper/Emails";
+import {EmailService} from "../services/Email.service";
+import {PasswordResetEmail} from "../helper/Emails.helper";
 
 dotenv.config();
 const registrationOrganizationSchema = Joi.object({

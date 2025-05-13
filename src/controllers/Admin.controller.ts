@@ -1,14 +1,14 @@
 import {Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
-import {authMiddleware} from "../middleware/authMiddleware";
-import {adminMiddleware} from "../middleware/adminMiddleware";
-import {ResponseFormatter} from "../helper/ResponseFormatter";
+import {authMiddleware} from "../middleware/Auth.middleware";
+import {adminMiddleware} from "../middleware/Admin.middleware";
+import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import {Response, Request} from "express";
-import {OrganizationService} from "../services/OrganizationService";
+import {OrganizationService} from "../services/Organization.service";
 import {Users} from "../entity/Users.entity";
-import {ConfigService} from "../services/ConfigService";
-import {upload} from "../helper/MulterConfig";
+import {ConfigService} from "../services/Config.service";
+import {upload} from "../helper/MulterConfig.helper";
 import Joi from "joi";
-import {UserService} from "../services/UserService";
+import {UserService} from "../services/User.service";
 import {getOrganizationsDetails} from "../util/Organization.util";
 
 const adminOrgEditSchema = Joi.object({

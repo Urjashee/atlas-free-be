@@ -1,16 +1,16 @@
 import AppDataSource from "../../ormconfig";
 import {Users} from "../entity/Users.entity";
-import {Constants} from "../helper/Constants";
+import {Constants} from "../helper/Constants.helper";
 import {randomBytes} from "crypto";
 import {PasswordReset} from "../entity/PasswordReset.entity";
-import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails";
+import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails.helper";
 import {type} from "node:os";
-import {EmailService} from "./EmailService";
+import {EmailService} from "./Email.service";
 import {IsNull, Not} from "typeorm";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
-import {ResponseFormatter} from "../helper/ResponseFormatter";
+import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
