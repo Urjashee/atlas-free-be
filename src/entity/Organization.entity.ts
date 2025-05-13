@@ -8,7 +8,7 @@ import {
     JoinColumn, OneToOne, OneToMany
 } from "typeorm";
 import {Users} from "./Users.entity";
-import {OrganizationDetails} from "./OrganizationDetails.entity";
+import {ServiceDetails} from "./ServiceDetails.entity";
 import {Affiliations} from "./Affiliations.entity";
 
 @Entity()
@@ -55,8 +55,8 @@ export class Organization {
     @UpdateDateColumn()
     updated_at!: Date;
 
-    @OneToMany(() => OrganizationDetails, organization_service => organization_service.organization, { cascade: true })
-    organizationService!: OrganizationDetails[];
+    @OneToMany(() => ServiceDetails, organization_service => organization_service.organization, { cascade: true })
+    organizationService!: ServiceDetails[];
 
     @OneToMany(() => Affiliations, affiliation => affiliation.organization)
     affiliations!: Affiliations[];

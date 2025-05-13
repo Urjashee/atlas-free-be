@@ -7,7 +7,7 @@ import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitation
 import {type} from "node:os";
 import {EmailService} from "./EmailService";
 import {IsNull, Not} from "typeorm";
-import {OrganizationDetails} from "../entity/OrganizationDetails.entity";
+import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
 import {ResponseFormatter} from "../helper/ResponseFormatter";
@@ -16,7 +16,7 @@ export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
     private organizationRepository = AppDataSource.getRepository(Organization);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
-    private organizationDetailsRepository = AppDataSource.getRepository(OrganizationDetails);
+    private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
     private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
@@ -66,7 +66,7 @@ export class OrganizationService {
                         type: Constants.CREATE_PASSWORD,
                         user: {id: organization_id}
                     })
-                    const emailContent = CreatePassword(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD);
+                    const emailContent = CreatePassword(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                         to: organization.email,
@@ -101,8 +101,8 @@ export class OrganizationService {
         }
     }
 
-    async addOrganizationSettings(organization_id: number, body: any) {
-        const addService = await this.organizationDetailsRepository.create({
+    async addServiceDetails(organization_id: number, role: number, body: any, user_id?: number) {
+        const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
             service_type: body.service_type,
@@ -152,13 +152,15 @@ export class OrganizationService {
             intake_process: body.intake_process,
             additional_requirements: body.additional_requirements,
             reason_for_removal: body.reason_for_removal,
-            is_submitted: body.is_submitted === true || body.is_submitted === 'true'
+            is_submitted: body.is_submitted === true || body.is_submitted === 'true',
+            role: {id: role},
+            user: {id: user_id}
         })
-        return await this.organizationDetailsRepository.save(addService)
+        return await this.serviceDetailsRepository.save(addService)
     }
 
-    async editOrganizationSettings(id: number, organization_id: number, body: any) {
-        const getService = await this.organizationDetailsRepository.findOne({
+    async editServiceDetails(id: number, organization_id: number, role: number, body: any, user_id?: number) {
+        const getService = await this.serviceDetailsRepository.findOne({
             where: {
                 id: id,
                 organization: {id: organization_id},
@@ -213,13 +215,13 @@ export class OrganizationService {
             getService.additional_requirements = body.additional_requirements
             getService.reason_for_removal = body.reason_for_removal
             getService.is_submitted = body.is_submitted === true || body.is_submitted === 'true';
-            return await this.organizationDetailsRepository.save(getService)
+            return await this.serviceDetailsRepository.save(getService)
         }
         return false
     }
 
     async checkIfValidOrganization(id: number, organization_id: number) {
-        return await this.organizationDetailsRepository.findOne({
+        return await this.serviceDetailsRepository.findOne({
             where: {
                 id: id,
                 organization: {id: organization_id}
@@ -228,7 +230,7 @@ export class OrganizationService {
     }
 
     async getOrganizationsService(organization: number) {
-        return await this.organizationDetailsRepository.find({
+        return await this.serviceDetailsRepository.find({
             where: {
                 organization: {id: organization}
             }
@@ -236,7 +238,7 @@ export class OrganizationService {
     }
 
     async getOrganizationsServiceById(id: number) {
-        return await this.organizationDetailsRepository.find({
+        return await this.serviceDetailsRepository.find({
             where: {
                 id: id
             }

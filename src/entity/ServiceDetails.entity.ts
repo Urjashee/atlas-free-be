@@ -8,6 +8,7 @@ import {
     JoinColumn, OneToOne
 } from "typeorm";
 import {Users} from "./Users.entity";
+import {UserRole} from "./UserRole.entity";
 
 export enum TimePeriod {
     "Days" = 1,
@@ -15,7 +16,7 @@ export enum TimePeriod {
     "Years" = 3,
 }
 @Entity()
-export class OrganizationDetails {
+export class ServiceDetails {
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -167,6 +168,14 @@ export class OrganizationDetails {
 
     @Column({ nullable: true, default: false })
     is_submitted!: boolean;
+
+    @ManyToOne(() => UserRole, { eager: true })
+    @JoinColumn({ name: 'role_id' })
+    role!: UserRole;
+
+    @ManyToOne(() => Users, (user) => user.id)
+    @JoinColumn({ name: "user_id" })
+    user!: Users;
 
     @CreateDateColumn()
     created_at!: Date;
