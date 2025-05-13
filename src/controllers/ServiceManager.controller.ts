@@ -38,12 +38,12 @@ export class ServiceManagerController {
                 const settings = await this.organizationService.editServiceDetails(req.body.id, req.user.organization_id, req.user.role, req.body, req.user.id)
                 if (!settings)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
+                return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
             } else {
                 const settings = await this.organizationService.addServiceDetails(req.user.organization_id, req.user.role, req.body, req.user.id)
                 if (!settings)
                     return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
+                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
             }
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

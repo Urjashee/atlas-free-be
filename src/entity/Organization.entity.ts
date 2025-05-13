@@ -19,14 +19,20 @@ export class Organization {
     @Column({ nullable: false })
     name!: string;
 
-    @Column()
+    @Column({ nullable: true})
     address!: string;
+
+    @Column({ nullable: true})
+    state!: string;
+
+    @Column({ nullable: true})
+    city!: string;
+
+    @Column({ nullable: true})
+    zipcode!: string;
 
     @Column({default: false})
     disclose_address!: boolean;
-
-    @Column()
-    zipcode!: string;
 
     @Column()
     year!: string;

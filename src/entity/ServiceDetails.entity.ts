@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import {Users} from "./Users.entity";
 import {UserRole} from "./UserRole.entity";
+import {Organization} from "./Organization.entity";
 
 export enum TimePeriod {
     "Days" = 1,
@@ -20,14 +21,26 @@ export class ServiceDetails {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @ManyToOne(() => Users, { eager: true })
+    @ManyToOne(() => Organization, { eager: true })
     @JoinColumn({ name: 'organization_id' })
-    organization!: Users;
+    organization!: Organization;
 
     // -------------------------------    General    -----------------------------------
 
     @Column({nullable: false})
     name!: string
+
+    @Column({ nullable: true})
+    address!: string;
+
+    @Column({ nullable: true})
+    state!: string;
+
+    @Column({ nullable: true})
+    city!: string;
+
+    @Column({ nullable: true})
+    zipcode!: string;
 
     @Column({nullable: false})
     service_type!: number
