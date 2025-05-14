@@ -1,4 +1,4 @@
-import {JsonController, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Get, JsonController, Post, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -9,6 +9,8 @@ import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import {advocateMiddleware} from "../middleware/Advocate.middleware";
 import {clientSchema} from "../schema/Client.schema";
 import {AdvocateService} from "../services/Advocate.service";
+import {getOrganizationsServiceDetails} from "../util/Organization.util";
+import {getClientDetails} from "../util/Advocate.util";
 
 @JsonController("/api/advocate")
 export class AdvocateController {
@@ -45,6 +47,19 @@ export class AdvocateController {
                 return ResponseFormatter.successResponse(res, "Successfully added clients.");
             }
 
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/clients")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async getClients(@Req() req: Request, @Res() res: Response) {
+        try {
+            const getClients = await this.advocateService.getClients(req.user.id);
+            const customResponse = await getClientDetails(getClients)
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

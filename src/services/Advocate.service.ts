@@ -91,4 +91,13 @@ export class AdvocateService {
         }
         return false
     }
+
+    async getClients(advocate: number) {
+        return await this.clientServiceRepository.find({
+            where: {
+                advocate: {id: advocate},
+            },
+            order: {created_at: "DESC"}
+        })
+    }
 }

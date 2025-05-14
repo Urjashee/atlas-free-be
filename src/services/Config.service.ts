@@ -53,6 +53,14 @@ export class ConfigService {
         return await this.advocateServiceRepository.find()
     }
 
+    async getAdvocateServiceById(id: number) {
+        return await this.advocateServiceRepository.findOne({
+            where: {
+                id
+            }
+        })
+    }
+
     async getPrimaryPurposeById(ids: number[]) {
         return await this.registrationOptionRepository.find({
             where: {
