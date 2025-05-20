@@ -19,6 +19,8 @@ const registrationOrganizationSchema = Joi.object({
     country_code: Joi.string().min(2).max(5).required(),
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
     address: Joi.string().min(3).max(1600).required(),
+    state: Joi.string().min(3).max(100).required(),
+    city: Joi.string().min(3).max(100).required(),
     disclose_address: Joi.boolean().required(),
     zipcode: Joi.string().min(4).max(10).required(),
     year: Joi.string().min(4).max(5).required(),

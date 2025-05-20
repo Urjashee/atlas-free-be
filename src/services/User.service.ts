@@ -28,6 +28,8 @@ export class UserService {
     async createUser(body: any, role: number): Promise<Users> {
         const profile = await this.organizationRepository.create({
             address: body.address,
+            state: body.state,
+            city: body.city,
             name: body.name,
             disclose_address: body.disclose_address,
             zipcode: body.zipcode,
@@ -67,7 +69,7 @@ export class UserService {
         return savedUser
     }
 
-    async updateUser(organization_id: number, body: any, role?:number){
+    async updateUser(organization_id: number, body: any, role?: number) {
         const user = await this.userRepository.findOne({
             where: {
                 organization: {id: organization_id},
@@ -85,6 +87,8 @@ export class UserService {
         })
         if (organization) {
             organization.address = body.address
+            organization.state = body.state
+            organization.city = body.city
             organization.disclose_address = body.disclose_address
             organization.zipcode = body.zipcode
             organization.year = body.year
@@ -103,8 +107,8 @@ export class UserService {
         const affiliations = JSON.parse(body.affiliations);
         const newIds = affiliations.map(a => a.id);
 
-        console.log("oldIds3: ",oldIds)
-        console.log("newIds3: ",newIds)
+        console.log("oldIds3: ", oldIds)
+        console.log("newIds3: ", newIds)
 
         const toRemove = currentAffiliations.filter(a => !newIds.includes(a.affiliation.id));
 
@@ -112,11 +116,11 @@ export class UserService {
             await this.affiliationRepository.remove(toRemove);
         }
         for (const affiliation of affiliations) {
-            console.log("affiliation: ",affiliation.id)
+            console.log("affiliation: ", affiliation.id)
             const affiliationData = await this.affiliationRepository.findOne({
                 where: {
-                    organization: { id: organization_id },
-                    affiliation: { id: affiliation.id },
+                    organization: {id: organization_id},
+                    affiliation: {id: affiliation.id},
                 },
             });
 
@@ -218,6 +222,7 @@ export class UserService {
             return false
         }
     }
+
     async sendPasswordResetRequest(email: string, type: number, token: string, user_id?: number) {
         const user = await this.userRepository.findOne({where: {email}});
         if (user) {

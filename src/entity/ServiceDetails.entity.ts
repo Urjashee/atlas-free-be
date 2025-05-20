@@ -42,6 +42,12 @@ export class ServiceDetails {
     @Column({ nullable: true})
     zipcode!: string;
 
+    @Column({default: false})
+    disclose_address!: boolean;
+
+    @Column({default: false})
+    is_organization_address!: boolean;
+
     @Column({nullable: false})
     service_type!: number
 

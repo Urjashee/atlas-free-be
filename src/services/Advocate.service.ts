@@ -56,6 +56,15 @@ export class AdvocateService {
         })
     }
 
+    async checkIfValidOrganization(organization_id: number, advocate_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: advocate_id,
+                organization: {id: organization_id},
+            }
+        })
+    }
+
     async editClient(id: number, user_id: number, organization_id: number, body: any) {
         const getClient = await this.clientServiceRepository.findOne({
             where: {
@@ -98,6 +107,14 @@ export class AdvocateService {
                 advocate: {id: advocate},
             },
             order: {created_at: "DESC"}
+        })
+    }
+
+    async getClientsById(id: number) {
+        return await this.clientServiceRepository.find({
+            where: {
+                id
+            }
         })
     }
 }

@@ -26,8 +26,8 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-                .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION })
-                .andWhere('organization.is_active = :orgActive', { orgActive: true })
+                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+                .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .getMany();
         }
         if (filter === "pending") {
@@ -36,8 +36,8 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-                .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION })
-                .andWhere('organization.is_active = :orgActive', { orgActive: false })
+                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+                .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .getMany();
         }
     }
@@ -105,6 +105,12 @@ export class OrganizationService {
         const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
+            address: body.address,
+            state: body.state,
+            city: body.city,
+            zipcode: body.zipcode,
+            disclose_address: body.disclose_address === true || body.disclose_address === 'true',
+            is_organization_address: body.is_organization_address === true || body.is_organization_address === 'true',
             service_type: body.service_type,
             client_slots: body.client_slots,
             client_slots_available: body.client_slots,
@@ -168,6 +174,12 @@ export class OrganizationService {
         })
         if (getService) {
             getService.name = body.name
+            getService.address = body.address
+            getService.state = body.state
+            getService.city = body.city
+            getService.zipcode = body.zipcode
+            getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
+            getService.is_organization_address = body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type
             getService.client_slots = body.client_slots
             getService.slots_beds = body.slots_beds
@@ -251,8 +263,8 @@ export class OrganizationService {
             .leftJoinAndSelect('user.organization', 'organization')
             .leftJoinAndSelect('organization.affiliations', 'affiliations')
             .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-            .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION })
-            .andWhere('organization.id = :orgId', { orgId: id })
+            .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+            .andWhere('organization.id = :orgId', {orgId: id})
             .getOne();
     }
 
