@@ -6,6 +6,7 @@ import {Affiliations} from "../entity/Affiliations.entity";
 import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import {ClientService} from "../entity/ClientService.entity";
+import {Constants} from "../helper/Constants.helper";
 
 export class AdvocateService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -15,6 +16,7 @@ export class AdvocateService {
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
     private clientServiceRepository = AppDataSource.getRepository(ClientService);
+
 
     async addClient(user_id: number, organization_id: number, body: any) {
         const addService = await this.clientServiceRepository.create({
@@ -114,6 +116,24 @@ export class AdvocateService {
         return await this.clientServiceRepository.find({
             where: {
                 id
+            }
+        })
+    }
+
+    async checkIfAdvocate(advocate_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: advocate_id,
+                role: {id: Constants.ROLE_ADVOCATE},
+            }
+        })
+    }
+
+    async checkIfAdvocateClient(advocate_id: number, id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id,
+                advocate: {id: advocate_id},
             }
         })
     }

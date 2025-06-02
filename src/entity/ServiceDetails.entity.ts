@@ -10,6 +10,7 @@ import {
 import {Users} from "./Users.entity";
 import {UserRole} from "./UserRole.entity";
 import {Organization} from "./Organization.entity";
+import {AssignedServices} from "./AssignedServices.entity";
 
 export enum TimePeriod {
     "Days" = 1,
@@ -195,6 +196,10 @@ export class ServiceDetails {
     @ManyToOne(() => Users, (user) => user.id)
     @JoinColumn({ name: "user_id" })
     user!: Users;
+
+    @ManyToOne(() => AssignedServices, services => services.id)
+    @JoinColumn({ name: 'service_id' })
+    service!: AssignedServices;
 
     @CreateDateColumn()
     created_at!: Date;

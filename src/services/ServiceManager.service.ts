@@ -16,6 +16,14 @@ export class ServiceManagerService {
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
     private s3UploadService = new s3UploadService
 
+    async checkIfService(service_id: number) {
+        return await this.serviceDetailsRepository.findOne({
+            where: {
+                id: service_id,
+            }
+        })
+    }
+
     async checkIfValidService(id: number, organization_id: number, user_id: number) {
         return await this.serviceDetailsRepository.findOne({
             where: {

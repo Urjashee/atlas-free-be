@@ -6,7 +6,7 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails.helper";
 import {type} from "node:os";
 import {EmailService} from "./Email.service";
-import {IsNull, Not} from "typeorm";
+import {Equal, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not} from "typeorm";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
@@ -335,6 +335,58 @@ export class OrganizationService {
                 is_status: true
             },
             order: {created_at: "DESC"}
+        })
+    }
+
+    async getServices(page_number: number, page_size: number, service_type: number,
+                      state: string, city: string, zipcode: string, availability: string, structure,
+                      staffing, substance, children: string, faith, living_arrangement,
+                      guidelines, staff_diversity) {
+
+        console.log("availability head 1: ", availability)
+        const where: any = {
+            service_type,
+        };
+
+        if (zipcode) {
+            where.zipcode = zipcode;
+        }
+
+        if (availability === "true") {
+            where.waitlist = true;
+        }
+
+        if (availability === "false") {
+            where.waitlist = false;
+        }
+
+        if (children === "true") {
+            where.served_to = Like('%18%');
+        }
+        if (structure) {
+
+        }
+        if (staffing) {
+            where.staffing_level = staffing
+        }
+        if (substance) {
+
+        }
+
+        const service = await this.serviceDetailsRepository.find({
+            where,
+            skip: (page_number - 1) * page_size,
+            take: page_size,
+        });
+
+        return service;
+    }
+
+    async checkIfOrganization(organization_id: number) {
+        return await this.organizationRepository.findOne({
+            where: {
+                id: organization_id,
+            }
         })
     }
 }

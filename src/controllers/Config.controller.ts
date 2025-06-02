@@ -46,8 +46,15 @@ export class ConfigController {
         const supportProvided = await this.configService.getServiceOptions("support_provided");
         const supportOffered = await this.configService.getServiceOptions("support_offered");
         const advocateService = await this.configService.getAdvocateService();
+        const state = await this.configService.getState();
 
         const rolesArray = Object.entries(roleMap).map(([name, id]) => ({ id, name }));
+        const stateArray = state.map((item) => {
+            return {
+                id: item.id,
+                name: item.name,
+            }
+        })
         const primaryPurposeArray = primaryPurpose.map((item) => {
             return {
                 id: item.id,
@@ -239,6 +246,7 @@ export class ConfigController {
 
         const customResponse = {
             "roles": rolesArray,
+            "states": stateArray,
             "primary_purpose": primaryPurposeArray,
             "platform_purpose": platformPurposeArray,
             "affiliation_licenses": affiliationLicensesArray,

@@ -12,6 +12,16 @@ import {AdvocateService} from "../services/Advocate.service";
 import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import {getClientDetails} from "../util/Advocate.util";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
+import {Constants} from "../helper/Constants.helper";
+import Joi from "joi";
+import {ClientService} from "../services/Client.service";
+
+const serviceSchema = Joi.object({
+    organization_id: Joi.number().required(),
+    advocate_id: Joi.number().required(),
+    client_id: Joi.number().required(),
+    service_id: Joi.number().required(),
+});
 
 @JsonController("/api/advocate")
 export class AdvocateController {
@@ -20,6 +30,7 @@ export class AdvocateController {
     private configService = new ConfigService();
     private serviceManagerService = new ServiceManagerService();
     private advocateService = new AdvocateService();
+    private clientService = new ClientService();
 
     @Post("/clients")
     @UseBefore(authMiddleware)
@@ -109,6 +120,69 @@ export class AdvocateController {
             const getOrganizationServices = await this.organizationService.getOrganizationsServiceById(serviceId);
             const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/services")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async getServiceList(@Req() req: Request, @Res() res: Response ) {
+        try {
+            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
+            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
+            const service_type = parseInt(req.query.service as string)
+            const state = req.query.state as string;
+            const city = req.query.city as string;
+            const zipcode = req.query.zipcode as string
+            const availability = req.query.availability as string
+            const structure = req.query.structure
+            const children = req.query.children as string
+            const staffing = req.query.staffing
+            const substance = req.query.substance
+            const faith = req.query.faith
+            const living_arrangement = req.query.living_arrangement
+            const guidelines = req.query.guidelines
+            const staff_diversity = req.query.staff_diversity
+
+            const getOrganizationService = await this.organizationService.getServices(page_number, page_size,
+                service_type, state, city, zipcode, availability, structure, staffing, substance, children,
+                faith, living_arrangement, guidelines, staff_diversity);
+            return ResponseFormatter.successResponse(res, "Successful", getOrganizationService);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/service/add")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async addClientService(@Req() req: Request, @Res() res: Response ) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = serviceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const checkIfOrganization = await this.organizationService.checkIfOrganization(req.body.organization_id);
+            if (!checkIfOrganization)
+                return ResponseFormatter.errorResponse(res, 'Invalid organization');
+            const checkIfAdvocate = await this.advocateService.checkIfAdvocate(req.body.advocate_id);
+            if (!checkIfAdvocate)
+                return ResponseFormatter.errorResponse(res, 'Invalid advocate');
+            const checkIfClient = await this.advocateService.checkIfAdvocateClient(req.body.advocate_id, req.body.client_id)
+            if (!checkIfClient)
+                return ResponseFormatter.errorResponse(res, 'Invalid client');
+            const checkIfService = await this.serviceManagerService.checkIfService(req.body.service_id);
+            if (!checkIfService)
+                return ResponseFormatter.errorResponse(res, 'Invalid service');
+            const addService = await this.clientService.addService(req.body);
+            if (!addService)
+                return ResponseFormatter.errorResponse(res, "Request can't be sent");
+            return ResponseFormatter.successResponse(res, "Successful");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
