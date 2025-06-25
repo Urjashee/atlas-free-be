@@ -90,3 +90,11 @@ export async function getClientDetails(clientsDetails: any) {
         })
     );
 }
+export async function getServiceRequestsUser(serviceRequest: any) {
+    return {
+        client_id: serviceRequest.client.id,
+        service_status: serviceRequest.client.status,
+        service_name: serviceRequest.service.name,
+        service_type: (await configService.getServiceOptionsById(serviceRequest.service.service_type)).name,
+    }
+}

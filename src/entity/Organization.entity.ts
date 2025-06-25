@@ -10,6 +10,7 @@ import {
 import {Users} from "./Users.entity";
 import {ServiceDetails} from "./ServiceDetails.entity";
 import {Affiliations} from "./Affiliations.entity";
+import {State} from "./State.entity";
 
 @Entity()
 export class Organization {
@@ -20,10 +21,14 @@ export class Organization {
     name!: string;
 
     @Column({ nullable: true})
-    address!: string;
+    street!: string;
 
     @Column({ nullable: true})
-    state!: string;
+    address!: string;
+
+    @ManyToOne(() => State, { nullable: true })
+    @JoinColumn({ name: "state_id" })
+    state!: State;
 
     @Column({ nullable: true})
     city!: string;

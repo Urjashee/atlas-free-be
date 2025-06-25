@@ -10,7 +10,7 @@ import {advocateMiddleware} from "../middleware/Advocate.middleware";
 import {clientSchema} from "../schema/Client.schema";
 import {AdvocateService} from "../services/Advocate.service";
 import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
-import {getClientDetails} from "../util/Advocate.util";
+import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {Constants} from "../helper/Constants.helper";
 import Joi from "joi";
@@ -155,7 +155,28 @@ export class AdvocateController {
         }
     }
 
-    @Post("/service/add")
+    @Get("/service-details/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async getServiceDetails(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number ) {
+        try {
+            const getServices = await this.organizationService.getOrganizationsServiceById(serviceId)
+            const customResponseService = await getOrganizationsServiceDetails(getServices)
+            const organization = await this.organizationService.getOrganizationsById(getServices[0].organization.id);
+            const customResponseOrganization =await getOrganizationsDetails(organization);
+
+            const customResponse = {
+                organization: customResponseOrganization,
+                service: customResponseService,
+            }
+
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/service-request/add")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
     async addClientService(@Req() req: Request, @Res() res: Response ) {
@@ -187,4 +208,49 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
+    @Get("/service-requests")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async getClient(@Req() req: Request, @Res() res: Response ) {
+        try {
+            const getServices = await this.clientService.getServiceRequests(req.user.id)
+            const customResponse = [];
+
+            for (const service of getServices) {
+                customResponse.push({
+                    id: service.id,
+                    client_id: service.client.id,
+                    case_no: service.case_no,
+                    client_nick_name: service.client.client_nick_name,
+                    service_request: service.status
+                });
+            }
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/service-requests/:serviceRequestsId")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async getServiceRequestsId(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number ) {
+        try {
+            const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
+            const getServices = await this.organizationService.getOrganizationsServiceById(getServiceRequests.service.id)
+            const customServiceRequests = await getServiceRequestsUser(getServiceRequests)
+            const customResponseService = await getOrganizationsServiceDetails(getServices)
+
+            const customResponse = {
+                client: getServiceRequests,
+                service: customResponseService,
+            }
+
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
 }
+

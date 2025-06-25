@@ -15,8 +15,9 @@ import {servicesSchema} from "../schema/Services.schema";
 const organizationEditSchema = Joi.object({
     country_code: Joi.string().min(2).max(5).required(),
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
+    street: Joi.string().min(3).max(1600).required(),
     address: Joi.string().min(3).max(1600).required(),
-    state: Joi.string().min(3).max(100).required(),
+    state: Joi.number().required(),
     city: Joi.string().min(3).max(100).required(),
     disclose_address: Joi.boolean().required(),
     zipcode: Joi.string().min(4).max(10).required(),
@@ -26,6 +27,26 @@ const organizationEditSchema = Joi.object({
     primary_purpose: Joi.array().items(Joi.number()).required(),
     affiliations: Joi.string().required(),
 });
+
+const emailReminderSchema = Joi.object({
+    id: Joi.number().optional(),
+    email: Joi.string().email().required(),
+    day_of_week: Joi.required(),
+    time: Joi.string()
+        .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/) // HH:MM 24-hour format
+        .required(),
+    time_zone: Joi.string().required()
+});
+
+
+const serviceSettingsSchema = Joi.object({
+    service_id: Joi.number().required(),
+    available_slots: Joi.number().required(),
+    service_manager: Joi.array().items(Joi.string()).required(),
+    contact_email: Joi.string().required(),
+    contact_phone: Joi.number().required(),
+    emailReminders: Joi.array().items(emailReminderSchema).min(1).required()
+})
 
 const sendInvitationSchema = Joi.object({
     email: Joi.string().email().pattern(/^\S+$/).required(),
@@ -94,6 +115,38 @@ export class AuthController {
             const getOrganizationServices = await this.organizationService.getOrganizationsServiceById(serviceId);
             const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/services-settings")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async addServiceSettings(@Req() req: Request, @Res() res: Response ) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = serviceSettingsSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const checkIfValidService = await this.organizationService.checkIfValidOrganization(req.body.service_id, req.user.organization_id);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service");
+            const checkIfServiceSettings = await this.organizationService.checkIfServiceSettingsExists(req.body.service_id);
+            if (checkIfServiceSettings) {
+                const editServiceSettings = await this.organizationService.editServiceSettings(req.body);
+                if (!editServiceSettings)
+                    return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
+            } else {
+                const addServiceSettings = await this.organizationService.addServiceSettings(req.body);
+                if (!addServiceSettings)
+                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
+            }
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

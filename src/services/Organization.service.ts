@@ -11,12 +11,16 @@ import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
+import {ServiceSetting} from "../entity/ServiceSetting.entity";
+import {EmailReminder} from "../entity/EmailReminder.entity";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
     private organizationRepository = AppDataSource.getRepository(Organization);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
+    private serviceSettingRepository = AppDataSource.getRepository(ServiceSetting);
+    private emailReminderRepository = AppDataSource.getRepository(EmailReminder);
     private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
@@ -105,6 +109,7 @@ export class OrganizationService {
         const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
+            street: body.street,
             address: body.address,
             state: body.state,
             city: body.city,
@@ -174,6 +179,7 @@ export class OrganizationService {
         })
         if (getService) {
             getService.name = body.name
+            getService.street = body.street
             getService.address = body.address
             getService.state = body.state
             getService.city = body.city
@@ -253,7 +259,8 @@ export class OrganizationService {
         return await this.serviceDetailsRepository.find({
             where: {
                 id: id
-            }
+            },
+            relations: ['organization']
         })
     }
 
@@ -388,5 +395,101 @@ export class OrganizationService {
                 id: organization_id,
             }
         })
+    }
+
+    async checkIfServiceSettingsExists(service_id: number) {
+        return await this.serviceSettingRepository.findOne({
+            where: {
+                service: {id: service_id}
+            }
+        })
+    }
+
+    async addServiceSettings(body: any) {
+        const serviceSetting = await this.serviceSettingRepository.create({
+            service: {id: body.service_id},
+            available_slots: body.available_slots,
+            service_manager: body.service_manager,
+            contact_email: body.contact_email,
+            contact_phone: body.contact_phone,
+        })
+        const addServiceSetting = await this.serviceSettingRepository.save(serviceSetting);
+        console.log(body.emailReminders)
+        for (const emailReminder of body.emailReminders) {
+            const email = await this.emailReminderRepository.create({
+                service: {id: body.service_id},
+                email: emailReminder.email,
+                day_of_week: emailReminder.day_of_week,
+                time: emailReminder.time,
+                time_zone: emailReminder.time_zone,
+            })
+            await this.emailReminderRepository.save(email);
+        }
+        return addServiceSetting
+    }
+
+    async editServiceSettings(body: any) {
+        const serviceSetting = await this.serviceSettingRepository.findOne({
+            where: {
+                service: {id: body.service_id}
+            }
+        })
+        console.log(serviceSetting)
+        if (serviceSetting) {
+            serviceSetting.available_slots = body.available_slots;
+            serviceSetting.service_manager = body.service_manager;
+            serviceSetting.contact_email = body.contact_email;
+            serviceSetting.contact_phone = body.contact_phone;
+            await this.serviceSettingRepository.save(serviceSetting);
+        } else {
+            return false;
+        }
+        const existingReminders = await this.emailReminderRepository.find({
+            where: { service: { id: body.service_id } },
+        });
+
+        const incoming = body.emailReminders || [];
+
+        // Force all processedIds to be numbers
+        const processedIds: number[] = [];
+
+        for (const reminder of incoming) {
+            if (reminder.id) {
+                const reminderId = parseInt(reminder.id); // ✅ ensure numeric ID
+
+                // Check if this ID actually exists
+                const existing = existingReminders.find(er => er.id === reminderId);
+                if (existing) {
+                    await this.emailReminderRepository.update(reminderId, {
+                        email: reminder.email,
+                        day_of_week: reminder.day_of_week,
+                        time: reminder.time,
+                        time_zone: reminder.time_zone,
+                    });
+                    processedIds.push(reminderId);
+                } else {
+                    console.warn(`Skipping update: reminder ID ${reminderId} not found.`);
+                }
+            } else {
+                // Create new reminder
+                const newReminder = this.emailReminderRepository.create({
+                    service: { id: body.service_id },
+                    email: reminder.email,
+                    day_of_week: reminder.day_of_week,
+                    time: reminder.time,
+                    time_zone: reminder.time_zone,
+                });
+                const saved = await this.emailReminderRepository.save(newReminder);
+                processedIds.push(saved.id);
+            }
+        }
+
+        // Delete only those that are not in processed list
+        for (const existing of existingReminders) {
+            if (!processedIds.includes(existing.id)) {
+                await this.emailReminderRepository.remove(existing);
+            }
+        }
+        return serviceSetting;
     }
 }

@@ -27,6 +27,7 @@ export class UserService {
 
     async createUser(body: any, role: number): Promise<Users> {
         const profile = await this.organizationRepository.create({
+            street: body.street,
             address: body.address,
             state: body.state,
             city: body.city,
@@ -86,6 +87,7 @@ export class UserService {
             }
         })
         if (organization) {
+            organization.street = body.street
             organization.address = body.address
             organization.state = body.state
             organization.city = body.city

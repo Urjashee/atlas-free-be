@@ -3,8 +3,9 @@ import Joi from "joi";
 export const servicesSchema = Joi.object({
     id: Joi.number(),
     name: Joi.string().required(),
+    street: Joi.string().min(3).max(1600).required(),
     address: Joi.string().min(3).max(1600).required(),
-    state: Joi.string().min(3).max(100).required(),
+    state: Joi.number().required(),
     city: Joi.string().min(3).max(100).required(),
     zipcode: Joi.string().min(4).max(10).required(),
     disclose_address: Joi.boolean().required(),
