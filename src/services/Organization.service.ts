@@ -492,4 +492,36 @@ export class OrganizationService {
         }
         return serviceSetting;
     }
+
+    async getServiceSettingsById(service_id: number) {
+        return await this.serviceSettingRepository.findOne({
+            where: {
+                service: {id: service_id}
+            },
+        })
+    }
+
+    async getEmailRemindersByServiceId(service_id: number) {
+        return await this.emailReminderRepository.find({
+            where: {
+                service: {id: service_id}
+            },
+        })
+    }
+
+    async getServiceManager(service_managers: any) {
+        const userArray = []
+        for (const service_manager of service_managers) {
+            const user = await this.userRepository.findOne({
+                where: {
+                    id: service_manager
+                },
+            })
+            userArray.push({
+                id: user.id,
+                name: `${user.first_name} ${user.last_name}`,
+            })
+        }
+        return userArray
+    }
 }

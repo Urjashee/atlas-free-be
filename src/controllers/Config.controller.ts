@@ -4,6 +4,7 @@ import { ConfigService } from "../services/Config.service";
 import { ResponseFormatter } from "@inquitickets/response";
 import {Constants, roleMap} from "../helper/Constants.helper";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
+import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 
 @JsonController("/api")
 export class ConfigController {
@@ -243,6 +244,18 @@ export class ConfigController {
                 }
             }
         }).filter(Boolean);
+        const dayOfTheWeekArray = Object.keys(DaysOfWeek)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: DaysOfWeek[key as keyof typeof DaysOfWeek],
+                name: key
+            }));
+        const timeZoneArray = Object.keys(TimeZone)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: TimeZone[key as keyof typeof TimeZone],
+                name: key
+            }));
 
         const customResponse = {
             "roles": rolesArray,
@@ -278,6 +291,8 @@ export class ConfigController {
             "race_ethnicity": raceEthnicityArray,
             "citizenship_status": citizenshipStatusArray,
             "birthdate_status": birthdateStatusArray,
+            "day_of_the_week": dayOfTheWeekArray,
+            "time_zone": timeZoneArray,
         }
 
         return ResponseFormatter.successResponse(res, "Configuration data", customResponse);
