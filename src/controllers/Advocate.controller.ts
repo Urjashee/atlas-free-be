@@ -133,13 +133,13 @@ export class AdvocateController {
             const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
             const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
             const service_type = parseInt(req.query.service as string)
-            const state = req.query.state as string;
+            const state = parseInt(req.query.state as string);
             const city = req.query.city as string;
             const zipcode = req.query.zipcode as string
             const availability = req.query.availability as string
             const structure = req.query.structure
             const children = req.query.children as string
-            const staffing = req.query.staffing
+            const staffing = parseInt(req.query.staffing as string)
             const substance = req.query.substance
             const faith = req.query.faith
             const living_arrangement = req.query.living_arrangement

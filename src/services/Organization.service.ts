@@ -6,7 +6,7 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails.helper";
 import {type} from "node:os";
 import {EmailService} from "./Email.service";
-import {Equal, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not} from "typeorm";
+import {Equal, FindOptionsWhere, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not} from "typeorm";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
@@ -68,8 +68,9 @@ export class OrganizationService {
                         email: organization.email,
                         token,
                         type: Constants.CREATE_PASSWORD,
-                        user: {id: organization_id}
+                        user: {id: organization.id}
                     })
+                    await this.passwordResetRepository.save(password_reset_request);
                     const emailContent = CreatePassword(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
@@ -78,7 +79,6 @@ export class OrganizationService {
                         html: emailContent
                     };
                     await this.mailerService.sendEmail(mailOptions);
-                    await this.passwordResetRepository.save(password_reset_request);
 
                 } else if (organization.emailVerifiedAt) {
                     organization.is_status = true
@@ -86,7 +86,7 @@ export class OrganizationService {
                         email: organization.email,
                         token,
                         type: Constants.CREATE_PASSWORD,
-                        user: {id: organization_id}
+                        user: {id: organization.id}
                     })
                     const emailContent = ActivateOrganization(organization.user_name, organization.email, token, Constants.ACTIVATE_ORGANIZATION);
                     const mailOptions = {
@@ -346,38 +346,46 @@ export class OrganizationService {
     }
 
     async getServices(page_number: number, page_size: number, service_type: number,
-                      state: string, city: string, zipcode: string, availability: string, structure,
-                      staffing, substance, children: string, faith, living_arrangement,
+                      state: number, city: string, zipcode: string, availability: string, structure,
+                      staffing: number, substance, children: string, faith, living_arrangement,
                       guidelines, staff_diversity) {
 
-        console.log("availability head 1: ", availability)
-        const where: any = {
+        const baseWhere: any = {
             service_type,
         };
 
+        if (city) {
+            baseWhere.city = city;
+        }
+
+        if (state) {
+            baseWhere.state = state;
+        }
+
         if (zipcode) {
-            where.zipcode = zipcode;
+            baseWhere.zipcode = zipcode;
         }
 
         if (availability === "true") {
-            where.waitlist = true;
+            baseWhere.waitlist = true;
+        } else if (availability === "false") {
+            baseWhere.waitlist = false;
         }
 
-        if (availability === "false") {
-            where.waitlist = false;
+        if (staffing) {
+            baseWhere.staffing_level = staffing;
         }
 
-        if (children === "true") {
-            where.served_to = Like('%18%');
-        }
         if (structure) {
 
         }
-        if (staffing) {
-            where.staffing_level = staffing
-        }
-        if (substance) {
 
+        let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
+        if (children === "true") {
+            where = [
+                { ...baseWhere, served_to: Like('%17%') },
+                { ...baseWhere, served_to: Like('%18%') }
+            ];
         }
 
         const service = await this.serviceDetailsRepository.find({

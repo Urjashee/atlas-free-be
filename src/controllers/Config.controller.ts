@@ -3,7 +3,14 @@ import { Request, Response } from "express";
 import { ConfigService } from "../services/Config.service";
 import { ResponseFormatter } from "@inquitickets/response";
 import {Constants, roleMap} from "../helper/Constants.helper";
-import {TimePeriod} from "../entity/ServiceDetails.entity";
+import {
+    Faith,
+    Guidelines,
+    StaffDiversity,
+    Structure,
+    SubstanceRecovery,
+    TimePeriod
+} from "../entity/ServiceDetails.entity";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 
 @JsonController("/api")
@@ -256,6 +263,48 @@ export class ConfigController {
                 id: TimeZone[key as keyof typeof TimeZone],
                 name: key
             }));
+        const structureArray = Object.keys(Structure)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: Structure[key as keyof typeof Structure],
+                name: key
+            }));
+        const substanceRecoveryArray = Object.keys(SubstanceRecovery)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: SubstanceRecovery[key as keyof typeof SubstanceRecovery],
+                name: key
+            }));
+        const faithArray = Object.keys(Faith)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: Faith[key as keyof typeof Faith],
+                name: key
+            }));
+        const guidelinesArray = Object.keys(Guidelines)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: Guidelines[key as keyof typeof Guidelines],
+                name: key
+            }));
+        const staffDiversityArray = Object.keys(StaffDiversity)
+            .filter(key => isNaN(Number(key)))
+            .map(key => ({
+                id: StaffDiversity[key as keyof typeof StaffDiversity],
+                name: key
+            }));
+
+        const filter = {
+            "availability": "Available options only (no waitlist)",
+            "children": "Housing accepts children",
+            "structure": structureArray,
+            "staffing_level": staffingLevelArray,
+            "substance_recovery": substanceRecoveryArray,
+            "faith": faithArray,
+            "living_arrangement": sleepingArrangementArray,
+            "guidelines": guidelinesArray,
+            "staff_diversity": staffDiversityArray,
+        }
 
         const customResponse = {
             "roles": rolesArray,
@@ -293,6 +342,7 @@ export class ConfigController {
             "birthdate_status": birthdateStatusArray,
             "day_of_the_week": dayOfTheWeekArray,
             "time_zone": timeZoneArray,
+            "filter": filter,
         }
 
         return ResponseFormatter.successResponse(res, "Configuration data", customResponse);

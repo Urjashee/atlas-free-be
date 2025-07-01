@@ -43,7 +43,7 @@ export const CreatePassword = (name: string, email: string, token: string, type:
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
         </div>
         <div class="content">
-            <p>Dear ${name},</p>
+            <p>Dear ${email},</p>
             <p>Thank you for your patience</p>
             <p>Please click the button below to create a password for your account to login</p>
             <button type="button" class="button">

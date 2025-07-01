@@ -18,6 +18,32 @@ export enum TimePeriod {
     "Months" = 2,
     "Years" = 3,
 }
+export enum Structure {
+    "Individualized (adaptable schedule and programing)" = 1,
+    "Pre-determined program (more daily structure and curriculum based)" = 2,
+}
+export enum SubstanceRecovery {
+    "Clean and sober requirement" = 1,
+    "Harm reduction model (participants may still be using substances)" = 2,
+}
+export enum Faith {
+    "Faith-based with required participation" = 1,
+    "Faith-based without required participation" = 2,
+    "No faith affiliation" = 3,
+}
+export enum Guidelines {
+    "Daily curfew" = 1,
+    "Initial blackout period (no phone, no internet, etc)" = 2,
+}
+export enum StaffDiversity {
+    "Survivors of human trafficking/sex trade on staff" = 1,
+    "BIPOC (Black, Indigenous, and People of Color) on staff" = 2,
+    "Bilingual or Multilingual staff" = 3,
+    "Gender and sexual minorities on staff" = 4,
+    "People with disabilities on staff" = 5,
+}
+
+
 @Entity()
 export class ServiceDetails {
     @PrimaryGeneratedColumn()
