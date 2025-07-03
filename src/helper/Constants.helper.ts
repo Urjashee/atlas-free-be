@@ -14,6 +14,11 @@ export class Constants {
 
     static PAGE_NUMBER = 1
     static PAGE_SIZE = 20
+
+    static PLACED = 0
+    static PENDING = 1
+    static UNABLE_TO_SERVE = 2
+    static WAITLISTED = 3
 }
 
 export const roleMap: { [key: string]: number } = {

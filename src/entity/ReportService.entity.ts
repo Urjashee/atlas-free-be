@@ -11,6 +11,7 @@ import {Users} from "./Users.entity";
 import {Organization} from "./Organization.entity";
 import {ServiceDetails} from "./ServiceDetails.entity";
 import {ClientService} from "./ClientService.entity";
+import {AssignedServices} from "./AssignedServices.entity";
 
 export enum ChildrenToAccompany {
     "Yes" = 1,
@@ -25,31 +26,28 @@ export enum ClientStatus {
 }
 
 @Entity()
-export class AssignedServices {
+export class ReportService {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ nullable: true, default: 0 })
-    status!: number;
-
     @Column({ nullable: true })
-    case_no!: string;
+    reason!: string;
 
     @ManyToOne(() => Organization, { eager: true })
     @JoinColumn({ name: 'organization_id' })
     organization!: Organization;
 
     @ManyToOne(() => Users, (user) => user.id)
-    @JoinColumn({ name: "advocate_id" })
+    @JoinColumn({ name: "user_id" })
     advocate!: Users;
-
-    @ManyToOne(() => ClientService, (client) => client.id)
-    @JoinColumn({ name: "client_id" })
-    client!: ClientService;
 
     @ManyToOne(() => ServiceDetails, (services) => services.id)
     @JoinColumn({ name: "service_id" })
     service!: ServiceDetails;
+
+    @ManyToOne(() => AssignedServices, (service_request) => service_request.id)
+    @JoinColumn({ name: "service_request_id" })
+    service_request!: AssignedServices;
 
     @CreateDateColumn()
     created_at!: Date;

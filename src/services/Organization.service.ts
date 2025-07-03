@@ -6,7 +6,7 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails.helper";
 import {type} from "node:os";
 import {EmailService} from "./Email.service";
-import {Equal, FindOptionsWhere, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not} from "typeorm";
+import {Equal, FindOptionsWhere, In, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not} from "typeorm";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
@@ -346,47 +346,105 @@ export class OrganizationService {
     }
 
     async getServices(page_number: number, page_size: number, service_type: number,
-                      state: number, city: string, zipcode: string, availability: string, structure,
-                      staffing: number, substance, children: string, faith, living_arrangement,
-                      guidelines, staff_diversity) {
+                      state: number, city: string, zipcode: string, availability: string, structure: any,
+                      staffing: number, substance: any, children: string, faith: any, living_arrangement: any,
+                      guidelines: any, staff_diversity: any) {
 
+        const structureMap = {
+            1: 113,
+            2: 112
+        };
+        const guidelinesMap = {
+            1: 126,
+            2: 127
+        };
+        const staffDiversityMap = {
+            1: 120,
+            2: 122,
+            3: 121,
+            4: 123,
+            5: 124,
+        };
+
+        // Service type
         const baseWhere: any = {
             service_type,
         };
-
+        let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
+        // City
         if (city) {
             baseWhere.city = city;
         }
-
+        // State
         if (state) {
             baseWhere.state = state;
         }
-
+        // Zipcode
         if (zipcode) {
             baseWhere.zipcode = zipcode;
         }
-
+        // Availability
         if (availability === "true") {
             baseWhere.waitlist = true;
         } else if (availability === "false") {
             baseWhere.waitlist = false;
         }
-
-        if (staffing) {
-            baseWhere.staffing_level = staffing;
+        // Structure
+        if (Array.isArray(structure) && structure.length > 0) {
+            const mappedStructures = structure.map((val) => structureMap[val]).filter(Boolean);
+            if (mappedStructures.length > 0) {
+                baseWhere.service_structure = In(mappedStructures);
+            }
         }
 
-        if (structure) {
-
+        if (!structure) {
+            baseWhere.service_structure = 111;
         }
 
-        let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
+        // Staffing
+        if (Array.isArray(staffing) && staffing.length > 0) {
+            baseWhere.staffing_level = In(staffing);
+        }
+
+        // Substance
+
+        // Children
         if (children === "true") {
             where = [
-                { ...baseWhere, served_to: Like('%17%') },
-                { ...baseWhere, served_to: Like('%18%') }
+                {...baseWhere, served_to: Like('%17%')},
+                {...baseWhere, served_to: Like('%18%')}
             ];
         }
+
+        // Faith
+
+        // Living Arrangement
+        if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
+            baseWhere.staffing_level = In(living_arrangement);
+        }
+        // Guidelines
+        if (Array.isArray(guidelines) && guidelines.length > 0) {
+            const mappedGuidelines = guidelines.map((val) => guidelinesMap[val]).filter(Boolean);
+            if (mappedGuidelines.length > 0) {
+                const guidelineConditions = mappedGuidelines.map(id => ({
+                    ...baseWhere,
+                    service_guidelines: Like(`%${id}%`)
+                }));
+                where = guidelineConditions;
+            }
+        }
+        // Staff Diversity
+        if (Array.isArray(staff_diversity) && staff_diversity.length > 0) {
+            const mappedStaffDiversity = staff_diversity.map((val) => staffDiversityMap[val]).filter(Boolean);
+            if (mappedStaffDiversity.length > 0) {
+                const staffDiversityConditions = mappedStaffDiversity.map(id => ({
+                    ...baseWhere,
+                    teams_diversity: Like(`%${id}%`)
+                }));
+                where = staffDiversityConditions;
+            }
+        }
+
 
         const service = await this.serviceDetailsRepository.find({
             where,
@@ -453,7 +511,7 @@ export class OrganizationService {
             return false;
         }
         const existingReminders = await this.emailReminderRepository.find({
-            where: { service: { id: body.service_id } },
+            where: {service: {id: body.service_id}},
         });
 
         const incoming = body.emailReminders || [];
@@ -481,7 +539,7 @@ export class OrganizationService {
             } else {
                 // Create new reminder
                 const newReminder = this.emailReminderRepository.create({
-                    service: { id: body.service_id },
+                    service: {id: body.service_id},
                     email: reminder.email,
                     day_of_week: reminder.day_of_week,
                     time: reminder.time,

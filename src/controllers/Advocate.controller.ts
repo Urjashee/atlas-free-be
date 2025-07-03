@@ -1,4 +1,4 @@
-import {Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -21,6 +21,10 @@ const serviceSchema = Joi.object({
     advocate_id: Joi.number().required(),
     client_id: Joi.number().required(),
     service_id: Joi.number().required(),
+});
+const reportServiceSchema = Joi.object({
+    service_request_id: Joi.number().required(),
+    reason: Joi.string().required(),
 });
 
 @JsonController("/api/advocate")
@@ -80,7 +84,7 @@ export class AdvocateController {
     @Get("/clients/:clientId")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number ) {
+    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
         try {
             const checkIfValidOrganization = await this.advocateService.checkIfValidClient(clientId, req.user.id);
             if (!checkIfValidOrganization)
@@ -96,13 +100,13 @@ export class AdvocateController {
     @Get("/organization/details")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async getOrganizationById(@Req() req: Request, @Res() res: Response ) {
+    async getOrganizationById(@Req() req: Request, @Res() res: Response) {
         try {
             const checkIfValidOrganization = await this.advocateService.checkIfValidOrganization(req.user.organization_id, req.user.id);
             if (!checkIfValidOrganization)
                 return ResponseFormatter.errorResponse(res, 'Invalid organization');
             const organization = await this.organizationService.getOrganizationsById(req.user.organization_id);
-            const customResponse =await getOrganizationsDetails(organization);
+            const customResponse = await getOrganizationsDetails(organization);
             return ResponseFormatter.successResponse(res, "Organization", customResponse)
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
@@ -112,7 +116,7 @@ export class AdvocateController {
     @Get("/services/:serviceId")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number ) {
+    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
         try {
             const checkIfValidOrganization = await this.advocateService.checkIfValidOrganization(req.user.organization_id, req.user.id);
             if (!checkIfValidOrganization)
@@ -128,7 +132,7 @@ export class AdvocateController {
     @Get("/services")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async getServiceList(@Req() req: Request, @Res() res: Response ) {
+    async getServiceList(@Req() req: Request, @Res() res: Response) {
         try {
             const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
             const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
@@ -158,12 +162,12 @@ export class AdvocateController {
     @Get("/service-details/:serviceId")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async getServiceDetails(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number ) {
+    async getServiceDetails(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
         try {
             const getServices = await this.organizationService.getOrganizationsServiceById(serviceId)
             const customResponseService = await getOrganizationsServiceDetails(getServices)
             const organization = await this.organizationService.getOrganizationsById(getServices[0].organization.id);
-            const customResponseOrganization =await getOrganizationsDetails(organization);
+            const customResponseOrganization = await getOrganizationsDetails(organization);
 
             const customResponse = {
                 organization: customResponseOrganization,
@@ -179,7 +183,7 @@ export class AdvocateController {
     @Post("/service-request/add")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async addClientService(@Req() req: Request, @Res() res: Response ) {
+    async addClientService(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
@@ -212,7 +216,7 @@ export class AdvocateController {
     @Get("/service-requests")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async getClient(@Req() req: Request, @Res() res: Response ) {
+    async getClient(@Req() req: Request, @Res() res: Response) {
         try {
             const getServices = await this.clientService.getServiceRequests(req.user.id)
             const customResponse = [];
@@ -235,7 +239,7 @@ export class AdvocateController {
     @Get("/service-requests/:serviceRequestsId")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async getServiceRequestsId(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number ) {
+    async getServiceRequestsId(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
         try {
             const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
             const getServices = await this.organizationService.getOrganizationsServiceById(getServiceRequests.service.id)
@@ -243,7 +247,7 @@ export class AdvocateController {
             const customResponseService = await getOrganizationsServiceDetails(getServices)
 
             const customResponse = {
-                client: getServiceRequests,
+                client: customServiceRequests,
                 service: customResponseService,
             }
 
@@ -252,5 +256,58 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
+    @Post("/service-report")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async reportService(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = reportServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const {serviceRequestsId, reason} = req.body;
+
+            const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequests)
+                return ResponseFormatter.errorResponse(res, 'Invalid service request');
+            if (getServiceRequests.advocate.id !== req.user.id)
+                return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
+            const checkIfService = await this.serviceManagerService.checkIfService(getServiceRequests.service.id);
+            if (!checkIfService)
+                return ResponseFormatter.errorResponse(res, 'Invalid service');
+            const reportService = await this.clientService.reportService(serviceRequestsId, reason, getServiceRequests);
+            if (!reportService)
+                return ResponseFormatter.errorResponse(res, "Can't report, try again later");
+
+            return ResponseFormatter.successResponse(res, "Successful reported service");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Delete("/service-request/:serviceRequestsId")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async deleteServiceRequests(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
+        try {
+            const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequests)
+                return ResponseFormatter.errorResponse(res, 'Invalid service request');
+            if (getServiceRequests.advocate.id !== req.user.id)
+                return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
+            const deleteServiceRequest = await this.clientService.deleteServiceRequest(serviceRequestsId);
+            if (!deleteServiceRequest)
+                return ResponseFormatter.errorResponse(res, "Can't remove, try again later");
+            return ResponseFormatter.successResponse(res, "Successful removed service request");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
 }
 
