@@ -49,24 +49,6 @@ export class AdvocateService {
         return await this.clientServiceRepository.save(addService);
     }
 
-    async checkIfValidClient(id: number, advocate_id: number) {
-        return await this.clientServiceRepository.findOne({
-            where: {
-                id,
-                advocate: {id: advocate_id},
-            }
-        })
-    }
-
-    async checkIfValidOrganization(organization_id: number, advocate_id: number) {
-        return await this.userRepository.findOne({
-            where: {
-                id: advocate_id,
-                organization: {id: organization_id},
-            }
-        })
-    }
-
     async editClient(id: number, user_id: number, organization_id: number, body: any) {
         const getClient = await this.clientServiceRepository.findOne({
             where: {
@@ -102,6 +84,25 @@ export class AdvocateService {
         }
         return false
     }
+
+    async checkIfValidClient(id: number, advocate_id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id,
+                advocate: {id: advocate_id},
+            }
+        })
+    }
+
+    async checkIfValidOrganization(organization_id: number, advocate_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: advocate_id,
+                organization: {id: organization_id},
+            }
+        })
+    }
+
 
     async getClients(advocate: number) {
         return await this.clientServiceRepository.find({

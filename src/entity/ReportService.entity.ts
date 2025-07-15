@@ -39,15 +39,11 @@ export class ReportService {
 
     @ManyToOne(() => Users, (user) => user.id)
     @JoinColumn({ name: "user_id" })
-    advocate!: Users;
+    user!: Users;
 
     @ManyToOne(() => ServiceDetails, (services) => services.id)
     @JoinColumn({ name: "service_id" })
     service!: ServiceDetails;
-
-    @ManyToOne(() => AssignedServices, (service_request) => service_request.id)
-    @JoinColumn({ name: "service_request_id" })
-    service_request!: AssignedServices;
 
     @CreateDateColumn()
     created_at!: Date;

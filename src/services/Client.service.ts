@@ -5,13 +5,18 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import {AssignedServices} from "../entity/AssignedServices.entity";
 import {ReportService} from "../entity/ReportService.entity";
+import {DeviceToken} from "../entity/DeviceToken.entity";
+import {Affiliations} from "../entity/Affiliations.entity";
+import {ClientService as ClientServiceEntity} from "../entity/ClientService.entity";
+import Joi from "joi";
+import {Constants} from "../helper/Constants.helper";
 
 export class ClientService {
     private userRepository = AppDataSource.getRepository(Users);
     private organizationRepository = AppDataSource.getRepository(Organization);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
-    private clientServiceRepository = AppDataSource.getRepository(ClientService);
+    private clientServiceRepository = AppDataSource.getRepository(ClientServiceEntity);
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
     private reportServiceRepository = AppDataSource.getRepository(ReportService);
 
@@ -19,8 +24,9 @@ export class ClientService {
         const services = await this.assignedServiceRepository.find({})
     }
 
-    async addService(body: any) {
+    async addService(body: any, user_id: number) {
         let case_no: string;
+
         let isUnique = false;
 
         while (!isUnique) {
@@ -34,8 +40,8 @@ export class ClientService {
         }
         const addService = await this.assignedServiceRepository.create({
             organization: {id: body.organization_id},
-            advocate: {id: body.advocate_id},
-            client: {id: body.client_id},
+            user: {id: user_id},
+            client_service: {id: body.client_service_id},
             service: {id: body.service_id},
             case_no
         })
@@ -43,12 +49,12 @@ export class ClientService {
         return await this.assignedServiceRepository.save(addService)
     }
 
-    async getServiceRequests(advocate_id: number) {
+    async getServiceRequests(user_id: number) {
         return await this.assignedServiceRepository.find({
             where: {
-                advocate: {id: advocate_id},
+                user: {id: user_id},
             },
-            relations: ["organization", "service", "client"]
+            relations: ["organization", "service", "client_service"]
         })
     }
 
@@ -57,7 +63,16 @@ export class ClientService {
             where: {
                 id
             },
-            relations: ["organization", "service", "client", "advocate"]
+            relations: ["organization", "service", "client_service", "user"]
+        });
+    }
+
+    async checkIfValidServiceRequest(id: number, user_id: number) {
+        return await this.assignedServiceRepository.findOne({
+            where: {
+                id,
+                user: {id: user_id},
+            }
         });
     }
 
@@ -65,9 +80,8 @@ export class ClientService {
         const createReport = await this.reportServiceRepository.create({
             reason: reason,
             organization: {id: body.organization.id},
-            advocate: {id: body.advocate.id},
-            service: {id: body.service.id},
-            service_request: {id: body.id}
+            user: {id: body.advocate.id},
+            service: {id: body.service.id}
         })
         return await this.reportServiceRepository.save(createReport);
     }
@@ -83,6 +97,96 @@ export class ClientService {
         } else {
             throw new Error("Service request not found");
         }
+    }
+
+
+    async addClient(user_id: number, organization_id: number, body: any, client_id?: number) {
+        const addService = await this.clientServiceRepository.create({
+            client: {id: user_id},
+            service: body.service,
+            zipcode: body.zipcode,
+            dob: body.dob,
+            english_speaking_ability: body.english_speaking_ability,
+            gender: body.gender,
+            citizenship_status: body.citizenship_status,
+            client_experienced: body.client_experienced,
+            pregnant: body.pregnant,
+            pregnant_months: body.pregnant_months,
+            birthdate_status: body.birthdate_status,
+            children_accompany: body.children_accompany,
+            children_to_accompany: body.children_to_accompany,
+            criteria: body.criteria,
+        })
+
+        return await this.clientServiceRepository.save(addService);
+    }
+
+    async editClient(id: number, user_id: number, organization_id: number, body: any, client_id?: number) {
+        const getClient = await this.clientServiceRepository.findOne({
+            where: {
+                id: id,
+                client: {id: client_id},
+            }
+        })
+        if (getClient) {
+            getClient.service = body.service
+            getClient.zipcode = body.zipcode
+            getClient.dob = body.dob
+            getClient.english_speaking_ability = body.english_speaking_ability
+            getClient.gender = body.gender
+            getClient.citizenship_status = body.citizenship_status
+            getClient.client_experienced = body.client_experienced
+            getClient.pregnant = body.pregnant
+            getClient.pregnant_months = body.pregnant_months
+            getClient.birthdate_status = body.birthdate_status
+            getClient.children_accompany = body.children_accompany
+            getClient.children_to_accompany = body.children_to_accompany
+            getClient.criteria = body.criteria
+            return await this.clientServiceRepository.save(getClient);
+        }
+        return false
+    }
+
+    async checkIfValidClient(id: number, client_id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id,
+                client: {id: client_id},
+            }
+        })
+    }
+    async getClients(client_id: number) {
+        return await this.clientServiceRepository.find({
+            where: {
+                client: {id: client_id},
+            },
+            order: {created_at: "DESC"}
+        })
+    }
+    async getRequestsById(id: number) {
+        return await this.clientServiceRepository.find({
+            where: {
+                id
+            }
+        })
+    }
+
+    async checkIfSurvivor(survivor_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: survivor_id,
+                role: {id: Constants.ROLE_SURVIVOR},
+            }
+        })
+    }
+
+    async checkIfClientService(id: number, client_id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id,
+                client: {id: client_id},
+            }
+        })
     }
 
 }

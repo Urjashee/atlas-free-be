@@ -8,6 +8,9 @@ import s3UploadService from "../helper/S3UploadService.helper";
 import {PasswordReset} from "../entity/PasswordReset.entity";
 import {IsNull, MoreThan, Not} from "typeorm";
 import {Organization} from "../entity/Organization.entity";
+import {randomBytes} from "crypto";
+import {VerifyEmail} from "../helper/Emails.helper";
+import {EmailService} from "./Email.service";
 
 export class UserService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -16,6 +19,7 @@ export class UserService {
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private s3UploadService = new s3UploadService
+    private mailerService = new EmailService();
 
     async findByEmail(email: string): Promise<Users> {
         return await this.userRepository.findOne({
@@ -68,6 +72,35 @@ export class UserService {
             }
         }
         return savedUser
+    }
+
+    async createSurvivor(body: any, role: number): Promise<Users> {
+        const user = await this.userRepository.create({
+            email: body.email,
+            user_name: body.username,
+            password: await bcrypt.hash(body.password, 10),
+            is_profile: true,
+            is_status: true,
+            role: {id: role},
+        })
+        const token = randomBytes(32).toString('hex');
+        const saved_user = await this.userRepository.save(user);
+        const password_reset_request = this.passwordResetRepository.create({
+            email: body.email,
+            token,
+            type: Constants.VERIFY_EMAIL,
+            user: {id: saved_user.id}
+        })
+        await this.passwordResetRepository.save(password_reset_request);
+        const emailContent = VerifyEmail(body.username, saved_user.id, token, Constants.VERIFY_EMAIL, Constants.ROLE_SURVIVOR);
+        const mailOptions = {
+            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            to: body.email,
+            subject: "Email from Atlas free!",
+            html: emailContent
+        };
+        await this.mailerService.sendEmail(mailOptions);
+        return saved_user
     }
 
     async updateUser(organization_id: number, body: any, role?: number) {
@@ -259,6 +292,15 @@ export class UserService {
         return false;
     }
 
+    async checkPreviousPassword(email: string, password: string) {
+        const user = await this.userRepository.findOne({where: {email}});
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+            return false
+        }
+        return true
+    }
+
     async updatePassword(email: string, password: string, passwordResetToken) {
         const user = await this.userRepository.findOne({
             where: {
@@ -303,6 +345,35 @@ export class UserService {
                 await this.passwordResetRepository.save(reset);
             }
             return await this.userRepository.save(user);
+        }
+    }
+    async checkIfTokenVerified(user_id: number, token: string) {
+        const verifyUser = await this.passwordResetRepository.findOne({
+            where:
+                {
+                    token,
+                    user: {id: user_id},
+                    active: false,
+                }
+        });
+        if (verifyUser) {
+            return true
+        }
+        return false
+    }
+
+    async findByCode(user_id: number, token: string): Promise<Users> {
+        const verifyUser = await this.passwordResetRepository.findOne({where: {token, user: {id: user_id}}});
+        if (verifyUser) {
+            const user = await this.userRepository.findOne({where: {email: verifyUser.email}});
+            if (user) {
+                const id = user.id
+                user.emailVerifiedAt = new Date()
+                user.is_active = true
+                verifyUser.active = false
+                await this.passwordResetRepository.save(verifyUser);
+                return await this.userRepository.save(user);
+            }
         }
     }
 }

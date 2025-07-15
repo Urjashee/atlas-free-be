@@ -40,12 +40,12 @@ export class AssignedServices {
     organization!: Organization;
 
     @ManyToOne(() => Users, (user) => user.id)
-    @JoinColumn({ name: "advocate_id" })
-    advocate!: Users;
+    @JoinColumn({ name: "user_id" })
+    user!: Users;
 
-    @ManyToOne(() => ClientService, (client) => client.id)
-    @JoinColumn({ name: "client_id" })
-    client!: ClientService;
+    @ManyToOne(() => ClientService, (client) => client.id, { nullable: true })
+    @JoinColumn({ name: "client_service_id" })
+    client_service?: ClientService;
 
     @ManyToOne(() => ServiceDetails, (services) => services.id)
     @JoinColumn({ name: "service_id" })

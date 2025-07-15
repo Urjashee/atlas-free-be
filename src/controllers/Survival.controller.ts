@@ -1,24 +1,23 @@
-import {Delete, Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
 import {ServiceManagerService} from "../services/ServiceManager.service";
+import {AdvocateService} from "../services/Advocate.service";
+import {ClientService} from "../services/Client.service";
 import {authMiddleware} from "../middleware/Auth.middleware";
 import {Request, Response} from "express";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
+import {clientSchema, survivorSchema} from "../schema/Client.schema";
+import {survivorMiddleware} from "../middleware/Survivor.middleware";
 import {advocateMiddleware} from "../middleware/Advocate.middleware";
-import {clientSchema} from "../schema/Client.schema";
-import {AdvocateService} from "../services/Advocate.service";
-import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
-import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {Constants} from "../helper/Constants.helper";
+import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import Joi from "joi";
-import {ClientService} from "../services/Client.service";
 
 const serviceSchema = Joi.object({
     organization_id: Joi.number().required(),
-    advocate_id: Joi.number().required(),
     client_service_id: Joi.number().required(),
     service_id: Joi.number().required(),
 });
@@ -26,8 +25,7 @@ const reportServiceSchema = Joi.object({
     service_request_id: Joi.number().required(),
     reason: Joi.string().required(),
 });
-
-@JsonController("/api/advocate")
+@JsonController("/api/survivor")
 export class AdvocateController {
     private userService = new UserService();
     private organizationService = new OrganizationService();
@@ -36,94 +34,33 @@ export class AdvocateController {
     private advocateService = new AdvocateService();
     private clientService = new ClientService();
 
-    @Post("/clients")
+    @Post("/service-requests")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(survivorMiddleware)
     async addOrganization(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
-            const {error} = clientSchema.validate(req.body);
+            const {error} = survivorSchema.validate(req.body);
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
             if (req.body.id) {
-                const checkIfValidOrganization = await this.advocateService.checkIfValidClient(req.body.id, req.user.id);
+                const checkIfValidOrganization = await this.clientService.checkIfValidClient(req.body.id, req.user.id);
                 if (!checkIfValidOrganization)
                     return ResponseFormatter.errorResponse(res, 'Invalid client');
-                const editClientDetails = await this.advocateService.editClient(req.body.id, req.user.id, req.user.organization_id, req.body)
+                const editClientDetails = await this.clientService.editClient(req.body.id, req.user.id, req.user.organization_id, req.body)
                 if (!editClientDetails)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully updated clients.");
+                return ResponseFormatter.successResponse(res, "Successfully updated service.");
             } else {
-                const addClientDetails = await this.advocateService.addClient(req.user.id, req.user.organization_id, req.body)
+                const addClientDetails = await this.clientService.addClient(req.user.id, req.user.organization_id, req.body)
                 if (!addClientDetails)
                     return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added clients.");
+                return ResponseFormatter.successResponse(res, "Successfully added service.");
             }
 
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
-        }
-    }
-
-    @Get("/clients")
-    @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
-    async getClients(@Req() req: Request, @Res() res: Response) {
-        try {
-            const getClients = await this.advocateService.getClients(req.user.id);
-            const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
-            return ResponseFormatter.successResponse(res, "Successful", customResponse);
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
-        }
-    }
-
-    @Get("/clients/:clientId")
-    @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
-    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
-        try {
-            const checkIfValidOrganization = await this.advocateService.checkIfValidClient(clientId, req.user.id);
-            if (!checkIfValidOrganization)
-                return ResponseFormatter.errorResponse(res, 'Invalid client');
-            const getClients = await this.advocateService.getClientsById(clientId);
-            const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
-            return ResponseFormatter.successResponse(res, "Successful", customResponse);
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
-        }
-    }
-
-    @Get("/organization/details")
-    @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
-    async getOrganizationById(@Req() req: Request, @Res() res: Response) {
-        try {
-            const checkIfValidOrganization = await this.advocateService.checkIfValidOrganization(req.user.organization_id, req.user.id);
-            if (!checkIfValidOrganization)
-                return ResponseFormatter.errorResponse(res, 'Invalid organization');
-            const organization = await this.organizationService.getOrganizationsById(req.user.organization_id);
-            const customResponse = await getOrganizationsDetails(organization);
-            return ResponseFormatter.successResponse(res, "Organization", customResponse)
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
-        }
-    }
-
-    @Get("/services/:serviceId")
-    @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
-    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
-        try {
-            const checkIfValidOrganization = await this.advocateService.checkIfValidOrganization(req.user.organization_id, req.user.id);
-            if (!checkIfValidOrganization)
-                return ResponseFormatter.errorResponse(res, 'Invalid organization');
-            const getOrganizationServices = await this.organizationService.getOrganizationsServiceById(serviceId);
-            const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
-            return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -131,7 +68,7 @@ export class AdvocateController {
 
     @Get("/services")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(survivorMiddleware)
     async getServiceList(@Req() req: Request, @Res() res: Response) {
         try {
             const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
@@ -161,7 +98,7 @@ export class AdvocateController {
 
     @Get("/service-details/:serviceId")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(survivorMiddleware)
     async getServiceDetails(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
         try {
             const getServices = await this.organizationService.getOrganizationsServiceById(serviceId)
@@ -179,10 +116,9 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
-
     @Post("/service-request/add")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(survivorMiddleware)
     async addClientService(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
@@ -192,19 +128,17 @@ export class AdvocateController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            console.log("Client: ", req.user.id);
             const checkIfOrganization = await this.organizationService.checkIfOrganization(req.body.organization_id);
             if (!checkIfOrganization)
                 return ResponseFormatter.errorResponse(res, 'Invalid organization');
-            const checkIfAdvocate = await this.advocateService.checkIfAdvocate(req.body.advocate_id);
-            if (!checkIfAdvocate)
-                return ResponseFormatter.errorResponse(res, 'Invalid advocate');
-            const checkIfClient = await this.advocateService.checkIfAdvocateClient(req.body.advocate_id, req.body.client_id)
-            if (!checkIfClient)
-                return ResponseFormatter.errorResponse(res, 'Invalid client');
+            const checkIfClientService = await this.clientService.checkIfClientService(req.body.client_service_id, req.user.id)
+            if (!checkIfClientService)
+                return ResponseFormatter.errorResponse(res, 'Invalid client service');
             const checkIfService = await this.serviceManagerService.checkIfService(req.body.service_id);
             if (!checkIfService)
                 return ResponseFormatter.errorResponse(res, 'Invalid service');
-            const addService = await this.clientService.addService(req.body, req.body.advocate_id);
+            const addService = await this.clientService.addService(req.body, req.user.id);
             if (!addService)
                 return ResponseFormatter.errorResponse(res, "Request can't be sent");
             return ResponseFormatter.successResponse(res, "Successful");
@@ -212,10 +146,9 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
-
     @Get("/service-requests")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(survivorMiddleware)
     async getClient(@Req() req: Request, @Res() res: Response) {
         try {
             const getServices = await this.clientService.getServiceRequests(req.user.id)
@@ -238,14 +171,18 @@ export class AdvocateController {
 
     @Get("/service-requests/:serviceRequestsId")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(survivorMiddleware)
     async getServiceRequestsId(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
         try {
+            const checkIfValidServiceRequest = await this.clientService.checkIfValidServiceRequest(serviceRequestsId, req.user.id);
+            if (!checkIfValidServiceRequest) {
+                return ResponseFormatter.errorResponse(res, 'Invalid service request');
+            }
             const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
             const getServices = await this.organizationService.getOrganizationsServiceById(getServiceRequests.service.id)
             const customServiceRequests = await getServiceRequestsUser(getServiceRequests)
             const customResponseService = await getOrganizationsServiceDetails(getServices)
-
+            //
             const customResponse = {
                 client: customServiceRequests,
                 service: customResponseService,
@@ -257,9 +194,28 @@ export class AdvocateController {
         }
     }
 
+    @Delete("/service-requests/:serviceRequestsId")
+    @UseBefore(authMiddleware)
+    @UseBefore(survivorMiddleware)
+    async deleteServiceRequests(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
+        try {
+            const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequests)
+                return ResponseFormatter.errorResponse(res, 'Invalid service request');
+            if (getServiceRequests.user.id !== req.user.id)
+                return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
+            const deleteServiceRequest = await this.clientService.deleteServiceRequest(serviceRequestsId);
+            if (!deleteServiceRequest)
+                return ResponseFormatter.errorResponse(res, "Can't remove, try again later");
+            return ResponseFormatter.successResponse(res, "Successful removed service request");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
     @Post("/service-report")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(survivorMiddleware)
     async reportService(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
@@ -289,25 +245,4 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
-
-    @Delete("/service-requests/:serviceRequestsId")
-    @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
-    async deleteServiceRequests(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
-        try {
-            const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
-            if (!getServiceRequests)
-                return ResponseFormatter.errorResponse(res, 'Invalid service request');
-            if (getServiceRequests.user.id !== req.user.id)
-                return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
-            const deleteServiceRequest = await this.clientService.deleteServiceRequest(serviceRequestsId);
-            if (!deleteServiceRequest)
-                return ResponseFormatter.errorResponse(res, "Can't remove, try again later");
-            return ResponseFormatter.successResponse(res, "Successful removed service request");
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
-        }
-    }
-
 }
-

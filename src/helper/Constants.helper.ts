@@ -11,6 +11,7 @@ export class Constants {
     static FORGOT_PASSWORD = 4
     static SEND_INVITATION = 5
     static RESEND_INVITATION = 6
+    static VERIFY_EMAIL = 7
 
     static PAGE_NUMBER = 1
     static PAGE_SIZE = 20

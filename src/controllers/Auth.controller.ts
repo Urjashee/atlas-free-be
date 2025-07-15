@@ -33,6 +33,11 @@ const registrationOrganizationSchema = Joi.object({
     // affiliation_license: Joi.array().items(Joi.number()).required(),
     affiliations: Joi.string().required(),
 });
+const registrationSurvivor = Joi.object({
+    username: Joi.string().required(),
+    email: Joi.string().pattern(/^\S+$/).required(),
+    password: Joi.string().required(),
+});
 const loginSchema = Joi.object({
     email: Joi.string().pattern(/^\S+$/).required(),
     password: Joi.string().required(),
@@ -45,6 +50,11 @@ const forgotPasswordSchema = Joi.object({
 });
 const logoutSchema = Joi.object({
     device_token: Joi.string(),
+});
+
+const verificationSchema = Joi.object({
+    user_id: Joi.string().required(),
+    verification_code: Joi.string().required(),
 });
 const updatePasswordSchema = Joi.object({
     token: Joi.string().required(),
@@ -102,6 +112,31 @@ export class AuthController {
             }
             const roleId = Constants.ROLE_ORGANIZATION
             const user = await this.userService.createUser(req.body, roleId,);
+            if (user)
+                return ResponseFormatter.successResponse(res, 'User created')
+            return ResponseFormatter.successResponse(res, 'User created')
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/survivor/register")
+    async registerSurvivor(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = registrationSurvivor.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const existingUser = await this.userService.findByEmail(req.body.email);
+            if (existingUser) {
+                return ResponseFormatter.errorResponse(res, 'Email already in use');
+            }
+            const roleId = Constants.ROLE_SURVIVOR
+            const user = await this.userService.createSurvivor(req.body, roleId,);
             if (user)
                 return ResponseFormatter.successResponse(res, 'User created')
             return ResponseFormatter.successResponse(res, 'User created')
@@ -201,6 +236,58 @@ export class AuthController {
             if (!createPassword)
                 return ResponseFormatter.errorResponse(res, "Password couldn't be created. Try again later");
             return ResponseFormatter.successResponse(res, "Password created successfully!")
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/update-password")
+    async updatePassword(@Req() req: Request, @Res() res: Response) {
+        try {
+            const {error} = updatePasswordSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {token, password} = req.body;
+            const passwordResetToken = await this.userService.findByToken(token);
+            if (passwordResetToken) {
+                const checkPasswordLinkExpiry = await this.userService.checkPasswordExpiry(token)
+                if (checkPasswordLinkExpiry)
+                    return ResponseFormatter.errorResponse(res, "Password link has expired");
+                const checkPreviousPassword = await this.userService.checkPreviousPassword(passwordResetToken.email, password)
+                if (!checkPreviousPassword) {
+                    return ResponseFormatter.errorResponse(res, "Password is same as the previous one");
+                } else {
+                    const updatePassword = await this.userService.updatePassword(passwordResetToken.email, password, passwordResetToken)
+                    if (!updatePassword)
+                        return ResponseFormatter.errorResponse(res, "Password couldn't be updated");
+                    return ResponseFormatter.successResponse(res, "Password updated successfully!")
+                }
+            } else {
+                return ResponseFormatter.errorResponse(res, "Token doesn't exist");
+            }
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/verify")
+    async verify(@Req() req: Request, @Res() res: Response) {
+        try {
+            const {error} = verificationSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {user_id, verification_code} = req.body;
+            const checkIfVerified = await this.userService.checkIfTokenVerified(user_id, verification_code);
+            if (checkIfVerified)
+                return ResponseFormatter.successResponse(res, 'Email has already been verified!');
+            const verifyUser = await this.userService.findByCode(user_id, verification_code);
+            if (!verifyUser) {
+                return ResponseFormatter.errorResponse(res, 'Your email has not been verified. Please try again later.');
+            }
+            return ResponseFormatter.successResponse(res, 'Your email has been verified. You can close the tab and login.');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

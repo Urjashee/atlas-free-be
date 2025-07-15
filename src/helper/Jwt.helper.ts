@@ -63,5 +63,15 @@ export class JwtHelper {
                 isProfile: user.is_profile,
             }, process.env.JWT_SECRET as string, {expiresIn: process.env.TOKEN_EXPIRY as any})
         }
+        if (user.role.id == Constants.ROLE_SURVIVOR) {
+            return jwt.sign({
+                id: user.id,
+                email: user.email,
+                role: user.role.id,
+                isActive: user.is_active,
+                isStatus: user.is_status,
+                isProfile: user.is_profile,
+            }, process.env.JWT_SECRET as string, {expiresIn: process.env.TOKEN_EXPIRY as any})
+        }
     }
 }

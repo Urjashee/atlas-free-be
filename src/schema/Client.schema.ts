@@ -25,3 +25,21 @@ export const clientSchema = Joi.object({
     nicotine_products: Joi.array().items(Joi.number()),
     specify_physical_accommodation: Joi.string(),
 })
+
+export const survivorSchema = Joi.object({
+    id: Joi.number(),
+    client_id: Joi.number(),
+    service: Joi.array().items(Joi.number()),
+    zipcode: Joi.string().min(5).max(10),
+    dob: Joi.date(),
+    english_speaking_ability: Joi.number(),
+    gender: Joi.array().items(Joi.number()),
+    citizenship_status: Joi.number(),
+    client_experienced: Joi.array().items(Joi.number()),
+    pregnant: Joi.boolean(),
+    pregnant_months: Joi.number(),
+    birthdate_status: Joi.number(),
+    children_accompany: Joi.number(),
+    children_to_accompany: Joi.number(),
+    criteria: Joi.array().items(Joi.number()),
+})
