@@ -8,14 +8,13 @@ import {ClientService} from "../services/Client.service";
 import {authMiddleware} from "../middleware/Auth.middleware";
 import {Request, Response} from "express";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
-import {clientSchema, survivorSchema} from "../schema/Client.schema";
+import {survivorSchema} from "../schema/Client.schema";
 import {survivorMiddleware} from "../middleware/Survivor.middleware";
-import {advocateMiddleware} from "../middleware/Advocate.middleware";
 import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
 import {Constants} from "../helper/Constants.helper";
-import {getFormDetails, getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
+import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import Joi from "joi";
-import {ServiceStatus} from "../entity/AssignedServices.entity";
+import {ClientStatus} from "../entity/AssignedServices.entity";
 
 const serviceSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -87,7 +86,7 @@ export class AdvocateController {
         try {
             const getServices = await this.organizationService.getOrganizationsServiceById(serviceId)
             const customResponseService = await getOrganizationsServiceDetails(getServices)
-            const organization = await this.organizationService.getOrganizationsById(getServices[0].organization.id);
+            const organization = await this.organizationService.getOrganizationsById(getServices.organization.id);
             const customResponseOrganization = await getOrganizationsDetails(organization);
 
             const customResponse = {
@@ -197,14 +196,14 @@ export class AdvocateController {
     @Delete("/service-requests/:serviceRequestsId")
     @UseBefore(authMiddleware)
     @UseBefore(survivorMiddleware)
-    async deleteServiceRequests(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
+    async cancelServiceRequests(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
         try {
             const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
             if (!getServiceRequests)
                 return ResponseFormatter.errorResponse(res, 'Invalid service request');
             if (getServiceRequests.user.id !== req.user.id)
                 return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
-            const deleteServiceRequest = await this.clientService.deleteServiceRequest(serviceRequestsId);
+            const deleteServiceRequest = await this.clientService.updateServiceRequestStatus(serviceRequestsId, ClientStatus.Cancelled);
             if (!deleteServiceRequest)
                 return ResponseFormatter.errorResponse(res, "Can't remove, try again later");
             return ResponseFormatter.successResponse(res, "Successful removed service request");

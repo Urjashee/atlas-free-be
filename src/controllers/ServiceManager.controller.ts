@@ -23,7 +23,6 @@ const serviceSettingsSchema = Joi.object({
 })
 
 
-
 @JsonController("/api/service-manager")
 export class ServiceManagerController {
     private userService = new UserService();
@@ -45,21 +44,16 @@ export class ServiceManagerController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            if (!req.body.id)
+                return ResponseFormatter.errorResponse(res, 'Service ID is required.');
 
-            if (req.body.id) {
-                const checkIfValidService = await this.serviceManagerService.checkIfValidService(req.body.id, req.user.organization_id, req.user.id);
-                if (!checkIfValidService)
-                    return ResponseFormatter.errorResponse(res, 'Invalid service');
-                const settings = await this.organizationService.editServiceDetails(req.body.id, req.user.organization_id, req.user.role, req.body, req.user.id)
-                if (!settings)
-                    return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
-            } else {
-                const settings = await this.organizationService.addServiceDetails(req.user.organization_id, req.user.role, req.body, req.user.id)
-                if (!settings)
-                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
-            }
+            const checkIfValidService = await this.serviceManagerService.checkIfValidService(req.body.id, req.user.organization_id, req.user.id);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, 'Invalid service');
+            const settings = await this.organizationService.editServiceDetails(req.body.id, req.user.organization_id, req.user.role, req.body, req.user.id)
+            if (!settings)
+                return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
+            return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -70,8 +64,12 @@ export class ServiceManagerController {
     @UseBefore(serviceManagerMiddleware)
     async getOrganizations(@Req() req: Request, @Res() res: Response) {
         try {
+            let customResponse = [];
             const getOrganizationServices = await this.serviceManagerService.getServiceManagerService(req.user.id);
-            const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
+            for (const service of getOrganizationServices) {
+                const data = await getOrganizationsServiceDetails(service.service)
+                customResponse.push(data)
+            }
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
@@ -81,7 +79,7 @@ export class ServiceManagerController {
     @Get("/services/:serviceId")
     @UseBefore(authMiddleware)
     @UseBefore(serviceManagerMiddleware)
-    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number ) {
+    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
         try {
             const checkIfValidService = await this.serviceManagerService.checkIfValidService(serviceId, req.user.organization_id, req.user.id);
             if (!checkIfValidService)
@@ -109,7 +107,7 @@ export class ServiceManagerController {
             const checkIfValidService = await this.organizationService.checkIfValidOrganization(req.body.service_id, req.user.organization_id);
             if (!checkIfValidService)
                 return ResponseFormatter.errorResponse(res, "Not a valid service");
-            const checkIfValidServiceManager = await this.serviceManagerService.getServiceManagerServiceById(req.body.service_id, req.user.id)
+            const checkIfValidServiceManager = await this.serviceManagerService.checkIfValidService(req.body.service_id, req.user.organization_id, req.user.id)
             if (!checkIfValidServiceManager)
                 return ResponseFormatter.errorResponse(res, "Not a valid service manager");
             const checkIfServiceSettings = await this.organizationService.checkIfServiceSettingsExists(req.body.service_id);

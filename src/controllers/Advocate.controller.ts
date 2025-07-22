@@ -133,7 +133,7 @@ export class AdvocateController {
         try {
             const getServices = await this.organizationService.getOrganizationsServiceById(serviceId)
             const customResponseService = await getOrganizationsServiceDetails(getServices)
-            const organization = await this.organizationService.getOrganizationsById(getServices[0].organization.id);
+            const organization = await this.organizationService.getOrganizationsById(getServices.organization.id);
             const customResponseOrganization = await getOrganizationsDetails(organization);
 
             const customResponse = {

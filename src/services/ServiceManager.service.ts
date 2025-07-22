@@ -7,6 +7,7 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import s3UploadService from "../helper/S3UploadService.helper";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import {ServiceSetting} from "../entity/ServiceSetting.entity";
+import {Like, Raw} from "typeorm";
 
 export class ServiceManagerService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -26,27 +27,28 @@ export class ServiceManagerService {
         })
     }
 
-    async checkIfValidService(id: number, organization_id: number, user_id: number) {
-        return await this.serviceDetailsRepository.findOne({
+    async checkIfValidService(service_id: number, organization_id: number, user_id: number) {
+        console.log("Checking if valid service", user_id)
+        return await this.serviceSettingRepository.findOne({
             where: {
-                id: id,
-                organization: {id: organization_id},
-                user: {id: user_id},
-            }
+                service: {id: service_id},
+                service_manager: Raw(alias => `FIND_IN_SET(:user_id, ${alias}) > 0`, { user_id })
+            },
+            relations: ["service"]
         })
     }
     async getServiceManagerService(user_id: number) {
-        return await this.serviceDetailsRepository.find({
+        return await this.serviceSettingRepository.find({
             where: {
-                user: {id: user_id},
-            }
+                service_manager: Raw(alias => `FIND_IN_SET(:user_id, ${alias}) > 0`, { user_id })
+            },
+            relations: ["service"]
         })
     }
     async getServiceManagerServiceById(id: number, user_id: number) {
-        return await this.serviceDetailsRepository.find({
+        return await this.serviceDetailsRepository.findOne({
             where: {
                 id,
-                user: {id: user_id},
             }
         })
     }

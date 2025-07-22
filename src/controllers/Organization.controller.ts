@@ -111,8 +111,12 @@ export class AuthController {
     @UseBefore(organizationMiddleware)
     async getOrganizations(@Req() req: Request, @Res() res: Response) {
         try {
+            let customResponse = [];
             const getOrganizationServices = await this.organizationService.getOrganizationsService(req.user.organization_id);
-            const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
+            for (const service of getOrganizationServices) {
+                const data = await getOrganizationsServiceDetails(service)
+                customResponse.push(data)
+            }
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

@@ -262,7 +262,7 @@ export class OrganizationService {
     }
 
     async getOrganizationsServiceById(id: number) {
-        return await this.serviceDetailsRepository.find({
+        return await this.serviceDetailsRepository.findOne({
             where: {
                 id: id
             },
