@@ -20,10 +20,10 @@ export class ServiceSetting {
     @Column({ type: "simple-array", nullable: true })
     service_manager!: number[];
 
-    @Column({ nullable: false})
+    @Column({ nullable: true})
     contact_email!: string;
 
-    @Column({ nullable: false})
+    @Column({ nullable: true})
     contact_phone!: string;
 
     @ManyToOne(() => ServiceDetails, (services) => services.id)

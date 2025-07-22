@@ -13,6 +13,9 @@ import {Organization} from "../entity/Organization.entity";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import {ServiceSetting} from "../entity/ServiceSetting.entity";
 import {EmailReminder} from "../entity/EmailReminder.entity";
+import {AssignedServices, ClientStatus} from "../entity/AssignedServices.entity";
+import {ReportUser} from "../entity/ReportUser";
+import {ClientService} from "../entity/ClientService.entity";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -21,6 +24,9 @@ export class OrganizationService {
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
     private serviceSettingRepository = AppDataSource.getRepository(ServiceSetting);
     private emailReminderRepository = AppDataSource.getRepository(EmailReminder);
+    private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
+    private reportUserRepository = AppDataSource.getRepository(ReportUser);
+    private clientServiceRepository = AppDataSource.getRepository(ClientService);
     private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
@@ -345,7 +351,7 @@ export class OrganizationService {
         })
     }
 
-    async getServices(page_number: number, page_size: number, service_type: number,
+    async getServices(page_number: number, page_size: number, service_type: any,
                       state: number, city: string, zipcode: string, availability: string, structure: any,
                       staffing: number, substance: any, children: string, faith: any, living_arrangement: any,
                       guidelines: any, staff_diversity: any) {
@@ -371,88 +377,117 @@ export class OrganizationService {
             service_type,
         };
         let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
-        // City
-        if (city) {
-            baseWhere.city = city;
-        }
-        // State
-        if (state) {
-            baseWhere.state = state;
-        }
-        // Zipcode
-        if (zipcode) {
-            baseWhere.zipcode = zipcode;
-        }
-        // Availability
-        if (availability === "true") {
-            baseWhere.waitlist = true;
-        } else if (availability === "false") {
-            baseWhere.waitlist = false;
-        }
-        // Structure
-        if (Array.isArray(structure) && structure.length > 0) {
-            const mappedStructures = structure.map((val) => structureMap[val]).filter(Boolean);
-            if (mappedStructures.length > 0) {
-                baseWhere.service_structure = In(mappedStructures);
-            }
-        }
 
-        if (!structure) {
-            baseWhere.service_structure = 111;
-        }
+        // // City
+        // if (city) {
+        //     baseWhere.city = city;
+        // }
+        // // State
+        // if (state) {
+        //     baseWhere.state = state;
+        // }
+        // // Zipcode
+        // if (zipcode) {
+        //     baseWhere.zipcode = zipcode;
+        // }
+        // // Availability
+        // if (availability === "true") {
+        //     baseWhere.waitlist = true;
+        // } else if (availability === "false") {
+        //     baseWhere.waitlist = false;
+        // }
+        // // Structure
+        // if (Array.isArray(structure) && structure.length > 0) {
+        //     const mappedStructures = structure.map((val) => structureMap[val]).filter(Boolean);
+        //     if (mappedStructures.length > 0) {
+        //         baseWhere.service_structure = In(mappedStructures);
+        //     }
+        // }
+        //
+        // if (!structure) {
+        //     baseWhere.service_structure = 111;
+        // }
+        //
+        // // Staffing
+        // if (Array.isArray(staffing) && staffing.length > 0) {
+        //     baseWhere.staffing_level = In(staffing);
+        // }
+        //
+        // // Substance
+        // if (substance == 1) {
+        //     where = [
+        //         {...baseWhere, entry_requirement: Like('%93%')},
+        //         {...baseWhere, entry_requirement: Like('%94%')}
+        //     ];
+        // }
+        // if (substance == 3) {
+        //     where = [
+        //         {...baseWhere, entry_requirement: Like('%95%')},
+        //     ];
+        // }
+        //
+        // // Children
+        // if (children === "true") {
+        //     where = [
+        //         {...baseWhere, served_to: Like('%17%')},
+        //         {...baseWhere, served_to: Like('%18%')}
+        //     ];
+        // }
+        //
+        // // Faith
+        // if (faith == 1) {
+        //     where = [{
+        //         ...baseWhere,
+        //         faith_engagement: 110,
+        //         service_model: Like('%99%')
+        //     }];
+        // }
+        // if (faith == 2) {
+        //     where = [{
+        //         ...baseWhere,
+        //         faith_engagement: 109,
+        //         service_model: Like('%99%')
+        //     }];
+        // }
+        // if (faith == 3) {
+        //     baseWhere.service_model = Not(Like('%99%'));
+        // }
+        //
+        // // Living Arrangement
+        // if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
+        //     baseWhere.staffing_level = In(living_arrangement);
+        // }
+        // // Guidelines
+        // if (Array.isArray(guidelines) && guidelines.length > 0) {
+        //     const mappedGuidelines = guidelines.map((val) => guidelinesMap[val]).filter(Boolean);
+        //     if (mappedGuidelines.length > 0) {
+        //         const guidelineConditions = mappedGuidelines.map(id => ({
+        //             ...baseWhere,
+        //             service_guidelines: Like(`%${id}%`)
+        //         }));
+        //         where = guidelineConditions;
+        //     }
+        // }
+        // // Staff Diversity
+        // if (Array.isArray(staff_diversity) && staff_diversity.length > 0) {
+        //     const mappedStaffDiversity = staff_diversity.map((val) => staffDiversityMap[val]).filter(Boolean);
+        //     if (mappedStaffDiversity.length > 0) {
+        //         const staffDiversityConditions = mappedStaffDiversity.map(id => ({
+        //             ...baseWhere,
+        //             teams_diversity: Like(`%${id}%`)
+        //         }));
+        //         where = staffDiversityConditions;
+        //     }
+        // }
 
-        // Staffing
-        if (Array.isArray(staffing) && staffing.length > 0) {
-            baseWhere.staffing_level = In(staffing);
-        }
 
-        // Substance
-
-        // Children
-        if (children === "true") {
-            where = [
-                {...baseWhere, served_to: Like('%17%')},
-                {...baseWhere, served_to: Like('%18%')}
-            ];
-        }
-
-        // Faith
-
-        // Living Arrangement
-        if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
-            baseWhere.staffing_level = In(living_arrangement);
-        }
-        // Guidelines
-        if (Array.isArray(guidelines) && guidelines.length > 0) {
-            const mappedGuidelines = guidelines.map((val) => guidelinesMap[val]).filter(Boolean);
-            if (mappedGuidelines.length > 0) {
-                const guidelineConditions = mappedGuidelines.map(id => ({
-                    ...baseWhere,
-                    service_guidelines: Like(`%${id}%`)
-                }));
-                where = guidelineConditions;
-            }
-        }
-        // Staff Diversity
-        if (Array.isArray(staff_diversity) && staff_diversity.length > 0) {
-            const mappedStaffDiversity = staff_diversity.map((val) => staffDiversityMap[val]).filter(Boolean);
-            if (mappedStaffDiversity.length > 0) {
-                const staffDiversityConditions = mappedStaffDiversity.map(id => ({
-                    ...baseWhere,
-                    teams_diversity: Like(`%${id}%`)
-                }));
-                where = staffDiversityConditions;
-            }
-        }
-
-
-        const service = await this.serviceDetailsRepository.find({
+        const [data, total] = await this.serviceDetailsRepository.findAndCount({
             where,
             skip: (page_number - 1) * page_size,
             take: page_size,
         });
 
-        return service;
+        return { data, total };
     }
 
     async checkIfOrganization(organization_id: number) {
@@ -589,5 +624,65 @@ export class OrganizationService {
             })
         }
         return userArray
+    }
+
+    async getServiceRequests(user_id: number, page_number = 1, page_size = 10, status?: number) {
+        const skip = (page_number - 1) * page_size;
+
+        const where: any = {
+            organization: { id: user_id },
+        };
+
+        if (typeof status === 'number' && status !== ClientStatus.All) {
+            where.status = status;
+        }
+
+        const [data, total] = await this.assignedServiceRepository.findAndCount({
+            where,
+            relations: ["organization", "service", "service.state", "client_service", "user"],
+            skip,
+            take: page_size,
+            order: { created_at: "DESC" }
+        });
+
+        return { data, total };
+    }
+
+    async reportUser(type: any, reported_user: number, reason: string, user_id: number, organization_id: number) {
+        const report = await this.reportUserRepository.create({
+            reported_user: {id: reported_user},
+            reason: reason,
+            reported_by: {id: user_id},
+            organization: {id: organization_id},
+            type
+        });
+        return await this.reportUserRepository.save(report);
+    }
+
+    async getServiceRequestsById(client_id: number) {
+        return await this.assignedServiceRepository.findOne({
+            where: {
+                client_service: {id: client_id}
+            },
+            relations: ["organization", "service", "service.state", "client_service", "user"],
+        })
+    }
+
+    async checkIfOrganizationUser(user_id: number, role: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {id: role},
+            }
+        })
+    }
+
+    async checkIfOrganizationClient(user_id: number, id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id,
+                user: {id: user_id},
+            }
+        })
     }
 }

@@ -140,7 +140,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
 }
 export async function getServiceRequestsUser(serviceRequest: any) {
     return {
-        client_id: serviceRequest.client_service.id,
+        client_service_id: serviceRequest.client_service.id,
         service_status_id: serviceRequest.status,
         service_status: ClientStatus[Number(serviceRequest.status)],
         service_name: serviceRequest.service.name,

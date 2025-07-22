@@ -52,5 +52,12 @@ export const servicesSchema = Joi.object({
     intake_process: Joi.string(),
     additional_requirements: Joi.string(),
     reason_for_removal: Joi.string(),
-    is_submitted: Joi.boolean().required(),
+    is_submitted: Joi.boolean(),
+});
+
+export const clientServiceSchema = Joi.object({
+    organization_id: Joi.number().required(),
+    user_id: Joi.number().required(),
+    client_service_id: Joi.number().required(),
+    service_id: Joi.number().required(),
 });

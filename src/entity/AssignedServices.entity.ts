@@ -18,10 +18,17 @@ export enum ChildrenToAccompany {
     "Preferred" = 3,
 }
 export enum ClientStatus {
-    "Placed" = 0,
+    "All" = 0,
     "Pending" = 1,
-    "Unable to serve" = 2,
-    "Waitlisted" = 3,
+    "Placed" = 2,
+    "Unable to serve" = 3,
+    "Waitlisted" = 4,
+    "Cancelled" = 5,
+}
+export enum ServiceStatus {
+    "Open" = 0,
+    "Full" = 1,
+    "Waitlist only" = 2,
 }
 
 @Entity()
@@ -29,7 +36,7 @@ export class AssignedServices {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ nullable: true, default: 0 })
+    @Column({ nullable: true, default: 1 })
     status!: number;
 
     @Column({ nullable: true })

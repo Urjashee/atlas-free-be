@@ -1,4 +1,4 @@
-import {Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -9,8 +9,18 @@ import Joi from "joi";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import {upload} from "../helper/MulterConfig.helper";
-import {servicesSchema} from "../schema/Services.schema";
+import {clientServiceSchema, servicesSchema} from "../schema/Services.schema";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
+import {Constants} from "../helper/Constants.helper";
+import {advocateMiddleware} from "../middleware/Advocate.middleware";
+import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
+import {ClientService} from "../services/Client.service";
+import {survivorMiddleware} from "../middleware/Survivor.middleware";
+import {AdvocateService} from "../services/Advocate.service";
+import {clientSchema} from "../schema/Client.schema";
+import {ServiceManagerService} from "../services/ServiceManager.service";
+import {addClientService, reportUser} from "../util/Common.util";
+import {reportSchema} from "../schema/Organization.schema";
 
 
 const organizationEditSchema = Joi.object({
@@ -54,11 +64,15 @@ const sendInvitationSchema = Joi.object({
     role: Joi.number().required()
 })
 
+
 @JsonController("/api/organization")
 export class AuthController {
     private userService = new UserService();
     private organizationService = new OrganizationService();
     private configService = new ConfigService();
+    private clientService = new ClientService();
+    private advocateService = new AdvocateService();
+    private serviceManagerService = new ServiceManagerService();
 
     @Post("/services")
     @UseBefore(authMiddleware)
@@ -82,7 +96,7 @@ export class AuthController {
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
             } else {
-                const settings = await this.organizationService.addServiceDetails(req.user.organization_id, req.user.role, req.body)
+                const settings = await this.organizationService.addServiceDetails(req.user.organization_id, req.user.role, req.body, req.user.id)
                 if (!settings)
                     return ResponseFormatter.errorResponse(res, "Can't add, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully added service settings.");
@@ -108,7 +122,7 @@ export class AuthController {
     @Get("/services/:serviceId")
     @UseBefore(authMiddleware)
     @UseBefore(organizationMiddleware)
-    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number ) {
+    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
         try {
             const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
             if (!checkValidService)
@@ -124,7 +138,7 @@ export class AuthController {
     @Post("/services-settings")
     @UseBefore(authMiddleware)
     @UseBefore(organizationMiddleware)
-    async addServiceSettings(@Req() req: Request, @Res() res: Response ) {
+    async addServiceSettings(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
@@ -201,7 +215,7 @@ export class AuthController {
     async getOrganizationList(@Req() req: Request, @Res() res: Response) {
         try {
             const organization = await this.organizationService.getOrganizationsById(req.user.organization_id);
-            const customResponse =await getOrganizationsDetails(organization);
+            const customResponse = await getOrganizationsDetails(organization);
             return ResponseFormatter.successResponse(res, "Organization list", customResponse)
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
@@ -306,8 +320,247 @@ export class AuthController {
                 })
             )
             return ResponseFormatter.successResponse(res, 'Users found', customResponse);
-        }catch (error: any) {
+        } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
+    @Get("/service-requests")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getServiceRequest(@Req() req: Request, @Res() res: Response) {
+        try {
+            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
+            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
+            const status = parseInt(req.query.status as string);
+
+            const {
+                data,
+                total
+            } = await this.organizationService.getServiceRequests(req.user.organization_id, page_number, page_size, status);
+
+            const customResponse = [];
+
+            for (const service of data) {
+
+                const user = await this.userService.findById(service.user.id);
+                if (user.role.id != Constants.ROLE_SURVIVOR) {
+                    customResponse.push({
+                        type: "user",
+                        id: service.id,
+                        service_id: service.service.id,
+                        service: service.service.name,
+                        case_no: service.case_no,
+                        requested_by: `${user.first_name} ${user.last_name}`,
+                        date_time: service.created_at,
+                        service_request: service.status,
+                        client_service_id: service.client_service.id,
+                        user: service.user.id
+                    });
+                }
+
+                if (user.role.id == Constants.ROLE_SURVIVOR) {
+                    customResponse.push({
+                        type: "survivor",
+                        id: service.id,
+                        service_id: service.service.id,
+                        service: service.service.name,
+                        client_name: `${user.user_name}`,
+                        client_email: user.email,
+                        date_time: service.created_at,
+                        service_request: service.status,
+                        client_service_id: service.client_service.id,
+                        user: service.user.id
+                    });
+                }
+            }
+
+            return ResponseFormatter.successResponse(res, "Successful", {
+                current_page: page_number,
+                page_size,
+                total_items: total,
+                total_pages: Math.ceil(total / page_size),
+                data: customResponse
+            });
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/service-requests/:serviceRequestsId")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getServiceRequestsId(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
+        try {
+            const getServiceRequest = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequest) {
+                return ResponseFormatter.errorResponse(res, "Service request not found");
+            }
+            let client, form
+            const user = await this.userService.findById(getServiceRequest.user.id);
+            const getClients = await this.advocateService.getClientsById(getServiceRequest.id);
+            if (user.role.id != Constants.ROLE_SURVIVOR) {
+                client = {
+                    type: "user",
+                    id: getServiceRequest.id,
+                    service_id: getServiceRequest.service.id,
+                    service: getServiceRequest.service.name,
+                    case_no: getServiceRequest.case_no,
+                    requested_by: `${user.first_name} ${user.last_name}`,
+                    date_time: getServiceRequest.created_at,
+                    service_request: getServiceRequest.status,
+                    client_service_id: getServiceRequest.client_service.id,
+                    user: getServiceRequest.user.id
+                };
+                form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+            }
+            if (user.role.id == Constants.ROLE_SURVIVOR) {
+                client = {
+                    type: "survivor",
+                    id: getServiceRequest.id,
+                    service_id: getServiceRequest.service.id,
+                    service: getServiceRequest.service.name,
+                    client_name: `${user.user_name}`,
+                    client_email: user.email,
+                    date_time: getServiceRequest.created_at,
+                    service_request: getServiceRequest.status,
+                    client_service_id: getServiceRequest.client_service.id,
+                    user: getServiceRequest.user.id
+                };
+                form = await getClientDetails(getClients, Constants.ROLE_SURVIVOR)
+            }
+
+            const customResponse = {
+                client: client,
+                form: form,
+            }
+
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/report-user")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async reportUser(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = reportSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            await reportUser(req.body, req.user.id, req.user.organization_id);
+            return ResponseFormatter.successResponse(res, 'Users reported');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Patch("/service-request/:serviceRequestsId/:status")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async changeServiceRequestStatus(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number, @Param("status") status: number) {
+        try {
+            const getServiceRequest = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequest) {
+                return ResponseFormatter.errorResponse(res, "Service request not found");
+            }
+            const updatedAssignedServiceStatus = await this.clientService.updateServiceRequestStatus(serviceRequestsId, status);
+            if (!updatedAssignedServiceStatus)
+                return ResponseFormatter.errorResponse(res, "Failed to update service request status");
+            return ResponseFormatter.successResponse(res, "Successfully updated service request status");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/clients")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async addClient(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = clientSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            if (req.body.id) {
+                const checkIfValidOrganization = await this.advocateService.checkIfValidClient(req.body.id, req.user.id);
+                if (!checkIfValidOrganization)
+                    return ResponseFormatter.errorResponse(res, 'Invalid client');
+                const editClientDetails = await this.advocateService.editClient(req.body.id, req.user.id, req.user.organization_id, req.body)
+                if (!editClientDetails)
+                    return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully updated clients.");
+            } else {
+                const addClientDetails = await this.advocateService.addClient(req.user.id, req.user.organization_id, req.body)
+                if (!addClientDetails)
+                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully added clients.");
+            }
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/clients")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getClients(@Req() req: Request, @Res() res: Response) {
+        try {
+            const getClients = await this.advocateService.getClients(req.user.id);
+            const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+    @Get("/clients/:clientId")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
+        try {
+            const checkIfValidOrganization = await this.advocateService.checkIfValidClient(clientId, req.user.id);
+            if (!checkIfValidOrganization)
+                return ResponseFormatter.errorResponse(res, 'Invalid client');
+            const getClients = await this.advocateService.getClientsById(clientId);
+            const form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+            const getServiceRequests = await this.organizationService.getServiceRequestsById(clientId);
+            const customResponseService = await getServiceRequestsUser(getServiceRequests)
+            const customResponse = {
+                form: form,
+                serviceRequests: customResponseService
+            }
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/service-request/add")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async addClientService(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = clientServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            await addClientService(req.body, req.user.role.id)
+            return ResponseFormatter.successResponse(res, "Successful");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
 }

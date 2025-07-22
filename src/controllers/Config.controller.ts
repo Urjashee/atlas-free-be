@@ -1,4 +1,4 @@
-import { Get, JsonController, Req, Res } from "routing-controllers";
+import {Get, JsonController, Req, Res, UseBefore} from "routing-controllers";
 import { Request, Response } from "express";
 import { ConfigService } from "../services/Config.service";
 import { ResponseFormatter } from "@inquitickets/response";
@@ -12,10 +12,15 @@ import {
     TimePeriod
 } from "../entity/ServiceDetails.entity";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
+import {authMiddleware} from "../middleware/Auth.middleware";
+import {advocateMiddleware} from "../middleware/Advocate.middleware";
+import {ServiceStatus} from "../entity/AssignedServices.entity";
+import {OrganizationService} from "../services/Organization.service";
 
 @JsonController("/api")
 export class ConfigController {
     private configService = new ConfigService();
+    private organizationService = new OrganizationService();
 
     @Get("/config")
     async config(@Req() req: Request, @Res() res: Response) {
@@ -346,5 +351,71 @@ export class ConfigController {
         }
 
         return ResponseFormatter.successResponse(res, "Configuration data", customResponse);
+    }
+
+    @Get("/services")
+    @UseBefore(authMiddleware)
+    async getServiceList(@Req() req: Request, @Res() res: Response) {
+        try {
+            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
+            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
+            const service_type = parseInt(req.query.service as string)
+            const state = parseInt(req.query.state as string);
+            const city = req.query.city as string;
+            const zipcode = req.query.zipcode as string
+            const availability = req.query.availability as string
+            const structure = req.query.structure
+            const children = req.query.children as string
+            const staffing = parseInt(req.query.staffing as string)
+            const substance = req.query.substance
+            const faith = req.query.faith
+            const living_arrangement = req.query.living_arrangement
+            const guidelines = req.query.guidelines
+            const staff_diversity = req.query.staff_diversity
+
+            if (!service_type)
+                return ResponseFormatter.errorResponse(res, 'Service type is required');
+            const { data, total } = await this.organizationService.getServices(page_number, page_size,
+                service_type, state, city, zipcode, availability, structure, staffing, substance, children,
+                faith, living_arrangement, guidelines, staff_diversity);
+
+            const customResponse = [];
+
+            for (const service of data) {
+                let availability
+                const serviceType = await this.configService.getServiceOptionsById(service.service_type);
+                const getAvailability = await this.configService.getServiceAvailability(service.id);
+                if (service.waitlist == false) {
+                    availability = 1
+                } else {
+                    if (service.client_slots > getAvailability.available_slots) {
+                        availability = 0
+                    }
+                    if (service.client_slots == getAvailability.available_slots) {
+                        availability = 2
+                    }
+                }
+
+                customResponse.push({
+                    id: service.id,
+                    name: service.name,
+                    service_type: serviceType.name,
+                    address: service.disclose_address === false
+                        ? "-"
+                        : `${service.street} ${service.city}, ${service.state} ${service.zipcode}`,
+                    availability_id: availability,
+                    availability: ServiceStatus[availability],
+                });
+            }
+            return ResponseFormatter.successResponse(res, "Successful", {
+                current_page: page_number,
+                page_size,
+                total_items: total,
+                total_pages: Math.ceil(total / page_size),
+                data: customResponse
+            });
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
     }
 }

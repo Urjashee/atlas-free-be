@@ -26,8 +26,8 @@ export class ClientService {
     organization!: Organization;
 
     @ManyToOne(() => Users, (user) => user.id)
-    @JoinColumn({ name: "advocate_id" })
-    advocate!: Users;
+    @JoinColumn({ name: "user_id" })
+    user!: Users;
 
     @ManyToOne(() => Users, (user) => user.id)
     @JoinColumn({ name: "client_id" })

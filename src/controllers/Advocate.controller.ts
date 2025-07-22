@@ -1,4 +1,4 @@
-import {Delete, Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -11,17 +11,13 @@ import {clientSchema} from "../schema/Client.schema";
 import {AdvocateService} from "../services/Advocate.service";
 import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
-import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {Constants} from "../helper/Constants.helper";
 import Joi from "joi";
 import {ClientService} from "../services/Client.service";
+import {ClientStatus} from "../entity/AssignedServices.entity";
+import {addClientService} from "../util/Common.util";
+import {clientServiceSchema} from "../schema/Services.schema";
 
-const serviceSchema = Joi.object({
-    organization_id: Joi.number().required(),
-    advocate_id: Joi.number().required(),
-    client_service_id: Joi.number().required(),
-    service_id: Joi.number().required(),
-});
 const reportServiceSchema = Joi.object({
     service_request_id: Joi.number().required(),
     reason: Joi.string().required(),
@@ -129,35 +125,6 @@ export class AdvocateController {
         }
     }
 
-    @Get("/services")
-    @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
-    async getServiceList(@Req() req: Request, @Res() res: Response) {
-        try {
-            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
-            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
-            const service_type = parseInt(req.query.service as string)
-            const state = parseInt(req.query.state as string);
-            const city = req.query.city as string;
-            const zipcode = req.query.zipcode as string
-            const availability = req.query.availability as string
-            const structure = req.query.structure
-            const children = req.query.children as string
-            const staffing = parseInt(req.query.staffing as string)
-            const substance = req.query.substance
-            const faith = req.query.faith
-            const living_arrangement = req.query.living_arrangement
-            const guidelines = req.query.guidelines
-            const staff_diversity = req.query.staff_diversity
-
-            const getOrganizationService = await this.organizationService.getServices(page_number, page_size,
-                service_type, state, city, zipcode, availability, structure, staffing, substance, children,
-                faith, living_arrangement, guidelines, staff_diversity);
-            return ResponseFormatter.successResponse(res, "Successful", getOrganizationService);
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
-        }
-    }
 
     @Get("/service-details/:serviceId")
     @UseBefore(authMiddleware)
@@ -188,25 +155,11 @@ export class AdvocateController {
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
-            const {error} = serviceSchema.validate(req.body);
+            const {error} = clientServiceSchema.validate(req.body);
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const checkIfOrganization = await this.organizationService.checkIfOrganization(req.body.organization_id);
-            if (!checkIfOrganization)
-                return ResponseFormatter.errorResponse(res, 'Invalid organization');
-            const checkIfAdvocate = await this.advocateService.checkIfAdvocate(req.body.advocate_id);
-            if (!checkIfAdvocate)
-                return ResponseFormatter.errorResponse(res, 'Invalid advocate');
-            const checkIfClient = await this.advocateService.checkIfAdvocateClient(req.body.advocate_id, req.body.client_id)
-            if (!checkIfClient)
-                return ResponseFormatter.errorResponse(res, 'Invalid client');
-            const checkIfService = await this.serviceManagerService.checkIfService(req.body.service_id);
-            if (!checkIfService)
-                return ResponseFormatter.errorResponse(res, 'Invalid service');
-            const addService = await this.clientService.addService(req.body, req.body.advocate_id);
-            if (!addService)
-                return ResponseFormatter.errorResponse(res, "Request can't be sent");
+            await addClientService(req.body, req.user.role.id)
             return ResponseFormatter.successResponse(res, "Successful");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
@@ -218,19 +171,29 @@ export class AdvocateController {
     @UseBefore(advocateMiddleware)
     async getClient(@Req() req: Request, @Res() res: Response) {
         try {
-            const getServices = await this.clientService.getServiceRequests(req.user.id)
-            const customResponse = [];
+            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
+            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
+            const status = parseInt(req.query.status as string);
 
-            for (const service of getServices) {
-                customResponse.push({
-                    id: service.id,
-                    client_id: service.client_service.id,
-                    case_no: service.case_no,
-                    client_nick_name: service.client_service.client_nick_name,
-                    service_request: service.status
-                });
-            }
-            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+            const { data, total } = await this.clientService.getServiceRequests(req.user.id, page_number, page_size, status);
+
+            const customResponse = data.map(service => ({
+                id: service.id,
+                service_id: service.service.id,
+                service: service.service.name,
+                client_id: service.client_service.id,
+                case_no: service.case_no,
+                client_nick_name: service.client_service.client_nick_name,
+                service_request: service.status
+            }));
+
+            return ResponseFormatter.successResponse(res, "Successful", {
+                current_page: page_number,
+                page_size,
+                total_items: total,
+                total_pages: Math.ceil(total / page_size),
+                data: customResponse
+            });
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -293,17 +256,17 @@ export class AdvocateController {
     @Delete("/service-requests/:serviceRequestsId")
     @UseBefore(authMiddleware)
     @UseBefore(advocateMiddleware)
-    async deleteServiceRequests(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
+    async cancelServiceRequests(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
         try {
             const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
             if (!getServiceRequests)
                 return ResponseFormatter.errorResponse(res, 'Invalid service request');
             if (getServiceRequests.user.id !== req.user.id)
                 return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
-            const deleteServiceRequest = await this.clientService.deleteServiceRequest(serviceRequestsId);
+            const deleteServiceRequest = await this.clientService.updateServiceRequestStatus(serviceRequestsId, ClientStatus.Cancelled);
             if (!deleteServiceRequest)
-                return ResponseFormatter.errorResponse(res, "Can't remove, try again later");
-            return ResponseFormatter.successResponse(res, "Successful removed service request");
+                return ResponseFormatter.errorResponse(res, "Can't cancel, try again later");
+            return ResponseFormatter.successResponse(res, "Successful cancelled service request");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

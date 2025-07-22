@@ -28,6 +28,13 @@ export class UserService {
             }
         })
     }
+    async findById(id: number): Promise<Users> {
+        return await this.userRepository.findOne({
+            where: {
+                id
+            }
+        })
+    }
 
     async createUser(body: any, role: number): Promise<Users> {
         const profile = await this.organizationRepository.create({
@@ -375,5 +382,23 @@ export class UserService {
                 return await this.userRepository.save(user);
             }
         }
+    }
+
+    async checkIfSurvivor(user_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {id: Constants.ROLE_SURVIVOR},
+            }
+        });
+    }
+
+    async checkIfAdvocate(user_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {id: Constants.ROLE_ADVOCATE},
+            }
+        });
     }
 }

@@ -13,8 +13,9 @@ import {survivorMiddleware} from "../middleware/Survivor.middleware";
 import {advocateMiddleware} from "../middleware/Advocate.middleware";
 import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
 import {Constants} from "../helper/Constants.helper";
-import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
+import {getFormDetails, getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import Joi from "joi";
+import {ServiceStatus} from "../entity/AssignedServices.entity";
 
 const serviceSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -34,7 +35,7 @@ export class AdvocateController {
     private advocateService = new AdvocateService();
     private clientService = new ClientService();
 
-    @Post("/service-requests")
+    @Post("/form-details")
     @UseBefore(authMiddleware)
     @UseBefore(survivorMiddleware)
     async addOrganization(@Req() req: Request, @Res() res: Response) {
@@ -66,31 +67,14 @@ export class AdvocateController {
         }
     }
 
-    @Get("/services")
+    @Get("/form-details")
     @UseBefore(authMiddleware)
     @UseBefore(survivorMiddleware)
-    async getServiceList(@Req() req: Request, @Res() res: Response) {
+    async getClientsById(@Req() req: Request, @Res() res: Response) {
         try {
-            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
-            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
-            const service_type = parseInt(req.query.service as string)
-            const state = parseInt(req.query.state as string);
-            const city = req.query.city as string;
-            const zipcode = req.query.zipcode as string
-            const availability = req.query.availability as string
-            const structure = req.query.structure
-            const children = req.query.children as string
-            const staffing = parseInt(req.query.staffing as string)
-            const substance = req.query.substance
-            const faith = req.query.faith
-            const living_arrangement = req.query.living_arrangement
-            const guidelines = req.query.guidelines
-            const staff_diversity = req.query.staff_diversity
-
-            const getOrganizationService = await this.organizationService.getServices(page_number, page_size,
-                service_type, state, city, zipcode, availability, structure, staffing, substance, children,
-                faith, living_arrangement, guidelines, staff_diversity);
-            return ResponseFormatter.successResponse(res, "Successful", getOrganizationService);
+            const getClients = await this.clientService.getClientsById(req.user.id);
+            const customResponse = await getClientDetails(getClients, Constants.ROLE_SURVIVOR)
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -151,19 +135,35 @@ export class AdvocateController {
     @UseBefore(survivorMiddleware)
     async getClient(@Req() req: Request, @Res() res: Response) {
         try {
-            const getServices = await this.clientService.getServiceRequests(req.user.id)
+            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
+            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
+            const status = parseInt(req.query.status as string);
+
+            const { data, total } = await this.clientService.getServiceRequests(req.user.id, page_number, page_size, status);
+
             const customResponse = [];
 
-            for (const service of getServices) {
+            for (const service of data) {
+                const serviceOption = await this.configService.getServiceOptionsById(service.service.service_type);
+
                 customResponse.push({
                     id: service.id,
+                    service_id: service.service.id,
+                    service: service.service.name,
+                    service_type: serviceOption.name,
                     client_id: service.client_service.id,
-                    case_no: service.case_no,
-                    client_nick_name: service.client_service.client_nick_name,
+                    address: `${service.service.street || ""} ${service.service.address || ""} ${service.service.city || ""} ${service.service.state?.name || ""} ${service.service.zipcode || ""}`.trim(),
                     service_request: service.status
                 });
             }
-            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+
+            return ResponseFormatter.successResponse(res, "Successful", {
+                current_page: page_number,
+                page_size,
+                total_items: total,
+                total_pages: Math.ceil(total / page_size),
+                data: customResponse
+            });
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -182,7 +182,7 @@ export class AdvocateController {
             const getServices = await this.organizationService.getOrganizationsServiceById(getServiceRequests.service.id)
             const customServiceRequests = await getServiceRequestsUser(getServiceRequests)
             const customResponseService = await getOrganizationsServiceDetails(getServices)
-            //
+
             const customResponse = {
                 client: customServiceRequests,
                 service: customResponseService,

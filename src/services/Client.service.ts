@@ -3,7 +3,7 @@ import {Users} from "../entity/Users.entity";
 import {Organization} from "../entity/Organization.entity";
 import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
-import {AssignedServices} from "../entity/AssignedServices.entity";
+import {AssignedServices, ClientStatus} from "../entity/AssignedServices.entity";
 import {ReportService} from "../entity/ReportService.entity";
 import {DeviceToken} from "../entity/DeviceToken.entity";
 import {Affiliations} from "../entity/Affiliations.entity";
@@ -49,14 +49,28 @@ export class ClientService {
         return await this.assignedServiceRepository.save(addService)
     }
 
-    async getServiceRequests(user_id: number) {
-        return await this.assignedServiceRepository.find({
-            where: {
-                user: {id: user_id},
-            },
-            relations: ["organization", "service", "client_service"]
-        })
+    async getServiceRequests(user_id: number, page_number = 1, page_size = 10, status?: number) {
+        const skip = (page_number - 1) * page_size;
+
+        const where: any = {
+            user: { id: user_id },
+        };
+
+        if (typeof status === 'number' && status !== ClientStatus.All) {
+            where.status = status;
+        }
+
+        const [data, total] = await this.assignedServiceRepository.findAndCount({
+            where,
+            relations: ["organization", "service", "service.state", "client_service"],
+            skip,
+            take: page_size,
+            order: { created_at: "DESC" }
+        });
+
+        return { data, total };
     }
+
 
     async getServiceRequestById(id: number) {
         return await this.assignedServiceRepository.findOne({
@@ -64,6 +78,14 @@ export class ClientService {
                 id
             },
             relations: ["organization", "service", "client_service", "user"]
+        });
+    }
+
+    async getClientServiceById(id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id
+            },
         });
     }
 
@@ -86,7 +108,7 @@ export class ClientService {
         return await this.reportServiceRepository.save(createReport);
     }
 
-    async deleteServiceRequest(id: number) {
+    async cancelServiceRequest(id: number) {
         const getServiceRequest = await this.assignedServiceRepository.findOne({
             where: {
                 id
@@ -187,6 +209,26 @@ export class ClientService {
                 client: {id: client_id},
             }
         })
+    }
+    async getClientsById(client_id: number) {
+        return await this.clientServiceRepository.find({
+            where: {
+                client: {id: client_id},
+            }
+        })
+    }
+
+    async updateServiceRequestStatus(id: number, status: ClientStatus) {
+        const serviceRequest = await this.assignedServiceRepository.findOne({
+            where: { id }
+        });
+
+        if (!serviceRequest) {
+            throw new Error("Service request not found");
+        }
+
+        serviceRequest.status = status;
+        return await this.assignedServiceRepository.save(serviceRequest);
     }
 
 }

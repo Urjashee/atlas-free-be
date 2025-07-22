@@ -6,6 +6,7 @@ import {Affiliations} from "../entity/Affiliations.entity";
 import {PasswordReset} from "../entity/PasswordReset.entity";
 import s3UploadService from "../helper/S3UploadService.helper";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
+import {ServiceSetting} from "../entity/ServiceSetting.entity";
 
 export class ServiceManagerService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -14,6 +15,7 @@ export class ServiceManagerService {
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
+    private serviceSettingRepository = AppDataSource.getRepository(ServiceSetting);
     private s3UploadService = new s3UploadService
 
     async checkIfService(service_id: number) {
@@ -47,5 +49,29 @@ export class ServiceManagerService {
                 user: {id: user_id},
             }
         })
+    }
+
+    async addServiceSettings(body: any) {
+        const serviceSetting = await this.serviceSettingRepository.create({
+            service: {id: body.service_id},
+            available_slots: body.available_slots,
+        })
+        return await this.serviceSettingRepository.save(serviceSetting)
+    }
+
+    async editServiceSettings(body: any) {
+        const serviceSetting = await this.serviceSettingRepository.findOne({
+            where: {
+                service: {id: body.service_id}
+            },
+            relations: ["service"]
+        })
+        // console.log(serviceSetting)
+        if (serviceSetting) {
+            serviceSetting.available_slots = body.available_slots;
+            return await this.serviceSettingRepository.save(serviceSetting);
+        } else {
+            return false;
+        }
     }
 }

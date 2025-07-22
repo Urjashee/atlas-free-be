@@ -64,7 +64,8 @@ export class ServiceDetails {
     @Column({ nullable: true})
     address!: string;
 
-    @ManyToOne(() => State, { nullable: true })
+    // @ManyToOne(() => Users, (user) => user.id)
+    @ManyToOne(() => State, (state) => state.id, { nullable: true })
     @JoinColumn({ name: "state_id" })
     state!: State;
 

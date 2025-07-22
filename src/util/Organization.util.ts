@@ -179,3 +179,15 @@ export async function getOrganizationsDetails(organization: any) {
         }))
     }
 }
+export async function getFormDetails(form: any) {
+    return {
+        id: form.id,
+        service_type: await Promise.all(form.service.map(async (item) => {
+            return {
+                id: item,
+                name: (await configService.getServiceOptionsById(item.service_type)).name
+            }
+        })),
+    }
+
+}

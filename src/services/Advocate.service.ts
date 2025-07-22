@@ -21,7 +21,7 @@ export class AdvocateService {
     async addClient(user_id: number, organization_id: number, body: any) {
         const addService = await this.clientServiceRepository.create({
             organization: {id: organization_id},
-            advocate: {id: user_id},
+            user: {id: user_id},
             service: body.service,
             client_nick_name: body.client_nick_name,
             zipcode: body.zipcode,
@@ -53,7 +53,7 @@ export class AdvocateService {
         const getClient = await this.clientServiceRepository.findOne({
             where: {
                 id: id,
-                advocate: {id: user_id},
+                user: {id: user_id},
                 organization: {id: organization_id},
             }
         })
@@ -89,7 +89,7 @@ export class AdvocateService {
         return await this.clientServiceRepository.findOne({
             where: {
                 id,
-                advocate: {id: advocate_id},
+                user: {id: advocate_id},
             }
         })
     }
@@ -107,7 +107,7 @@ export class AdvocateService {
     async getClients(advocate: number) {
         return await this.clientServiceRepository.find({
             where: {
-                advocate: {id: advocate},
+                user: {id: advocate},
             },
             order: {created_at: "DESC"}
         })
@@ -134,7 +134,7 @@ export class AdvocateService {
         return await this.clientServiceRepository.findOne({
             where: {
                 id,
-                advocate: {id: advocate_id},
+                user: {id: advocate_id},
             }
         })
     }
