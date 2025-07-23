@@ -21,6 +21,7 @@ import {clientSchema} from "../schema/Client.schema";
 import {ServiceManagerService} from "../services/ServiceManager.service";
 import {addClientService, reportUser} from "../util/Common.util";
 import {reportSchema} from "../schema/Organization.schema";
+import {clients, getClientsById} from "../util/ServiceRequest.util";
 
 
 const organizationEditSchema = Joi.object({
@@ -494,20 +495,8 @@ export class AuthController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            if (req.body.id) {
-                const checkIfValidOrganization = await this.advocateService.checkIfValidClient(req.body.id, req.user.id);
-                if (!checkIfValidOrganization)
-                    return ResponseFormatter.errorResponse(res, 'Invalid client');
-                const editClientDetails = await this.advocateService.editClient(req.body.id, req.user.id, req.user.organization_id, req.body)
-                if (!editClientDetails)
-                    return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully updated clients.");
-            } else {
-                const addClientDetails = await this.advocateService.addClient(req.user.id, req.user.organization_id, req.body)
-                if (!addClientDetails)
-                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added clients.");
-            }
+            const addEditClient = await clients(req.body, req.user.id, req.user.organization_id);
+            return ResponseFormatter.successResponse(res, `${addEditClient}`);
 
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
@@ -526,22 +515,13 @@ export class AuthController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
     @Get("/clients/:clientId")
     @UseBefore(authMiddleware)
     @UseBefore(organizationMiddleware)
     async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
         try {
-            const checkIfValidOrganization = await this.advocateService.checkIfValidClient(clientId, req.user.id);
-            if (!checkIfValidOrganization)
-                return ResponseFormatter.errorResponse(res, 'Invalid client');
-            const getClients = await this.advocateService.getClientsById(clientId);
-            const form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
-            const getServiceRequests = await this.organizationService.getServiceRequestsById(clientId);
-            const customResponseService = await getServiceRequestsUser(getServiceRequests)
-            const customResponse = {
-                form: form,
-                serviceRequests: customResponseService
-            }
+            const customResponse = await getClientsById(clientId, req.user.id);
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

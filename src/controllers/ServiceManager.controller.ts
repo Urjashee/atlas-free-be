@@ -8,7 +8,7 @@ import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
 import {serviceManagerMiddleware} from "../middleware/ServiceManager.middleware";
 import {ServiceManagerService} from "../services/ServiceManager.service";
-import {servicesSchema} from "../schema/Services.schema";
+import {clientServiceSchema, servicesSchema} from "../schema/Services.schema";
 import {getOrganizationsServiceDetails} from "../util/Organization.util";
 import Joi from "joi";
 import {Constants} from "../helper/Constants.helper";
@@ -16,6 +16,9 @@ import {getClientDetails} from "../util/Advocate.util";
 import {ClientService} from "../services/Client.service";
 import {AdvocateService} from "../services/Advocate.service";
 import {reportSchema} from "../schema/Organization.schema";
+import {clientSchema} from "../schema/Client.schema";
+import {clients, getClientsById} from "../util/ServiceRequest.util";
+import {addClientService} from "../util/Common.util";
 
 const serviceSettingsSchema = Joi.object({
     service_id: Joi.number().required(),
@@ -295,5 +298,66 @@ export class ServiceManagerController {
         }
     }
 
+    @Post("/clients")
+    @UseBefore(authMiddleware)
+    @UseBefore(serviceManagerMiddleware)
+    async addClient(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = clientSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const addEditClient = await clients(req.body, req.user.id, req.user.organization_id);
+            return ResponseFormatter.successResponse(res, `${addEditClient}`);
 
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/clients")
+    @UseBefore(authMiddleware)
+    @UseBefore(serviceManagerMiddleware)
+    async getClients(@Req() req: Request, @Res() res: Response) {
+        try {
+            const getClients = await this.advocateService.getClients(req.user.id);
+            const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/clients/:clientId")
+    @UseBefore(authMiddleware)
+    @UseBefore(serviceManagerMiddleware)
+    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
+        try {
+            const customResponse = await getClientsById(clientId, req.user.id);
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+    @Post("/service-request/add")
+    @UseBefore(authMiddleware)
+    @UseBefore(serviceManagerMiddleware)
+    async addClientService(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = clientServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            await addClientService(req.body, req.user.role.id)
+            return ResponseFormatter.successResponse(res, "Successful");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
 }

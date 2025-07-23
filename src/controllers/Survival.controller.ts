@@ -1,4 +1,4 @@
-import {Delete, Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Post, Put, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -24,6 +24,10 @@ const serviceSchema = Joi.object({
 const reportServiceSchema = Joi.object({
     service_request_id: Joi.number().required(),
     reason: Joi.string().required(),
+});
+const profileSchema = Joi.object({
+    username: Joi.string().required(),
+    email: Joi.string().pattern(/^\S+$/).required(),
 });
 @JsonController("/api/survivor")
 export class AdvocateController {
@@ -240,6 +244,54 @@ export class AdvocateController {
                 return ResponseFormatter.errorResponse(res, "Can't report, try again later");
 
             return ResponseFormatter.successResponse(res, "Successful reported service");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Put("/profile")
+    @UseBefore(authMiddleware)
+    @UseBefore(survivorMiddleware)
+    async editProfile(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = profileSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {username, email} = req.body;
+            const checkIfSurvivor = await this.clientService.checkIfSurvivor(req.user.id)
+            if (!checkIfSurvivor) {
+                return ResponseFormatter.errorResponse(res, 'You are not a survivor user');
+            }
+
+            const updateProfile = await this.userService.updateUserProfile(req.user.id, username, email);
+            if (!updateProfile) {
+                return ResponseFormatter.errorResponse(res, "Can't update profile, try again later");
+            }
+            return ResponseFormatter.successResponse(res, "Profile updated successfully");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/profile")
+    @UseBefore(authMiddleware)
+    @UseBefore(survivorMiddleware)
+    async getProfile(@Req() req: Request, @Res() res: Response) {
+        try {
+            const checkIfSurvivor = await this.clientService.checkIfSurvivor(req.user.id)
+            if (!checkIfSurvivor) {
+                return ResponseFormatter.errorResponse(res, 'You are not a survivor user');
+            }
+            const customResponse = {
+                id: req.user.id,
+                username: checkIfSurvivor.user_name,
+                email: checkIfSurvivor.email,
+            }
+            return ResponseFormatter.successResponse(res, "Profile updated successfully", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

@@ -401,4 +401,18 @@ export class UserService {
             }
         });
     }
+
+    async updateUserProfile(user_id: number, username: string, email: string) {
+        const user = await this.userRepository.findOne({
+            where: {
+                id: user_id
+            }
+        });
+        if (user) {
+            user.user_name = username;
+            user.email = email;
+            return await this.userRepository.save(user);
+        }
+        return null;
+    }
 }
