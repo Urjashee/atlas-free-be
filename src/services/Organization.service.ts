@@ -6,7 +6,7 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails.helper";
 import {type} from "node:os";
 import {EmailService} from "./Email.service";
-import {Equal, FindOptionsWhere, In, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not} from "typeorm";
+import {Equal, FindOptionsWhere, In, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, Raw} from "typeorm";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
@@ -30,7 +30,7 @@ export class OrganizationService {
     private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
-        if (filter === "all") {
+        if (filter === "active") {
             return await this.userRepository
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.organization', 'organization')
@@ -38,6 +38,17 @@ export class OrganizationService {
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
+                .getMany();
+        }
+        if (filter === "inactive") {
+            return await this.userRepository
+                .createQueryBuilder('user')
+                .leftJoinAndSelect('user.organization', 'organization')
+                .leftJoinAndSelect('organization.affiliations', 'affiliations')
+                .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+                .andWhere('organization.is_active = :orgActive', {orgActive: false})
+                .andWhere('user.is_status = :userStatus', {userStatus: true})
                 .getMany();
         }
         if (filter === "pending") {
@@ -48,6 +59,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
+                .andWhere('user.is_status = :userStatus', {userStatus: false})
                 .getMany();
         }
     }
@@ -68,6 +80,7 @@ export class OrganizationService {
             }
             if (organization.organization.is_active == false) {
                 organization.organization.is_active = true
+                organization.is_status = true
                 const token = randomBytes(32).toString('hex');
                 if (organization.emailVerifiedAt === null) {
                     const password_reset_request = this.passwordResetRepository.create({
@@ -105,6 +118,7 @@ export class OrganizationService {
                     await this.passwordResetRepository.save(password_reset_request);
 
                 }
+                await this.userRepository.save(organization);
                 await this.organizationRepository.save(organization.organization);
                 return organization.organization;
             }
@@ -685,4 +699,47 @@ export class OrganizationService {
             }
         })
     }
+    async checkIfOrganizationIsAvailable(organization_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                organization: {id: organization_id},
+            },
+            relations: ["organization", "organization.affiliations"]
+        })
+    }
+
+    async getOrganizationServices(organization_id: number) {
+        return await this.serviceDetailsRepository.find({
+            where: {
+                organization: {id: organization_id},
+                is_submitted: true
+            },
+            relations: ["organization"]
+        })
+    }
+
+    async getUserByOrganization(organization_id: number, role: number) {
+        const whereCondition: any = {
+            organization: { id: organization_id }
+        };
+
+        if (role !== 0) {
+            whereCondition.role = { id: role };
+        }
+
+        return await this.userRepository.find({
+            where: whereCondition,
+            order: { created_at: "DESC" }
+        });
+    }
+
+    async getOrganizationServicesByUserId(service_manager_id: number) {
+        return await this.serviceSettingRepository.find({
+            where: {
+                service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, { service_manager_id })
+            },
+            relations: ["service"]
+        });
+    }
+
 }

@@ -3,6 +3,7 @@ import {OrganizationService} from "../services/Organization.service";
 import {ServiceManagerService} from "../services/ServiceManager.service";
 import {ClientService} from "../services/Client.service";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
+import {roleMap} from "../helper/Constants.helper";
 
 const organizationService = new OrganizationService();
 const serviceManagerService = new ServiceManagerService();
@@ -47,4 +48,15 @@ export async function reportUser(body: any, user_id: number, organization_id: nu
     if (!reportUser)
         throw new Error("Can't report user, try again later");
 
+}
+
+export function getRoleIdByName(roleName: string): number | undefined {
+    return roleMap[roleName];
+}
+export const roleIdToNameMap: { [key: number]: string } = Object.fromEntries(
+    Object.entries(roleMap).map(([key, value]) => [value, key])
+);
+
+export function getRoleNameById(roleId: number): string | undefined {
+    return roleIdToNameMap[roleId];
 }

@@ -58,7 +58,7 @@ export class UserService {
             country_code: body.country_code,
             mobile: body.phone_no,
             is_profile: true,
-            is_status: true,
+            is_status: false,
             role: {id: role},
             organization: {id: org.id},
         })

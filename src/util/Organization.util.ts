@@ -2,6 +2,8 @@ import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
+import {getRoleNameById} from "./Common.util";
+import {Constants} from "../helper/Constants.helper";
 
 const userService = new UserService();
 const organizationService = new OrganizationService();
@@ -169,11 +171,42 @@ export async function getOrganizationsDetails(organization: any) {
             name: purpose.name,
         })),
         tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
-        affiliation: organization.organization.affiliations.map(a => ({
-            id: a.affiliation.id,
-            name: a.affiliation.name,
-            file: a.affiliation_file
+        affiliation: organization.organization.affiliations.map(item => ({
+            id: item.affiliation.id,
+            name: item.affiliation.name,
+            file: item.affiliation_file
         }))
+    }
+}
+
+export async function getUserDetails(user: any) {
+    if (user.role.id === Constants.ROLE_SERVICE_MANAGER) {
+        const getServices = await organizationService.getOrganizationServicesByUserId(user.id);
+        return {
+            id: user.id,
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone_no: user.mobile,
+            country_code: user.country_code,
+            role: getRoleNameById(user.role.id),
+            services: getServices.map(item => ({
+                name: item.service.name
+            })),
+            created_at: new Date(user.created_at).toISOString().split('T')[0],
+        }
+    }
+    return {
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        phone_no: user.mobile,
+        country_code: user.country_code,
+        role: getRoleNameById(user.role.id),
+        created_at: new Date(user.created_at).toISOString().split('T')[0],
     }
 }
 

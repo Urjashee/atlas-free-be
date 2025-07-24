@@ -9,7 +9,8 @@ import {ConfigService} from "../services/Config.service";
 import {upload} from "../helper/MulterConfig.helper";
 import Joi from "joi";
 import {UserService} from "../services/User.service";
-import {getOrganizationsDetails} from "../util/Organization.util";
+import {getOrganizationsDetails, getOrganizationsServiceDetails, getUserDetails} from "../util/Organization.util";
+import {getRoleIdByName} from "../util/Common.util";
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -79,6 +80,51 @@ export class AdminController {
             if (!organization)
                 return ResponseFormatter.errorResponse(res, 'Not an organization')
             return ResponseFormatter.successResponse(res, 'Status updated')
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/:organization_id")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getOrganizationDetails(@Req() req: Request, @Res() res: Response, @Param("organization_id") organization_id: number) {
+        try {
+            let customServices = [];
+            let customUser = [];
+            let roleId: number | undefined;
+            const user = req.query.user as string;
+            if (user == "all") {
+                roleId = 0
+            } else
+                roleId = getRoleIdByName(user);
+            console.log("role: ", roleId)
+            const checkIfOrganization = await this.organizationService.checkIfOrganizationIsAvailable(organization_id);
+            if (!checkIfOrganization)
+                return ResponseFormatter.errorResponse(res, 'Not an organization');
+
+            const organizationDetails = await getOrganizationsDetails(checkIfOrganization);
+            const getServices = await this.organizationService.getOrganizationServices(organization_id);
+
+            const getUsers = await this.organizationService.getUserByOrganization(organization_id, roleId);
+            for (const user of getUsers) {
+                const data = await getUserDetails(user);
+                customUser.push(data);
+            }
+
+
+            for (const service of getServices) {
+                const data = await getOrganizationsServiceDetails(service)
+                customServices.push(data)
+            }
+
+            const customResponse = {
+                organization: organizationDetails,
+                services: customServices,
+                users: customUser
+            }
+            return ResponseFormatter.successResponse(res, 'Status updated', customResponse);
 
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
