@@ -180,6 +180,27 @@ export async function getOrganizationsDetails(organization: any) {
 }
 
 export async function getUserDetails(user: any) {
+    if (user.role.id === Constants.ROLE_ORGANIZATION || user.role.id === Constants.ROLE_ADVOCATE) {
+        const getClients = await organizationService.getOrganizationClientsByUserId(user.id);
+        return {
+            id: user.id,
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone_no: user.mobile,
+            country_code: user.country_code,
+            role: getRoleNameById(user.role.id),
+            client: await Promise.all(getClients.map((item) => ({
+                id: item.id,
+                client_number: item.case_no,
+                client_nick_name: item.client_service.client_nick_name,
+                dob: new Date(item.client_service.dob).toISOString().split('T')[0],
+                zipcode: item.client_service.zipcode,
+            }))),
+            created_at: new Date(user.created_at).toISOString().split('T')[0],
+        }
+    }
     if (user.role.id === Constants.ROLE_SERVICE_MANAGER) {
         const getServices = await organizationService.getOrganizationServicesByUserId(user.id);
         return {
@@ -191,9 +212,14 @@ export async function getUserDetails(user: any) {
             phone_no: user.mobile,
             country_code: user.country_code,
             role: getRoleNameById(user.role.id),
-            services: getServices.map(item => ({
-                name: item.service.name
-            })),
+            services: await Promise.all(
+                getServices.map(async (item) => ({
+                    id: item.service.id,
+                    name: item.service.name,
+                    service_type: (await configService.getServiceOptionsById(item.service.service_type)).name,
+                    address: item.service.disclose_address == false ? `${item.service.address} ${item.service.street} ${item.service.city} ${item.service.state.name} ${item.service.zipcode}` : "",
+                }))
+            ),
             created_at: new Date(user.created_at).toISOString().split('T')[0],
         }
     }

@@ -20,7 +20,7 @@ import {AdvocateService} from "../services/Advocate.service";
 import {clientSchema} from "../schema/Client.schema";
 import {ServiceManagerService} from "../services/ServiceManager.service";
 import {addClientService, reportUser} from "../util/Common.util";
-import {reportSchema} from "../schema/Organization.schema";
+import {reportSchema, sendInvitationSchema} from "../schema/Organization.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
 
 
@@ -58,11 +58,6 @@ const serviceSettingsSchema = Joi.object({
     contact_email: Joi.string().required(),
     contact_phone: Joi.number().required(),
     emailReminders: Joi.array().items(emailReminderSchema).min(1).required()
-})
-
-const sendInvitationSchema = Joi.object({
-    email: Joi.string().email().pattern(/^\S+$/).required(),
-    role: Joi.number().required()
 })
 
 

@@ -50,7 +50,7 @@ export class UserService {
             tax_exemption: body.tax_exemption,
             ein: body.ein,
             primary_purpose: body.primary_purpose,
-            platform_purpose: body.platform_purpose,
+            platform_purpose: body.platform_purpose
         })
         const org = await this.organizationRepository.save(profile)
         const user = await this.userRepository.create({
@@ -58,7 +58,7 @@ export class UserService {
             country_code: body.country_code,
             mobile: body.phone_no,
             is_profile: true,
-            is_status: false,
+            is_status: true,
             role: {id: role},
             organization: {id: org.id},
         })
@@ -137,6 +137,7 @@ export class UserService {
             organization.website = body.website
             organization.tax_exemption = body.tax_exemption
             organization.primary_purpose = body.primary_purpose
+            organization.under_review = true
             await this.organizationRepository.save(organization)
         }
         const currentAffiliations = await this.affiliationRepository.find({

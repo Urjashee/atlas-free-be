@@ -11,6 +11,8 @@ import Joi from "joi";
 import {UserService} from "../services/User.service";
 import {getOrganizationsDetails, getOrganizationsServiceDetails, getUserDetails} from "../util/Organization.util";
 import {getRoleIdByName} from "../util/Common.util";
+import {organizationMiddleware} from "../middleware/Organization.middleware";
+import {sendInvitationSchema} from "../schema/Organization.schema";
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -126,6 +128,118 @@ export class AdminController {
             }
             return ResponseFormatter.successResponse(res, 'Status updated', customResponse);
 
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/user-invitation")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async sendInvitation(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = sendInvitationSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const {email, role, organization_id} = req.body
+
+            const checkIfEmailAlreadyInUse = await this.organizationService.checkIfEmailAlreadyInUse(req.body.email)
+            if (checkIfEmailAlreadyInUse)
+                return ResponseFormatter.errorResponse(res, "Email already in use!");
+            const checkIfOrganization = await this.organizationService.checkIfOrganization(organization_id);
+            if (!checkIfOrganization)
+                return ResponseFormatter.errorResponse(res, "Invalid organization");
+            const sendUserInvitation = await this.organizationService.sendInvitation(email, role, organization_id, checkIfOrganization.name)
+            if (!sendUserInvitation)
+                return ResponseFormatter.errorResponse(res, "Invitation not sent");
+            return ResponseFormatter.successResponse(res, "Invite successfully sent.  An email has been sent to the registered email ID.");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/user-invitation-resend")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async resendInvitation(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = sendInvitationSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const {email, role, organization_id} = req.body
+
+            const user = await this.organizationService.checkIfEmailAlreadyInUse(req.body.email)
+            if (!user)
+                return ResponseFormatter.errorResponse(res, "Email does not exist");
+            if (user.is_active)
+                return ResponseFormatter.successResponse(res, "User account already setup");
+            const checkIfOrganization = await this.organizationService.checkIfOrganization(organization_id);
+            if (!checkIfOrganization)
+                return ResponseFormatter.errorResponse(res, "Invalid organization");
+            const sendUserInvitation = await this.organizationService.resendInvitation(user.id, email, role, organization_id, checkIfOrganization.name)
+            if (!sendUserInvitation)
+                return ResponseFormatter.errorResponse(res, "Invitation not sent");
+            return ResponseFormatter.successResponse(res, "Invite successfully resent.  An email has been sent to the registered email ID.");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/users/:organizationId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getOrganizationUser(@Req() req: Request, @Res() res: Response, @Param("organizationId") organization_id: number) {
+        try {
+            const getUsers = await this.organizationService.getOrgUsers(organization_id);
+            const customResponse = await Promise.all(
+                getUsers.map(async (users: any) => {
+                    return {
+                        id: users.id,
+                        first_name: users.first_name,
+                        last_name: users.last_name,
+                        email: users.email,
+                        role_id: users.role.id,
+                        role_name: users.role.name,
+                    }
+                })
+            )
+            return ResponseFormatter.successResponse(res, 'Users found', customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/user-details/:organizationId/:userId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getOrganizationUserDetails(@Req() req: Request, @Res() res: Response, @Param("organizationId") organization_id: number, @Param("userId") user_id: number) {
+        try {
+            const checkIfOrganizationUser = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            const User = await getUserDetails(checkIfOrganizationUser);
+            // const getUsers = await this.organizationService.getOrgUsers(user_id);
+            // const customResponse = await Promise.all(
+            //     getUsers.map(async (users: any) => {
+            //         return {
+            //             id: users.id,
+            //             first_name: users.first_name,
+            //             last_name: users.last_name,
+            //             email: users.email,
+            //             role_id: users.role.id,
+            //             role_name: users.role.name,
+            //         }
+            //     })
+            // )
+            return ResponseFormatter.successResponse(res, 'Users found', User);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

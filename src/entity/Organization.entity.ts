@@ -57,6 +57,9 @@ export class Organization {
     @Column({ default: 0 })
     is_active!: boolean;
 
+    @Column({ default: 0 })
+    under_review!: boolean;
+
     @Column()
     platform_purpose!: number
 

@@ -80,7 +80,7 @@ export class OrganizationService {
             }
             if (organization.organization.is_active == false) {
                 organization.organization.is_active = true
-                organization.is_status = true
+                organization.organization.under_review = false
                 const token = randomBytes(32).toString('hex');
                 if (organization.emailVerifiedAt === null) {
                     const password_reset_request = this.passwordResetRepository.create({
@@ -355,6 +355,17 @@ export class OrganizationService {
     }
 
     async getOrgUsers(organization_id: number) {
+        return await this.userRepository.find({
+            where: {
+                organization: {id: organization_id},
+                is_active: true,
+                is_status: true
+            },
+            order: {created_at: "DESC"}
+        })
+    }
+
+    async getOrgUsersDetails(organization_id: number) {
         return await this.userRepository.find({
             where: {
                 organization: {id: organization_id},
@@ -682,11 +693,20 @@ export class OrganizationService {
         })
     }
 
-    async checkIfOrganizationUser(user_id: number, role: number) {
+    async checkIfOrganizationRoleUser(user_id: number, role: number) {
         return await this.userRepository.findOne({
             where: {
                 id: user_id,
                 role: {id: role},
+            }
+        })
+    }
+
+    async checkIfOrganizationUser(user_id: number, organization_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                organization: {id: organization_id},
             }
         })
     }
@@ -738,8 +758,17 @@ export class OrganizationService {
             where: {
                 service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, { service_manager_id })
             },
-            relations: ["service"]
+            relations: ["service", "service.state"]
         });
+    }
+
+    async getOrganizationClientsByUserId(user_id: number) {
+        return await this.assignedServiceRepository.find({
+            where: {
+                user: { id: user_id },
+            },
+            relations: ["client_service"],
+        })
     }
 
 }
