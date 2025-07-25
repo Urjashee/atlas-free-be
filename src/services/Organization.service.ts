@@ -711,6 +711,15 @@ export class OrganizationService {
         })
     }
 
+    async checkIfClientCreatedByUser(client_id: number, user_id: number) {
+        return await this.assignedServiceRepository.findOne({
+            where: {
+                client_service: {id: client_id},
+                user: {id: user_id},
+            }
+        })
+    }
+
     async checkIfOrganizationClient(user_id: number, id: number) {
         return await this.clientServiceRepository.findOne({
             where: {
@@ -801,7 +810,7 @@ export class OrganizationService {
         })
     }
 
-    async removeUserFromService(service_manager_id: number, service_id: number, replace_id: number) {
+    async removeUserFromService(service_manager_id: number, service_id: number) {
         const serviceSetting = await this.serviceSettingRepository.findOne({
             where: {
                 service: { id: service_id },
@@ -824,15 +833,35 @@ export class OrganizationService {
             id => id !== service_manager_id
         );
 
-        if (!serviceSetting.service_manager.includes(replace_id)) {
-            serviceSetting.service_manager.push(replace_id);
-        }
+        // if (!serviceSetting.service_manager.includes(replace_id)) {
+        //     serviceSetting.service_manager.push(replace_id);
+        // }
 
         console.log("After replacement:", serviceSetting.service_manager);
 
         const settings = await this.serviceSettingRepository.save(serviceSetting);
         console.log(`Removed service_manager_id ${service_manager_id} from serviceSetting ${serviceSetting.id}`);
         return settings;
+    }
+
+    async removeUserClient(client_id: number) {
+        const client = await this.assignedServiceRepository.findOne({
+            where: {
+                client_service: {id: client_id}
+            }
+        });
+        if (client) {
+            const getClient = await this.clientServiceRepository.findOne({
+                where: {
+                    id: client_id
+                }
+            });
+            if (getClient) {
+                await this.assignedServiceRepository.delete(client.id);
+                return await this.clientServiceRepository.delete(getClient.id);
+            }
+        }
+        return true
     }
 
 }

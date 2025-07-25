@@ -14,7 +14,7 @@ import {getRoleIdByName} from "../util/Common.util";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {sendInvitationSchema} from "../schema/Organization.schema";
 import {Constants} from "../helper/Constants.helper";
-import {removeUser} from "../schema/Admin.schema";
+import {removeClient, removeUser} from "../schema/Admin.schema";
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -246,7 +246,7 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const {organization_id, user_id, service_id, email} = req.body
+            const {organization_id, user_id, service_id} = req.body
             const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
             if (!checkIfServiceManager) {
                 return ResponseFormatter.errorResponse(res, 'User not found in organization');
@@ -262,13 +262,46 @@ export class AdminController {
             if (!checkIfUserInService) {
                 return ResponseFormatter.errorResponse(res, 'User not assigned to this service');
             }
-            const checkIfEmail = await this.organizationService.checkIfEmailIsServiceManager(email, user_id, organization_id);
-            if (!checkIfEmail) {
-                return ResponseFormatter.errorResponse(res, 'Email provided is not a service manager');
-            }
-            const removeUserService = await this.organizationService.removeUserFromService(user_id, service_id, checkIfEmail.id);
+            // const checkIfEmail = await this.organizationService.checkIfEmailIsServiceManager(email, user_id, organization_id);
+            // if (!checkIfEmail) {
+            //     return ResponseFormatter.errorResponse(res, 'Email provided is not a service manager');
+            // }
+            const removeUserService = await this.organizationService.removeUserFromService(user_id, service_id);
             if (!removeUserService) {
                 return ResponseFormatter.errorResponse(res, 'Failed to remove user from service');
+            }
+            return ResponseFormatter.successResponse(res, 'Service Removed from user successfully');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/organization/remove-client")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeClient(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeClient.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {organization_id, user_id, client_id, role_id} = req.body
+            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            if (!checkIfServiceManager) {
+                return ResponseFormatter.errorResponse(res, 'User not found in organization');
+            }
+            if (checkIfServiceManager.role.id != role_id)
+                return ResponseFormatter.errorResponse(res, 'Not a valid user type');
+            const checkIfClientCreatedByUser = await this.organizationService.checkIfClientCreatedByUser(client_id, user_id);
+            if (!checkIfClientCreatedByUser) {
+                return ResponseFormatter.errorResponse(res, 'Client not created by this user');
+            }
+            const removeUserClient = await this.organizationService.removeUserClient(client_id)
+            if (!removeUserClient) {
+                return ResponseFormatter.errorResponse(res, 'Failed to remove client');
             }
             return ResponseFormatter.successResponse(res, 'Service Removed from user successfully');
         } catch (error: any) {
