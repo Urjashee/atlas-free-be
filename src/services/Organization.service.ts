@@ -762,6 +762,16 @@ export class OrganizationService {
         });
     }
 
+    async checkIfUserInService(service_manager_id: number, service_id: number) {
+        return await this.serviceSettingRepository.findOne({
+            where: {
+                service: { id: service_id },
+                service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, { service_manager_id })
+            },
+            relations: ["service", "service.state"]
+        });
+    }
+
     async getOrganizationClientsByUserId(user_id: number) {
         return await this.assignedServiceRepository.find({
             where: {
@@ -769,6 +779,60 @@ export class OrganizationService {
             },
             relations: ["client_service"],
         })
+    }
+
+    async checkIfServiceInOrganization(organization_id: number, service_id: number) {
+        return await this.serviceDetailsRepository.find({
+            where: {
+                id: service_id,
+                organization: {id: organization_id},
+            }
+        })
+    }
+
+    async checkIfEmailIsServiceManager(email: string, user_id: number, organization_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                email,
+                role: { id: Constants.ROLE_SERVICE_MANAGER },
+                id: Not(user_id),
+                organization: { id: organization_id }
+            }
+        })
+    }
+
+    async removeUserFromService(service_manager_id: number, service_id: number, replace_id: number) {
+        const serviceSetting = await this.serviceSettingRepository.findOne({
+            where: {
+                service: { id: service_id },
+                service_manager: Raw(() => `FIND_IN_SET(:idStr, service_manager) > 0`, {
+                    idStr: service_manager_id.toString(),
+                }),
+            },
+            relations: ["service", "service.state"],
+        });
+
+        if (!serviceSetting) {
+            console.log("No matching serviceSetting found.");
+            return;
+        }
+
+        console.log("Before removal:", serviceSetting.service_manager);
+
+        // Remove the service_manager_id
+        serviceSetting.service_manager = serviceSetting.service_manager.filter(
+            id => id !== service_manager_id
+        );
+
+        if (!serviceSetting.service_manager.includes(replace_id)) {
+            serviceSetting.service_manager.push(replace_id);
+        }
+
+        console.log("After replacement:", serviceSetting.service_manager);
+
+        const settings = await this.serviceSettingRepository.save(serviceSetting);
+        console.log(`Removed service_manager_id ${service_manager_id} from serviceSetting ${serviceSetting.id}`);
+        return settings;
     }
 
 }

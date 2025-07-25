@@ -13,6 +13,8 @@ import {getOrganizationsDetails, getOrganizationsServiceDetails, getUserDetails}
 import {getRoleIdByName} from "../util/Common.util";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {sendInvitationSchema} from "../schema/Organization.schema";
+import {Constants} from "../helper/Constants.helper";
+import {removeUser} from "../schema/Admin.schema";
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -226,20 +228,49 @@ export class AdminController {
         try {
             const checkIfOrganizationUser = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
             const User = await getUserDetails(checkIfOrganizationUser);
-            // const getUsers = await this.organizationService.getOrgUsers(user_id);
-            // const customResponse = await Promise.all(
-            //     getUsers.map(async (users: any) => {
-            //         return {
-            //             id: users.id,
-            //             first_name: users.first_name,
-            //             last_name: users.last_name,
-            //             email: users.email,
-            //             role_id: users.role.id,
-            //             role_name: users.role.name,
-            //         }
-            //     })
-            // )
             return ResponseFormatter.successResponse(res, 'Users found', User);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/organization/remove-user-service")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeUserService(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeUser.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {organization_id, user_id, service_id, email} = req.body
+            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            if (!checkIfServiceManager) {
+                return ResponseFormatter.errorResponse(res, 'User not found in organization');
+            }
+            if (checkIfServiceManager.role.id != Constants.ROLE_SERVICE_MANAGER) {
+                return ResponseFormatter.errorResponse(res, 'Not a service Manager');
+            }
+            const checkIfServiceInOrganization = await this.organizationService.checkIfServiceInOrganization(service_id, organization_id);
+            if (!checkIfServiceInOrganization) {
+                return ResponseFormatter.errorResponse(res, 'Service not found in organization');
+            }
+            const checkIfUserInService = await this.organizationService.checkIfUserInService(user_id, service_id);
+            if (!checkIfUserInService) {
+                return ResponseFormatter.errorResponse(res, 'User not assigned to this service');
+            }
+            const checkIfEmail = await this.organizationService.checkIfEmailIsServiceManager(email, user_id, organization_id);
+            if (!checkIfEmail) {
+                return ResponseFormatter.errorResponse(res, 'Email provided is not a service manager');
+            }
+            const removeUserService = await this.organizationService.removeUserFromService(user_id, service_id, checkIfEmail.id);
+            if (!removeUserService) {
+                return ResponseFormatter.errorResponse(res, 'Failed to remove user from service');
+            }
+            return ResponseFormatter.successResponse(res, 'Service Removed from user successfully');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
