@@ -7,7 +7,12 @@ import {Request, Response} from "express";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import Joi from "joi";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
-import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
+import {
+    getOrganizationsDetails,
+    getOrganizationsServiceDetails,
+    getServiceRequestDetails,
+    getServiceRequests
+} from "../util/Organization.util";
 import {upload} from "../helper/MulterConfig.helper";
 import {clientServiceSchema, servicesSchema} from "../schema/Services.schema";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
@@ -20,7 +25,7 @@ import {AdvocateService} from "../services/Advocate.service";
 import {clientSchema} from "../schema/Client.schema";
 import {ServiceManagerService} from "../services/ServiceManager.service";
 import {addClientService, reportUser} from "../util/Common.util";
-import {reportSchema, sendInvitationSchema} from "../schema/Organization.schema";
+import {reportSchema, sendInvitationSchema, serviceSettingsSchema} from "../schema/Organization.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
 
 
@@ -40,35 +45,12 @@ const organizationEditSchema = Joi.object({
     affiliations: Joi.string().required(),
 });
 
-const emailReminderSchema = Joi.object({
-    id: Joi.number().optional(),
-    email: Joi.string().email().required(),
-    day_of_week: Joi.required(),
-    time: Joi.string()
-        .pattern(/^([0-1]\d|2[0-3]):([0-5]\d)$/) // HH:MM 24-hour format
-        .required(),
-    time_zone: Joi.string().required()
-});
-
-
-const serviceSettingsSchema = Joi.object({
-    service_id: Joi.number().required(),
-    available_slots: Joi.number().required(),
-    service_manager: Joi.array().items(Joi.string()).required(),
-    contact_email: Joi.string().required(),
-    contact_phone: Joi.number().required(),
-    emailReminders: Joi.array().items(emailReminderSchema).min(1).required()
-})
-
-
 @JsonController("/api/organization")
 export class AuthController {
     private userService = new UserService();
     private organizationService = new OrganizationService();
-    private configService = new ConfigService();
     private clientService = new ClientService();
     private advocateService = new AdvocateService();
-    private serviceManagerService = new ServiceManagerService();
 
     @Post("/services")
     @UseBefore(authMiddleware)
@@ -165,49 +147,49 @@ export class AuthController {
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
-    }
-
-    @Get("/services-settings/:serviceId")
-    @UseBefore(authMiddleware)
-    @UseBefore(organizationMiddleware)
-    async getServiceSettings(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
-        try {
-            const checkIfValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
-            if (!checkIfValidService)
-                return ResponseFormatter.errorResponse(res, "Not a valid service");
-            const getServiceSettings = await this.organizationService.getServiceSettingsById(serviceId);
-            if (!getServiceSettings)
-                return ResponseFormatter.errorResponse(res, "No service settings found");
-            const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
-            const customResponse = {
-                id: getServiceSettings.id,
-                service_id: getServiceSettings.service,
-                available_slots: getServiceSettings.available_slots,
-                service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
-                contact_email: getServiceSettings.contact_email,
-                contact_phone: getServiceSettings.contact_phone,
-                emailReminders: getEmailReminders.map((reminder: any) => {
-                    return ({
-                        id: reminder.id,
-                        email: reminder.email,
-                        day_of_week: reminder.day_of_week.map((day: string) => {
-                                return {
-                                    id: day,
-                                    name: DaysOfWeek[parseInt(day)]
-                                };
-                            }
-                        ),
-                        time: reminder.time,
-                        time_zone_id: reminder.time_zone,
-                        time_zone: TimeZone[reminder.time_zone]
-                    });
-                })
-            }
-            return ResponseFormatter.successResponse(res, "Service settings", customResponse)
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
-    }
+
+        @Get("/services-settings/:serviceId")
+        @UseBefore(authMiddleware)
+        @UseBefore(organizationMiddleware)
+        async getServiceSettings(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
+            try {
+                const checkIfValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
+                if (!checkIfValidService)
+                    return ResponseFormatter.errorResponse(res, "Not a valid service");
+                const getServiceSettings = await this.organizationService.getServiceSettingsById(serviceId);
+                if (!getServiceSettings)
+                    return ResponseFormatter.errorResponse(res, "No service settings found");
+                const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
+                const customResponse = {
+                    id: getServiceSettings.id,
+                    service_id: getServiceSettings.service,
+                    available_slots: getServiceSettings.available_slots,
+                    service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
+                    contact_email: getServiceSettings.contact_email,
+                    contact_phone: getServiceSettings.contact_phone,
+                    emailReminders: getEmailReminders.map((reminder: any) => {
+                        return ({
+                            id: reminder.id,
+                            email: reminder.email,
+                            day_of_week: reminder.day_of_week.map((day: string) => {
+                                    return {
+                                        id: day,
+                                        name: DaysOfWeek[parseInt(day)]
+                                    };
+                                }
+                            ),
+                            time: reminder.time,
+                            time_zone_id: reminder.time_zone,
+                            time_zone: TimeZone[reminder.time_zone]
+                        });
+                    })
+                }
+                return ResponseFormatter.successResponse(res, "Service settings", customResponse)
+            } catch (error: any) {
+                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+            }
+        }
 
     @Get("/details")
     @UseBefore(authMiddleware)
@@ -333,55 +315,8 @@ export class AuthController {
             const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
             const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
             const status = parseInt(req.query.status as string);
-
-            const {
-                data,
-                total
-            } = await this.organizationService.getServiceRequests(req.user.organization_id, page_number, page_size, status);
-
-            const customResponse = [];
-
-            for (const service of data) {
-
-                const user = await this.userService.findById(service.user.id);
-                if (user.role.id != Constants.ROLE_SURVIVOR) {
-                    customResponse.push({
-                        type: "user",
-                        id: service.id,
-                        service_id: service.service.id,
-                        service: service.service.name,
-                        case_no: service.case_no,
-                        requested_by: `${user.first_name} ${user.last_name}`,
-                        date_time: service.created_at,
-                        service_request: service.status,
-                        client_service_id: service.client_service.id,
-                        user: service.user.id
-                    });
-                }
-
-                if (user.role.id == Constants.ROLE_SURVIVOR) {
-                    customResponse.push({
-                        type: "survivor",
-                        id: service.id,
-                        service_id: service.service.id,
-                        service: service.service.name,
-                        client_name: `${user.user_name}`,
-                        client_email: user.email,
-                        date_time: service.created_at,
-                        service_request: service.status,
-                        client_service_id: service.client_service.id,
-                        user: service.user.id
-                    });
-                }
-            }
-
-            return ResponseFormatter.successResponse(res, "Successful", {
-                current_page: page_number,
-                page_size,
-                total_items: total,
-                total_pages: Math.ceil(total / page_size),
-                data: customResponse
-            });
+            const getServiceRequestsData = await getServiceRequests(req.user.organization_id, page_number, page_size, status);
+            return ResponseFormatter.successResponse(res, "Successful", getServiceRequestsData);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -392,49 +327,7 @@ export class AuthController {
     @UseBefore(organizationMiddleware)
     async getServiceRequestsId(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number) {
         try {
-            const getServiceRequest = await this.clientService.getServiceRequestById(serviceRequestsId);
-            if (!getServiceRequest) {
-                return ResponseFormatter.errorResponse(res, "Service request not found");
-            }
-            let client, form
-            const user = await this.userService.findById(getServiceRequest.user.id);
-            const getClients = await this.advocateService.getClientsById(getServiceRequest.id);
-            if (user.role.id != Constants.ROLE_SURVIVOR) {
-                client = {
-                    type: "user",
-                    id: getServiceRequest.id,
-                    service_id: getServiceRequest.service.id,
-                    service: getServiceRequest.service.name,
-                    case_no: getServiceRequest.case_no,
-                    requested_by: `${user.first_name} ${user.last_name}`,
-                    date_time: getServiceRequest.created_at,
-                    service_request: getServiceRequest.status,
-                    client_service_id: getServiceRequest.client_service.id,
-                    user: getServiceRequest.user.id
-                };
-                form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
-            }
-            if (user.role.id == Constants.ROLE_SURVIVOR) {
-                client = {
-                    type: "survivor",
-                    id: getServiceRequest.id,
-                    service_id: getServiceRequest.service.id,
-                    service: getServiceRequest.service.name,
-                    client_name: `${user.user_name}`,
-                    client_email: user.email,
-                    date_time: getServiceRequest.created_at,
-                    service_request: getServiceRequest.status,
-                    client_service_id: getServiceRequest.client_service.id,
-                    user: getServiceRequest.user.id
-                };
-                form = await getClientDetails(getClients, Constants.ROLE_SURVIVOR)
-            }
-
-            const customResponse = {
-                client: client,
-                form: form,
-            }
-
+            const customResponse = await getServiceRequestDetails(serviceRequestsId)
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

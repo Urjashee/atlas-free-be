@@ -864,4 +864,37 @@ export class OrganizationService {
         return true
     }
 
+    async checkIfSlotAvailable(service_id: number, organization_id: number) {
+        const checkIfWaitlist = await this.serviceDetailsRepository.findOne({
+            where: {
+                id: service_id,
+                organization: {id: organization_id},
+            }
+        })
+        if (checkIfWaitlist.waitlist == true) {
+            const checkIfSlotsAvailable = await this.serviceSettingRepository.findOne({
+                where: {
+                    service: {id: service_id},
+                }
+            })
+            if (checkIfSlotsAvailable) {
+                if (checkIfSlotsAvailable.available_slots == checkIfWaitlist.client_slots_available) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return true
+    }
+    async checkIfServiceRequestExists(organization_id: number, service_request: number) {
+        return await this.assignedServiceRepository.findOne({
+            where: {
+                organization: {id: organization_id},
+                id: service_request
+            },
+            relations: ["organization", "service", "service.state", "client_service", "user"]
+        })
+    }
+
 }

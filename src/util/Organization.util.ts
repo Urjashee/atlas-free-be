@@ -4,10 +4,16 @@ import {ConfigService} from "../services/Config.service";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
 import {getRoleNameById} from "./Common.util";
 import {Constants} from "../helper/Constants.helper";
+import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
+import {getClientDetails} from "./Advocate.util";
+import {ClientService} from "../services/Client.service";
+import {AdvocateService} from "../services/Advocate.service";
 
 const userService = new UserService();
 const organizationService = new OrganizationService();
 const configService = new ConfigService();
+const clientService = new ClientService();
+const advocateService = new AdvocateService();
 
 export async function getOrganizationsServiceDetails(service: any) {
     return {
@@ -246,5 +252,101 @@ export async function getFormDetails(form: any) {
             }
         })),
     }
+}
 
+export async function getServiceRequests(organization_id: number, page_number: number, page_size: number, status: number) {
+    const {
+        data,
+        total
+    } = await organizationService.getServiceRequests(organization_id, page_number, page_size, status);
+
+    const customResponse = [];
+
+    for (const service of data) {
+
+        const user = await userService.findById(service.user.id);
+        if (user.role.id != Constants.ROLE_SURVIVOR) {
+            customResponse.push({
+                type: "user",
+                id: service.id,
+                service_id: service.service.id,
+                service: service.service.name,
+                case_no: service.case_no,
+                requested_by: `${user.first_name} ${user.last_name}`,
+                date_time: service.created_at,
+                service_request: service.status,
+                client_service_id: service.client_service.id,
+                user: service.user.id
+            });
+        }
+
+        if (user.role.id == Constants.ROLE_SURVIVOR) {
+            customResponse.push({
+                type: "survivor",
+                id: service.id,
+                service_id: service.service.id,
+                service: service.service.name,
+                client_name: `${user.user_name}`,
+                client_email: user.email,
+                date_time: service.created_at,
+                service_request: service.status,
+                client_service_id: service.client_service.id,
+                user: service.user.id
+            });
+        }
+    }
+
+    return {
+        current_page: page_number,
+        page_size,
+        total_items: total,
+        total_pages: Math.ceil(total / page_size),
+        data: customResponse
+    };
+}
+
+export async function getServiceRequestDetails(serviceRequestsId: number) {
+    const getServiceRequest = await clientService.getServiceRequestById(serviceRequestsId);
+    if (!getServiceRequest) {
+        throw new Error("Service request not found")
+    }
+    let client: any, form: any
+    const user = await userService.findById(getServiceRequest.user.id);
+    const getClients = await advocateService.getClientsById(getServiceRequest.id);
+
+    if (user.role.id != Constants.ROLE_SURVIVOR) {
+        client = {
+            type: "user",
+            id: getServiceRequest.id,
+            service_id: getServiceRequest.service.id,
+            service: getServiceRequest.service.name,
+            case_no: getServiceRequest.case_no,
+            requested_by: `${user.first_name} ${user.last_name}`,
+            date_time: getServiceRequest.created_at,
+            service_request: getServiceRequest.status,
+            client_service_id: getServiceRequest.client_service.id,
+            user: getServiceRequest.user.id
+        };
+        form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+    }
+    if (user.role.id == Constants.ROLE_SURVIVOR) {
+        client = {
+            type: "survivor",
+            id: getServiceRequest.id,
+            service_id: getServiceRequest.service.id,
+            service: getServiceRequest.service.name,
+            client_name: `${user.user_name}`,
+            client_email: user.email,
+            date_time: getServiceRequest.created_at,
+            service_request: getServiceRequest.status,
+            client_service_id: getServiceRequest.client_service.id,
+            user: getServiceRequest.user.id
+        };
+        form = await getClientDetails(getClients, Constants.ROLE_SURVIVOR)
+    }
+
+    return  {
+        client: client,
+        form: form,
+    }
 }

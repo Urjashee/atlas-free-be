@@ -125,6 +125,9 @@ export class AdvocateController {
             const checkIfService = await this.serviceManagerService.checkIfService(req.body.service_id);
             if (!checkIfService)
                 return ResponseFormatter.errorResponse(res, 'Invalid service');
+            const checkIfSlotAvailable = await this.organizationService.checkIfSlotAvailable(req.body.service_id, req.body.organization_id);
+            if (!checkIfSlotAvailable)
+                return ResponseFormatter.errorResponse(res, 'No slot available for this service');
             const addService = await this.clientService.addService(req.body, req.user.id);
             if (!addService)
                 return ResponseFormatter.errorResponse(res, "Request can't be sent");

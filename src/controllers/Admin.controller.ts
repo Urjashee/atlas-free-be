@@ -9,12 +9,20 @@ import {ConfigService} from "../services/Config.service";
 import {upload} from "../helper/MulterConfig.helper";
 import Joi from "joi";
 import {UserService} from "../services/User.service";
-import {getOrganizationsDetails, getOrganizationsServiceDetails, getUserDetails} from "../util/Organization.util";
+import {
+    getOrganizationsDetails,
+    getOrganizationsServiceDetails, getServiceRequestDetails,
+    getServiceRequests,
+    getUserDetails
+} from "../util/Organization.util";
 import {getRoleIdByName} from "../util/Common.util";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
-import {sendInvitationSchema} from "../schema/Organization.schema";
+import {reportSchema, sendInvitationSchema, serviceSettingsSchema} from "../schema/Organization.schema";
 import {Constants} from "../helper/Constants.helper";
 import {removeClient, removeUser} from "../schema/Admin.schema";
+import {servicesSchema} from "../schema/Services.schema";
+import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
+import {reportUser} from "../util/Common.util"
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -304,6 +312,201 @@ export class AdminController {
                 return ResponseFormatter.errorResponse(res, 'Failed to remove client');
             }
             return ResponseFormatter.successResponse(res, 'Service Removed from user successfully');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+//     Remove service manager
+
+//     Remove advocate
+
+//     Remove org admin
+
+    @Post("/organization/services")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async addOrganization(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = servicesSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            if (req.body.id) {
+                const checkIfValidOrganization = await this.organizationService.checkIfValidOrganization(req.body.id, req.body.organization_id);
+                if (!checkIfValidOrganization)
+                    return ResponseFormatter.errorResponse(res, 'Invalid service');
+                const settings = await this.organizationService.editServiceDetails(req.body.id, req.body.organization_id, req.user.role, req.body)
+                if (!settings)
+                    return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
+            } else {
+                const settings = await this.organizationService.addServiceDetails(req.body.organization_id, req.user.role, req.body, req.user.id)
+                if (!settings)
+                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully added service.");
+            }
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+
+    @Get("/organization/services/:organizationId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getOrganizations(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number) {
+        try {
+            let customResponse = [];
+            const getOrganizationServices = await this.organizationService.getOrganizationsService(organizationId);
+            for (const service of getOrganizationServices) {
+                const data = await getOrganizationsServiceDetails(service)
+                customResponse.push(data)
+            }
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/services/:organizationId/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number, @Param("organizationId") organizationId: number) {
+        try {
+            const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, organizationId);
+            if (!checkValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service")
+            const getOrganizationServices = await this.organizationService.getOrganizationsServiceById(serviceId);
+            const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/organization/services-settings")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async addServiceSettings(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = serviceSettingsSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const checkIfValidService = await this.organizationService.checkIfValidOrganization(req.body.service_id, req.body.organization_id);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service");
+            const checkIfServiceSettings = await this.organizationService.checkIfServiceSettingsExists(req.body.service_id);
+            if (checkIfServiceSettings) {
+                const editServiceSettings = await this.organizationService.editServiceSettings(req.body);
+                if (!editServiceSettings)
+                    return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
+            } else {
+                const addServiceSettings = await this.organizationService.addServiceSettings(req.body);
+                if (!addServiceSettings)
+                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
+                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
+            }
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/services-settings/:organizationId/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getServiceSettings(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number, @Param("organizationId") organizationId: number) {
+        try {
+            const checkIfValidService = await this.organizationService.checkIfValidOrganization(serviceId, organizationId);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service");
+            const getServiceSettings = await this.organizationService.getServiceSettingsById(serviceId);
+            if (!getServiceSettings)
+                return ResponseFormatter.errorResponse(res, "No service settings found");
+            const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
+            const customResponse = {
+                id: getServiceSettings.id,
+                service_id: getServiceSettings.service,
+                available_slots: getServiceSettings.available_slots,
+                service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
+                contact_email: getServiceSettings.contact_email,
+                contact_phone: getServiceSettings.contact_phone,
+                emailReminders: getEmailReminders.map((reminder: any) => {
+                    return ({
+                        id: reminder.id,
+                        email: reminder.email,
+                        day_of_week: reminder.day_of_week.map((day: string) => {
+                                return {
+                                    id: day,
+                                    name: DaysOfWeek[parseInt(day)]
+                                };
+                            }
+                        ),
+                        time: reminder.time,
+                        time_zone_id: reminder.time_zone,
+                        time_zone: TimeZone[reminder.time_zone]
+                    });
+                })
+            }
+            return ResponseFormatter.successResponse(res, "Service settings", customResponse)
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/service-requests/:organizationId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getServiceRequest(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number) {
+        try {
+            const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
+            const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
+            const status = parseInt(req.query.status as string);
+            const getServiceRequestsData = await getServiceRequests(organizationId, page_number, page_size, status);
+            return ResponseFormatter.successResponse(res, "Successful", getServiceRequestsData);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/service-requests/:organizationId/:serviceRequestsId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getServiceRequestsId(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number, @Param("serviceRequestsId") serviceRequestsId: number) {
+        try {
+            const checkIfServiceRequest = await this.organizationService.checkIfServiceRequestExists(organizationId, serviceRequestsId);
+            if (!checkIfServiceRequest)
+                return ResponseFormatter.errorResponse(res, "Not a valid service request");
+            const customResponse = await getServiceRequestDetails(serviceRequestsId)
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/organization/report-user")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async reportUser(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = reportSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            await reportUser(req.body, req.user.id, req.user.organization_id);
+            return ResponseFormatter.successResponse(res, 'Users reported');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
