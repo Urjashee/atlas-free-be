@@ -2,6 +2,7 @@ import Joi from "joi";
 
 export const clientSchema = Joi.object({
     id: Joi.number(),
+    organization_id: Joi.number(),
     service: Joi.array().items(Joi.number()),
     client_nick_name: Joi.string(),
     zipcode: Joi.string().min(5).max(10),

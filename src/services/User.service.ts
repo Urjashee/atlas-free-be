@@ -416,4 +416,44 @@ export class UserService {
         }
         return null;
     }
+
+    async passwordResetDelete(user_id: number) {
+        const password_resets = await this.passwordResetRepository.find({
+            where: {
+                user: {id: user_id}
+            }
+        })
+        if (password_resets) {
+            for (const password_reset of password_resets) {
+                await this.passwordResetRepository.delete(password_reset.id)
+            }
+        }
+    }
+    async deleteDeviceTokenForAllUser(user_id: number) {
+        const device_tokens = await this.deviceTokenRepository.find({
+            where: {
+                user: {id: user_id}
+            }
+        })
+        if (device_tokens) {
+            for (const device of device_tokens) {
+                await this.deviceTokenRepository.delete(device.id)
+            }
+        }
+    }
+    async deleteUser(user_id: number, role: number) {
+        const users = await this.userRepository.find({
+            where: {
+                id: user_id,
+                role: {id: role}
+            }
+        })
+        if (users) {
+            for (const user of users) {
+                await this.userRepository.remove(user)
+            }
+            return true
+        }
+        return false
+    }
 }

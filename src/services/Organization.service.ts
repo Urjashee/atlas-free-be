@@ -512,7 +512,7 @@ export class OrganizationService {
             take: page_size,
         });
 
-        return { data, total };
+        return {data, total};
     }
 
     async checkIfOrganization(organization_id: number) {
@@ -655,7 +655,7 @@ export class OrganizationService {
         const skip = (page_number - 1) * page_size;
 
         const where: any = {
-            organization: { id: user_id },
+            organization: {id: user_id},
         };
 
         if (typeof status === 'number' && status !== ClientStatus.All) {
@@ -667,10 +667,10 @@ export class OrganizationService {
             relations: ["organization", "service", "service.state", "client_service", "user"],
             skip,
             take: page_size,
-            order: { created_at: "DESC" }
+            order: {created_at: "DESC"}
         });
 
-        return { data, total };
+        return {data, total};
     }
 
     async reportUser(type: any, reported_user: number, reason: string, user_id: number, organization_id: number) {
@@ -728,6 +728,7 @@ export class OrganizationService {
             }
         })
     }
+
     async checkIfOrganizationIsAvailable(organization_id: number) {
         return await this.userRepository.findOne({
             where: {
@@ -749,23 +750,23 @@ export class OrganizationService {
 
     async getUserByOrganization(organization_id: number, role: number) {
         const whereCondition: any = {
-            organization: { id: organization_id }
+            organization: {id: organization_id}
         };
 
         if (role !== 0) {
-            whereCondition.role = { id: role };
+            whereCondition.role = {id: role};
         }
 
         return await this.userRepository.find({
             where: whereCondition,
-            order: { created_at: "DESC" }
+            order: {created_at: "DESC"}
         });
     }
 
     async getOrganizationServicesByUserId(service_manager_id: number) {
         return await this.serviceSettingRepository.find({
             where: {
-                service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, { service_manager_id })
+                service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, {service_manager_id})
             },
             relations: ["service", "service.state"]
         });
@@ -774,8 +775,8 @@ export class OrganizationService {
     async checkIfUserInService(service_manager_id: number, service_id: number) {
         return await this.serviceSettingRepository.findOne({
             where: {
-                service: { id: service_id },
-                service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, { service_manager_id })
+                service: {id: service_id},
+                service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, {service_manager_id})
             },
             relations: ["service", "service.state"]
         });
@@ -784,7 +785,7 @@ export class OrganizationService {
     async getOrganizationClientsByUserId(user_id: number) {
         return await this.assignedServiceRepository.find({
             where: {
-                user: { id: user_id },
+                user: {id: user_id},
             },
             relations: ["client_service"],
         })
@@ -803,9 +804,9 @@ export class OrganizationService {
         return await this.userRepository.findOne({
             where: {
                 email,
-                role: { id: Constants.ROLE_SERVICE_MANAGER },
+                role: {id: Constants.ROLE_SERVICE_MANAGER},
                 id: Not(user_id),
-                organization: { id: organization_id }
+                organization: {id: organization_id}
             }
         })
     }
@@ -813,7 +814,7 @@ export class OrganizationService {
     async removeUserFromService(service_manager_id: number, service_id: number) {
         const serviceSetting = await this.serviceSettingRepository.findOne({
             where: {
-                service: { id: service_id },
+                service: {id: service_id},
                 service_manager: Raw(() => `FIND_IN_SET(:idStr, service_manager) > 0`, {
                     idStr: service_manager_id.toString(),
                 }),
@@ -887,6 +888,7 @@ export class OrganizationService {
         }
         return true
     }
+
     async checkIfServiceRequestExists(organization_id: number, service_request: number) {
         return await this.assignedServiceRepository.findOne({
             where: {
@@ -896,5 +898,97 @@ export class OrganizationService {
             relations: ["organization", "service", "service.state", "client_service", "user"]
         })
     }
+
+    async removeServiceManagerFromSettings(service_manager_id: number, assigned_user_id: number) {
+        const serviceSettings = await this.serviceSettingRepository.find({
+            where: {
+                service_manager: Raw(() => `FIND_IN_SET(:idStr, service_manager) > 0`, {
+                    idStr: service_manager_id.toString(),
+                }),
+            },
+            relations: ["service", "service.state"],
+        });
+
+        if (!serviceSettings) {
+            console.log("No matching serviceSetting found.");
+            return;
+        }
+        for (const serviceSetting of serviceSettings) {
+            console.log("Before removal:", serviceSetting.service_manager);
+
+            // Remove the service_manager_id
+            serviceSetting.service_manager = serviceSetting.service_manager.filter(
+                id => id !== service_manager_id
+            );
+
+            if (!serviceSetting.service_manager.includes(assigned_user_id)) {
+                serviceSetting.service_manager.push(assigned_user_id);
+            }
+
+            console.log("After replacement:", serviceSetting.service_manager);
+
+            await this.serviceSettingRepository.save(serviceSetting);
+            console.log(`Removed service_manager_id ${service_manager_id} from serviceSetting ${serviceSetting.id}`);
+        }
+        return true
+    }
+
+    async removeServiceManagerServiceRequest(service_manager_id: number, assigned_user_id: any) {
+        const assignedServices = await this.assignedServiceRepository.find({
+            where: {
+                user: {id: service_manager_id},
+            },
+            relations: ["user", "service", "service.state", "client_service"]
+        });
+
+        if (assignedServices) {
+            for (const assignedService of assignedServices) {
+                if (assignedService.user.id == service_manager_id) {
+                    assignedService.user = assigned_user_id
+                    await this.assignedServiceRepository.save(assignedService);
+                }
+            }
+            return true;
+        }
+    }
+
+    async removeServiceManagerClients(service_manager_id: number, assigned_user_id: any) {
+        const clients = await this.clientServiceRepository.find({
+            where: {
+                user: {id: service_manager_id},
+            },
+            relations: ["user"]
+        });
+        if (clients) {
+            for (const client of clients) {
+                if (client.user.id == service_manager_id) {
+                    client.user = assigned_user_id;
+                    await this.clientServiceRepository.save(client);
+                }
+            }
+        }
+        return true
+    }
+
+    async removeServiceDetails(service_manager_id: number, assigned_user_id: any) {
+        const service_details = await this.serviceDetailsRepository.find({
+            where: {
+                user: {id: service_manager_id},
+            },
+            relations: ["user"]
+        });
+
+        if (service_details) {
+            for (const service_detail of service_details) {
+                if (service_detail.user.id == service_manager_id) {
+                    service_detail.user = assigned_user_id;
+                    await this.serviceDetailsRepository.save(service_detail);
+                }
+            }
+        }
+        return true
+    }
+
+
 
 }

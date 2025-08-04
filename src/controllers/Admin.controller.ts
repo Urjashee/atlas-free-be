@@ -20,9 +20,15 @@ import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {reportSchema, sendInvitationSchema, serviceSettingsSchema} from "../schema/Organization.schema";
 import {Constants} from "../helper/Constants.helper";
 import {removeClient, removeUser} from "../schema/Admin.schema";
-import {servicesSchema} from "../schema/Services.schema";
+import {clientServiceSchema, removeUserSchema, servicesSchema} from "../schema/Services.schema";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 import {reportUser} from "../util/Common.util"
+import {ClientService} from "../services/Client.service";
+import {clientSchema} from "../schema/Client.schema";
+import {getClientDetails} from "../util/Advocate.util";
+import {clients, getClientsById} from "../util/ServiceRequest.util";
+import {AdvocateService} from "../services/Advocate.service";
+import {addClientService} from "../util/Common.util"
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -43,6 +49,8 @@ export class AdminController {
     private organizationService = new OrganizationService();
     private configService = new ConfigService();
     private userService = new UserService();
+    private clientService = new ClientService();
+    private advocateService = new AdvocateService();
 
     @Get("/organization/list/:filter")
     @UseBefore(authMiddleware)
@@ -60,6 +68,7 @@ export class AdminController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
     @Post("/organization/edit")
     @UseBefore(authMiddleware)
     @UseBefore(adminMiddleware)
@@ -318,10 +327,110 @@ export class AdminController {
     }
 
 //     Remove service manager
+    @Post("/organization/remove/service-manager")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeServiceManager(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {organization_id, user_id, email} = req.body;
+            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            if (!checkIfServiceManager) {
+                return ResponseFormatter.errorResponse(res, 'User not found in organization');
+            }
+
+            if (checkIfServiceManager.role.id != Constants.ROLE_SERVICE_MANAGER) {
+                return ResponseFormatter.errorResponse(res, 'Not a valid user type');
+            }
+            const checkIfEmail = await this.organizationService.checkIfEmailIsServiceManager(email, user_id, organization_id);
+            if (!checkIfEmail) {
+                return ResponseFormatter.errorResponse(res, 'Email provided is not a service manager');
+            }
+
+            //     replace service manager from service settings
+            const removeServiceManagerFromSettings = await this.organizationService.removeServiceManagerFromSettings(user_id, checkIfEmail.id);
+            if (!removeServiceManagerFromSettings) {
+                return ResponseFormatter.errorResponse(res, "Can't remove service manager from service settings. Try again later");
+            }
+
+            //     replace service request
+            const removeServiceManagerServiceRequest = await this.organizationService.removeServiceManagerServiceRequest(user_id, checkIfEmail.id);
+            if (!removeServiceManagerServiceRequest) {
+                return ResponseFormatter.errorResponse(res, "Can't remove service manager from service request. Try again later");
+            }
+
+            //     replace client
+            const removeServiceManagerClients = await this.organizationService.removeServiceManagerClients(user_id, checkIfEmail.id);
+            if (!removeServiceManagerClients) {
+                return ResponseFormatter.errorResponse(res, "Can't remove service manager from clients. Try again later");
+            }
+            console.log("1")
+            //     replace service details
+            const removeServiceDetails = await this.organizationService.removeServiceDetails(user_id, checkIfEmail.id);
+            if (!removeServiceDetails) {
+                return ResponseFormatter.errorResponse(res, "Can't remove service details. Try again later");
+            }
+            console.log("2")
+            // delete password reset
+            await this.userService.passwordResetDelete(user_id)
+
+            // delete device token
+            await this.userService.deleteDeviceTokenForAllUser(user_id)
+
+            //     delete service manager
+            const deleteServiceManager = await this.userService.deleteUser(user_id, Constants.ROLE_SERVICE_MANAGER);
+            if (!deleteServiceManager) {
+                return ResponseFormatter.errorResponse(res, "Can't remove service manager. Try again later");
+            }
+
+            return ResponseFormatter.successResponse(res, 'Service manager deleted');
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
 
 //     Remove advocate
+    @Post("/organization/remove/advocate")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeAdvocate(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
 
 //     Remove org admin
+    @Post("/organization/remove/organization-admin")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeOrganizationAdmin(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
 
     @Post("/organization/services")
     @UseBefore(authMiddleware)
@@ -505,8 +614,94 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            await reportUser(req.body, req.user.id, req.user.organization_id);
+            await reportUser(req.body, req.user.id, req.body.organization_id);
             return ResponseFormatter.successResponse(res, 'Users reported');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Patch("/organization/service-requests/:organizationId/:serviceRequestsId/:status")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async changeServiceRequestStatus(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number, @Param("serviceRequestsId") serviceRequestsId: number, @Param("status") status: number) {
+        try {
+            const checkIfServiceRequest = await this.organizationService.checkIfServiceRequestExists(organizationId, serviceRequestsId);
+            if (!checkIfServiceRequest)
+                return ResponseFormatter.errorResponse(res, "Not a valid service request");
+            const getServiceRequest = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequest) {
+                return ResponseFormatter.errorResponse(res, "Service request not found");
+            }
+            const updatedAssignedServiceStatus = await this.clientService.updateServiceRequestStatus(serviceRequestsId, status);
+            if (!updatedAssignedServiceStatus)
+                return ResponseFormatter.errorResponse(res, "Failed to update service request status");
+            return ResponseFormatter.successResponse(res, "Successfully updated service request status");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/organization/clients")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async addClient(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = clientSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const addEditClient = await clients(req.body, req.user.id, req.body.organization_id);
+            return ResponseFormatter.successResponse(res, `${addEditClient}`);
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/clients")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getClients(@Req() req: Request, @Res() res: Response) {
+        try {
+            const getClients = await this.advocateService.getClients(req.user.id);
+            const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/organization/clients/:clientId")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
+        try {
+            const customResponse = await getClientsById(clientId, req.user.id);
+            return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    //
+    @Post("/organization/service-request/add")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async addClientService(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = clientServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            await addClientService(req.body, req.user.role.id)
+            return ResponseFormatter.successResponse(res, "Successful");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

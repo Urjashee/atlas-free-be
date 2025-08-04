@@ -62,3 +62,9 @@ export const clientServiceSchema = Joi.object({
     client_service_id: Joi.number().required(),
     service_id: Joi.number().required(),
 });
+
+export const removeUserSchema = Joi.object({
+    organization_id: Joi.number().required(),
+    user_id: Joi.number().required(),
+    email: Joi.string().email().required(),
+})
