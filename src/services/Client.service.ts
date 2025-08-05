@@ -10,6 +10,8 @@ import {Affiliations} from "../entity/Affiliations.entity";
 import {ClientService as ClientServiceEntity} from "../entity/ClientService.entity";
 import Joi from "joi";
 import {Constants} from "../helper/Constants.helper";
+import {ReportUserEmail} from "../helper/Emails.helper";
+import {EmailService} from "./Email.service";
 
 export class ClientService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -19,6 +21,7 @@ export class ClientService {
     private clientServiceRepository = AppDataSource.getRepository(ClientServiceEntity);
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
     private reportServiceRepository = AppDataSource.getRepository(ReportService);
+    private mailerService = new EmailService();
 
     async findExistingServices(organization_id: number,) {
         const services = await this.assignedServiceRepository.find({})
@@ -105,6 +108,18 @@ export class ClientService {
             user: {id: body.advocate.id},
             service: {id: body.service.id}
         })
+        const reportedService = await this.serviceDetailsRepository.findOne({
+            where: { id: body.service.id }
+        });
+
+        const emailContent = ReportUserEmail(reportedService.name, reason, "service");
+        const mailOptions = {
+            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            to: process.env.SUPER_ADMIN_MAIN,
+            subject: "Email from Atlas free!",
+            html: emailContent
+        };
+        await this.mailerService.sendEmail(mailOptions)
         return await this.reportServiceRepository.save(createReport);
     }
 

@@ -186,7 +186,7 @@ export async function getOrganizationsDetails(organization: any) {
 }
 
 export async function getUserDetails(user: any) {
-    if (user.role.id === Constants.ROLE_ORGANIZATION || user.role.id === Constants.ROLE_ADVOCATE) {
+    if (user.role.id === Constants.ROLE_ORGANIZATION_ADMIN || user.role.id === Constants.ROLE_ADVOCATE) {
         const getClients = await organizationService.getOrganizationClientsByUserId(user.id);
         return {
             id: user.id,

@@ -348,35 +348,48 @@ export class AdminController {
             if (checkIfServiceManager.role.id != Constants.ROLE_SERVICE_MANAGER) {
                 return ResponseFormatter.errorResponse(res, 'Not a valid user type');
             }
-            const checkIfEmail = await this.organizationService.checkIfEmailIsServiceManager(email, user_id, organization_id);
+            const checkIfEmail = await this.organizationService.checkIfEmailIsRoleUser(email, user_id, organization_id, Constants.ROLE_SERVICE_MANAGER);
             if (!checkIfEmail) {
                 return ResponseFormatter.errorResponse(res, 'Email provided is not a service manager');
             }
 
             //     replace service manager from service settings
-            const removeServiceManagerFromSettings = await this.organizationService.removeServiceManagerFromSettings(user_id, checkIfEmail.id);
+            const removeServiceManagerFromSettings = await this.organizationService.removeUserFromSettings(user_id, checkIfEmail.id);
             if (!removeServiceManagerFromSettings) {
                 return ResponseFormatter.errorResponse(res, "Can't remove service manager from service settings. Try again later");
             }
 
             //     replace service request
-            const removeServiceManagerServiceRequest = await this.organizationService.removeServiceManagerServiceRequest(user_id, checkIfEmail.id);
+            const removeServiceManagerServiceRequest = await this.organizationService.removeUserServiceRequest(user_id, checkIfEmail.id);
             if (!removeServiceManagerServiceRequest) {
                 return ResponseFormatter.errorResponse(res, "Can't remove service manager from service request. Try again later");
             }
 
             //     replace client
-            const removeServiceManagerClients = await this.organizationService.removeServiceManagerClients(user_id, checkIfEmail.id);
+            const removeServiceManagerClients = await this.organizationService.removeUserClients(user_id, checkIfEmail.id);
             if (!removeServiceManagerClients) {
                 return ResponseFormatter.errorResponse(res, "Can't remove service manager from clients. Try again later");
             }
-            console.log("1")
+
             //     replace service details
             const removeServiceDetails = await this.organizationService.removeServiceDetails(user_id, checkIfEmail.id);
             if (!removeServiceDetails) {
                 return ResponseFormatter.errorResponse(res, "Can't remove service details. Try again later");
             }
-            console.log("2")
+
+            // remove reported user
+
+            const removeReportedUser = await this.organizationService.removeReportedUser(user_id, req.user.id);
+            if (!removeReportedUser) {
+                return ResponseFormatter.errorResponse(res, "Can't remove reported user. Try again later");
+            }
+
+            // remove reported service
+            const removeReportedService = await this.organizationService.removeReportedService(user_id, req.user.id);
+            if (!removeReportedService) {
+                return ResponseFormatter.errorResponse(res, "Can't remove reported service. Try again later");
+            }
+
             // delete password reset
             await this.userService.passwordResetDelete(user_id)
 
@@ -409,6 +422,64 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            const {organization_id, user_id, email} = req.body;
+            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            if (!checkIfServiceManager) {
+                return ResponseFormatter.errorResponse(res, 'User not found in organization');
+            }
+
+            if (checkIfServiceManager.role.id != Constants.ROLE_ADVOCATE) {
+                return ResponseFormatter.errorResponse(res, 'Not a valid user type');
+            }
+            const checkIfEmail = await this.organizationService.checkIfEmailIsRoleUser(email, user_id, organization_id, Constants.ROLE_ADVOCATE);
+            if (!checkIfEmail) {
+                return ResponseFormatter.errorResponse(res, 'Email provided is not an advocate');
+            }
+
+            //     replace service request
+            const removeAdvocateServiceRequest = await this.organizationService.removeUserServiceRequest(user_id, checkIfEmail.id);
+            if (!removeAdvocateServiceRequest) {
+                return ResponseFormatter.errorResponse(res, "Can't remove advocate from service request. Try again later");
+            }
+
+            //     replace client
+            const removeAdvocateClients = await this.organizationService.removeUserClients(user_id, checkIfEmail.id);
+            if (!removeAdvocateClients) {
+                return ResponseFormatter.errorResponse(res, "Can't remove advocate from clients. Try again later");
+            }
+
+            //     replace service details
+            const removeAdvocateServiceDetails = await this.organizationService.removeServiceDetails(user_id, checkIfEmail.id);
+            if (!removeAdvocateServiceDetails) {
+                return ResponseFormatter.errorResponse(res, "Can't remove service details. Try again later");
+            }
+
+            // remove reported user
+
+            const removeReportedUser = await this.organizationService.removeReportedUser(user_id, req.user.id);
+            if (!removeReportedUser) {
+                return ResponseFormatter.errorResponse(res, "Can't remove reported user. Try again later");
+            }
+
+            // remove reported service
+            const removeReportedService = await this.organizationService.removeReportedService(user_id, req.user.id);
+            if (!removeReportedService) {
+                return ResponseFormatter.errorResponse(res, "Can't remove reported service. Try again later");
+            }
+
+            // delete password reset
+            await this.userService.passwordResetDelete(user_id)
+
+            // delete device token
+            await this.userService.deleteDeviceTokenForAllUser(user_id)
+
+            //     delete advocate
+            const deleteAdvocate = await this.userService.deleteUser(user_id, Constants.ROLE_ADVOCATE);
+            if (!deleteAdvocate) {
+                return ResponseFormatter.errorResponse(res, "Can't remove advocate. Try again later");
+            }
+
+            return ResponseFormatter.successResponse(res, 'Advocate deleted');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -427,6 +498,65 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            const {organization_id, user_id, email} = req.body;
+            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            if (!checkIfServiceManager) {
+                return ResponseFormatter.errorResponse(res, 'User not found in organization');
+            }
+
+            if (checkIfServiceManager.role.id != Constants.ROLE_ORGANIZATION_ADMIN) {
+                return ResponseFormatter.errorResponse(res, 'Not a valid user type');
+            }
+            const checkIfEmail = await this.organizationService.checkIfEmailIsRoleUser(email, user_id, organization_id, Constants.ROLE_ORGANIZATION_ADMIN);
+
+            if (!checkIfEmail) {
+                return ResponseFormatter.errorResponse(res, 'Email provided is not an organization admin');
+            }
+            console.log("1")
+            //     replace service request
+            const removeAdvocateServiceRequest = await this.organizationService.removeUserServiceRequest(user_id, checkIfEmail.id);
+            if (!removeAdvocateServiceRequest) {
+                return ResponseFormatter.errorResponse(res, "Can't remove organization admin from service request. Try again later");
+            }
+            console.log("2")
+            //     replace client
+            const removeAdvocateClients = await this.organizationService.removeUserClients(user_id, checkIfEmail.id);
+            if (!removeAdvocateClients) {
+                return ResponseFormatter.errorResponse(res, "Can't remove organization admin from clients. Try again later");
+            }
+            console.log("3")
+            //     replace service details
+            const removeAdvocateServiceDetails = await this.organizationService.removeServiceDetails(user_id, checkIfEmail.id);
+            if (!removeAdvocateServiceDetails) {
+                return ResponseFormatter.errorResponse(res, "Can't remove service details. Try again later");
+            }
+
+            // remove reported user
+            console.log("4")
+            const removeReportedUser = await this.organizationService.removeReportedUser(user_id, req.user.id);
+            if (!removeReportedUser) {
+                return ResponseFormatter.errorResponse(res, "Can't remove reported user. Try again later");
+            }
+            console.log("5")
+            // remove reported service
+            const removeReportedService = await this.organizationService.removeReportedService(user_id, req.user.id);
+            if (!removeReportedService) {
+                return ResponseFormatter.errorResponse(res, "Can't remove reported service. Try again later");
+            }
+
+            // delete password reset
+            await this.userService.passwordResetDelete(user_id)
+
+            // delete device token
+            await this.userService.deleteDeviceTokenForAllUser(user_id)
+
+            //     delete organization admin
+            const deleteOrganizationAdmin = await this.userService.deleteUser(user_id, Constants.ROLE_ORGANIZATION_ADMIN);
+            if (!deleteOrganizationAdmin) {
+                return ResponseFormatter.errorResponse(res, "Can't remove organization admin. Try again later");
+            }
+
+            return ResponseFormatter.successResponse(res, 'Organization admin deleted');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

@@ -302,3 +302,62 @@ export const VerifyEmail = (username: string, user_id: number, token: string, ty
 </body>
 </html>
 `;
+export const ReportUserEmail = (username: string, reason: string, type: string) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: "Google Sans", sans-serif;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #f7f7f7;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .content {
+            margin-top: 20px;
+            font-family: "Google Sans", sans-serif;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: grey;
+            font-family: "Google Sans", sans-serif;
+        }
+        .button {
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+        </div>
+        <div class="content">
+            <p>Dear Admin,</p>
+            
+            <p>Someone reported ${type} ${username}</p>
+            <p>Reason: ${reason}</p>
+            
+        </div>
+        <div class="footer">
+            <p>Best Regards,</p>
+            <p>Team Atlas free</p>
+        </div>
+    </div>
+</body>
+</html>
+`;

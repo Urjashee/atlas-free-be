@@ -11,7 +11,7 @@ export const organizationMiddleware = async (req: Request, res: Response, next: 
         token = req.headers.authorization.split(' ')[1];
     }
     try {
-        const ADVISOR_ROLE_ID: number = Constants.ROLE_ORGANIZATION;
+        const ADVISOR_ROLE_ID: number = Constants.ROLE_ORGANIZATION_ADMIN;
         const decoded = jwt.decode(token) as JwtPayload | null;
         if (!decoded || decoded.role !== ADVISOR_ROLE_ID) {
             return ResponseFormatter.unauthorizedResponse(res, 'Not an organization user');

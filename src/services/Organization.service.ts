@@ -3,7 +3,13 @@ import {Users} from "../entity/Users.entity";
 import {Constants} from "../helper/Constants.helper";
 import {randomBytes} from "crypto";
 import {PasswordReset} from "../entity/PasswordReset.entity";
-import {ActivateOrganization, CreatePassword, PasswordResetEmail, SendInvitationEmail} from "../helper/Emails.helper";
+import {
+    ActivateOrganization,
+    CreatePassword,
+    PasswordResetEmail, ReportUserEmail,
+    SendInvitationEmail,
+    VerifyEmail
+} from "../helper/Emails.helper";
 import {type} from "node:os";
 import {EmailService} from "./Email.service";
 import {Equal, FindOptionsWhere, In, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, Raw} from "typeorm";
@@ -16,6 +22,7 @@ import {EmailReminder} from "../entity/EmailReminder.entity";
 import {AssignedServices, ClientStatus} from "../entity/AssignedServices.entity";
 import {ReportUser} from "../entity/ReportUser";
 import {ClientService} from "../entity/ClientService.entity";
+import {ReportService} from "../entity/ReportService.entity";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -26,6 +33,7 @@ export class OrganizationService {
     private emailReminderRepository = AppDataSource.getRepository(EmailReminder);
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
     private reportUserRepository = AppDataSource.getRepository(ReportUser);
+    private reportServiceRepository = AppDataSource.getRepository(ReportService);
     private clientServiceRepository = AppDataSource.getRepository(ClientService);
     private mailerService = new EmailService();
 
@@ -36,7 +44,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .getMany();
         }
@@ -46,7 +54,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .andWhere('user.is_status = :userStatus', {userStatus: true})
                 .getMany();
@@ -57,7 +65,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+                .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .andWhere('user.is_status = :userStatus', {userStatus: false})
                 .getMany();
@@ -68,7 +76,7 @@ export class OrganizationService {
         const organization = await this.userRepository.findOne({
             where: {
                 organization: {id: organization_id},
-                role: {id: Constants.ROLE_ORGANIZATION}
+                role: {id: Constants.ROLE_ORGANIZATION_ADMIN}
             },
             relations: ['organization']
         })
@@ -290,7 +298,7 @@ export class OrganizationService {
             .leftJoinAndSelect('user.organization', 'organization')
             .leftJoinAndSelect('organization.affiliations', 'affiliations')
             .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-            .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION})
+            .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
             .andWhere('organization.id = :orgId', {orgId: id})
             .getOne();
     }
@@ -681,6 +689,20 @@ export class OrganizationService {
             organization: {id: organization_id},
             type
         });
+
+        const reportedUser = await this.userRepository.findOne({
+            where: { id: reported_user },
+            select: ["id", "first_name", "last_name", "user_name"]
+        });
+
+        const emailContent = ReportUserEmail(reportedUser.user_name == null ? `${reportedUser.first_name} ${reportedUser.last_name}` : reportedUser.user_name, reason, "user");
+        const mailOptions = {
+            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            to: process.env.SUPER_ADMIN_MAIN,
+            subject: "Email from Atlas free!",
+            html: emailContent
+        };
+        await this.mailerService.sendEmail(mailOptions)
         return await this.reportUserRepository.save(report);
     }
 
@@ -800,11 +822,11 @@ export class OrganizationService {
         })
     }
 
-    async checkIfEmailIsServiceManager(email: string, user_id: number, organization_id: number) {
+    async checkIfEmailIsRoleUser(email: string, user_id: number, organization_id: number, role: number) {
         return await this.userRepository.findOne({
             where: {
                 email,
-                role: {id: Constants.ROLE_SERVICE_MANAGER},
+                role: {id: role},
                 id: Not(user_id),
                 organization: {id: organization_id}
             }
@@ -899,7 +921,7 @@ export class OrganizationService {
         })
     }
 
-    async removeServiceManagerFromSettings(service_manager_id: number, assigned_user_id: number) {
+    async removeUserFromSettings(service_manager_id: number, assigned_user_id: number) {
         const serviceSettings = await this.serviceSettingRepository.find({
             where: {
                 service_manager: Raw(() => `FIND_IN_SET(:idStr, service_manager) > 0`, {
@@ -933,7 +955,7 @@ export class OrganizationService {
         return true
     }
 
-    async removeServiceManagerServiceRequest(service_manager_id: number, assigned_user_id: any) {
+    async removeUserServiceRequest(service_manager_id: number, assigned_user_id: any) {
         const assignedServices = await this.assignedServiceRepository.find({
             where: {
                 user: {id: service_manager_id},
@@ -952,7 +974,7 @@ export class OrganizationService {
         }
     }
 
-    async removeServiceManagerClients(service_manager_id: number, assigned_user_id: any) {
+    async removeUserClients(service_manager_id: number, assigned_user_id: any) {
         const clients = await this.clientServiceRepository.find({
             where: {
                 user: {id: service_manager_id},
@@ -989,6 +1011,55 @@ export class OrganizationService {
         return true
     }
 
+    async removeReportedUser(user_id:number, admin_id: number) {
+        const reportedByUsers = await this.reportUserRepository.find({
+            where: {
+                reported_by: {id: user_id}
+            },
+            relations: ['reported_by']
+        });
+        if (reportedByUsers) {
+            for (const reportedByUser of reportedByUsers) {
+                if (reportedByUser.reported_by.id == user_id) {
+                    reportedByUser.reported_by.id = admin_id;
+                    await this.reportUserRepository.save(reportedByUser);
+                }
+            }
+        }
 
+        const reportedUsers = await this.reportUserRepository.find({
+            where: {
+                reported_user: {id: user_id}
+            },
+            relations: ['reported_user']
+        });
+        if (reportedUsers) {
+            for (const reportedUser of reportedUsers) {
+                if (reportedUser.reported_user.id == user_id) {
+                    await this.reportUserRepository.delete(reportedUser.id);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    async removeReportedService(user_id:number, admin_id: number) {
+        const reportedByServices = await this.reportServiceRepository.find({
+            where: {
+                user: {id: user_id}
+            },
+            relations: ['user']
+        });
+        if (reportedByServices) {
+            for (const reportedByService of reportedByServices) {
+                if (reportedByService.user.id == user_id) {
+                    reportedByService.user.id = admin_id;
+                    await this.reportServiceRepository.save(reportedByService);
+                }
+            }
+        }
+        return true
+    }
 
 }

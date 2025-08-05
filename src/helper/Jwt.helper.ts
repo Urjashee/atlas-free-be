@@ -18,7 +18,7 @@ export class JwtHelper {
                 isProfile: user.is_profile,
             }, process.env.JWT_SECRET as string, {expiresIn: process.env.TOKEN_EXPIRY as any})
         }
-        if (user.role.id == Constants.ROLE_ORGANIZATION) {
+        if (user.role.id == Constants.ROLE_ORGANIZATION_ADMIN) {
             return jwt.sign({
                 id: user.id,
                 email: user.email,

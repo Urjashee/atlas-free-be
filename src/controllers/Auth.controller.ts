@@ -110,7 +110,7 @@ export class AuthController {
             if (existingUser) {
                 return ResponseFormatter.errorResponse(res, 'Email already in use');
             }
-            const roleId = Constants.ROLE_ORGANIZATION
+            const roleId = Constants.ROLE_ORGANIZATION_ADMIN
             const user = await this.userService.createUser(req.body, roleId,);
             if (user)
                 return ResponseFormatter.successResponse(res, 'User created')

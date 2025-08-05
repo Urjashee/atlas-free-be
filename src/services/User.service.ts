@@ -188,7 +188,7 @@ export class UserService {
                     await this.affiliationRepository.save(addAffiliation);
                 }
             }
-            if (role === Constants.ROLE_ORGANIZATION) {
+            if (role === Constants.ROLE_ORGANIZATION_ADMIN) {
                 organization.is_active = false
                 await this.organizationRepository.save(organization)
             }
