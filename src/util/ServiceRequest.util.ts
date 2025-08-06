@@ -23,10 +23,12 @@ export async function clients(body: any, user_id: number, organization_id: numbe
         return "Successfully added clients."
     }
 }
-export async function getClientsById(client_id: number, user_id: number) {
-    const checkIfValidOrganization = await advocateService.checkIfValidClient(client_id, user_id);
-    if (!checkIfValidOrganization)
-        throw new Error('Invalid client');
+export async function getClientsById(client_id: number, user_id: number, organization_id?: number) {
+    if (!organization_id) {
+        const checkIfValidOrganization = await advocateService.checkIfValidClient(client_id, user_id);
+        if (!checkIfValidOrganization)
+            throw new Error('Invalid client');
+    }
 
     const getClients = await advocateService.getClientsById(client_id);
     const form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)

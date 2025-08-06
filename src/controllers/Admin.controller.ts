@@ -1,4 +1,4 @@
-import {Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
 import {authMiddleware} from "../middleware/Auth.middleware";
 import {adminMiddleware} from "../middleware/Admin.middleware";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
@@ -244,6 +244,8 @@ export class AdminController {
     async getOrganizationUserDetails(@Req() req: Request, @Res() res: Response, @Param("organizationId") organization_id: number, @Param("userId") user_id: number) {
         try {
             const checkIfOrganizationUser = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            if (!checkIfOrganizationUser)
+                return ResponseFormatter.errorResponse(res, 'User not found in organization');
             const User = await getUserDetails(checkIfOrganizationUser);
             return ResponseFormatter.successResponse(res, 'Users found', User);
         } catch (error: any) {
@@ -594,6 +596,33 @@ export class AdminController {
         }
     }
 
+    @Delete("/organization/service-delete/:organizationId/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async serviceDelete(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number, @Param("serviceId") serviceId: number) {
+        try {
+            const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, organizationId);
+            if (!checkValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service")
+            // remove assigned service
+            const removeAssignedService = await this.organizationService.removeAssignedService(serviceId);
+            if (!removeAssignedService)
+                return ResponseFormatter.errorResponse(res, "Can't remove assigned service, try again later");
+            // remove service settings
+            const removeServiceSettings = await this.organizationService.removeServiceSettings(serviceId);
+            if (!removeServiceSettings)
+                return ResponseFormatter.errorResponse(res, "Can't remove service settings, try again later");
+            // remove service
+            const removeService = await this.organizationService.removeService(serviceId);
+            if (!removeService)
+                return ResponseFormatter.errorResponse(res, "Can't remove service, try again later");
+
+            return ResponseFormatter.successResponse(res, "Successful");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
 
     @Get("/organization/services/:organizationId")
     @UseBefore(authMiddleware)
@@ -792,12 +821,12 @@ export class AdminController {
         }
     }
 
-    @Get("/organization/clients")
+    @Get("/organization/clients/:organizationId")
     @UseBefore(authMiddleware)
-    @UseBefore(organizationMiddleware)
-    async getClients(@Req() req: Request, @Res() res: Response) {
+    @UseBefore(adminMiddleware)
+    async getClients(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number) {
         try {
-            const getClients = await this.advocateService.getClients(req.user.id);
+            const getClients = await this.organizationService.getClientsByOrganization(organizationId);
             const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
@@ -805,12 +834,16 @@ export class AdminController {
         }
     }
 
-    @Get("/organization/clients/:clientId")
+    @Get("/organization/clients/:organizationId/:clientId")
     @UseBefore(authMiddleware)
-    @UseBefore(organizationMiddleware)
-    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
+    @UseBefore(adminMiddleware)
+    async getClientsById(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number, @Param("clientId") clientId: number) {
         try {
-            const customResponse = await getClientsById(clientId, req.user.id);
+            const checkIfOrganizationClientExists = await this.organizationService.checkIfOrganizationClientExists(organizationId, clientId);
+            if (!checkIfOrganizationClientExists) {
+                return ResponseFormatter.errorResponse(res, "Not a valid client");
+            }
+            const customResponse = await getClientsById(clientId, req.user.id, organizationId);
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

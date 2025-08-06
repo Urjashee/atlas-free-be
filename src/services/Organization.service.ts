@@ -46,6 +46,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
+                .andWhere('organization.under_review = :underReview', {underReview: false})
                 .getMany();
         }
         if (filter === "inactive") {
@@ -56,7 +57,8 @@ export class OrganizationService {
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
-                .andWhere('user.is_status = :userStatus', {userStatus: true})
+                .andWhere('organization.under_review = :underReview', {underReview: false})
+                .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
         }
         if (filter === "pending") {
@@ -66,8 +68,9 @@ export class OrganizationService {
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
-                .andWhere('organization.is_active = :orgActive', {orgActive: false})
-                .andWhere('user.is_status = :userStatus', {userStatus: false})
+                .andWhere('organization.is_active = :orgActive', {orgActive: true})
+                .andWhere('organization.under_review = :underReview', {underReview: true})
+                .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
         }
     }
@@ -691,7 +694,7 @@ export class OrganizationService {
         });
 
         const reportedUser = await this.userRepository.findOne({
-            where: { id: reported_user },
+            where: {id: reported_user},
             select: ["id", "first_name", "last_name", "user_name"]
         });
 
@@ -1011,7 +1014,7 @@ export class OrganizationService {
         return true
     }
 
-    async removeReportedUser(user_id:number, admin_id: number) {
+    async removeReportedUser(user_id: number, admin_id: number) {
         const reportedByUsers = await this.reportUserRepository.find({
             where: {
                 reported_by: {id: user_id}
@@ -1044,7 +1047,7 @@ export class OrganizationService {
         return true;
     }
 
-    async removeReportedService(user_id:number, admin_id: number) {
+    async removeReportedService(user_id: number, admin_id: number) {
         const reportedByServices = await this.reportServiceRepository.find({
             where: {
                 user: {id: user_id}
@@ -1060,6 +1063,84 @@ export class OrganizationService {
             }
         }
         return true
+    }
+
+    async removeAssignedService(service_id: number) {
+        const assignedServices = await this.assignedServiceRepository.find({
+            where: {
+                service: {id: service_id}
+            },
+            relations: ["service"]
+        });
+
+        if (assignedServices) {
+            for (const assignedService of assignedServices) {
+                if (assignedService.service.id == service_id) {
+                    await this.assignedServiceRepository.delete(assignedService.id);
+                }
+            }
+        }
+        return true;
+    }
+
+    async removeServiceSettings(service_id: number) {
+        const serviceSetting = await this.serviceSettingRepository.findOne({
+            where: {
+                service: {id: service_id}
+            },
+            relations: ["service"]
+        });
+        console.log("serviceSetting: ", serviceSetting)
+        if (serviceSetting) {
+            if (serviceSetting.service.id == service_id) {
+                await this.serviceSettingRepository.delete(serviceSetting.id);
+            }
+        }
+
+        const emailReminders = await this.emailReminderRepository.find({
+            where: {
+                service: {id: service_id}
+            }
+        });
+        console.log("emailReminders: ", emailReminders)
+        if (emailReminders) {
+            for (const emailReminder of emailReminders) {
+                await this.emailReminderRepository.delete(emailReminder.id);
+            }
+        }
+        return true;
+    }
+
+    async removeService(service_id: number) {
+        const service = await this.serviceDetailsRepository.findOne({
+            where: {
+                id: service_id,
+            }
+        });
+
+        if (service) {
+            await this.serviceDetailsRepository.delete(service.id);
+            return true;
+        }
+        return false;
+    }
+
+    async getClientsByOrganization(organization_id: number) {
+        return await this.clientServiceRepository.find({
+            where: {
+                organization: {id: organization_id},
+            },
+            order: {created_at: "DESC"}
+        })
+    }
+
+    async checkIfOrganizationClientExists(organization_id: number, client_id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id: client_id,
+                organization: {id: organization_id},
+            }
+        })
     }
 
 }

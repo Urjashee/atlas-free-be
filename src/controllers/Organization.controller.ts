@@ -1,4 +1,4 @@
-import {Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -117,6 +117,33 @@ export class AuthController {
         }
     }
 
+    @Delete("/service-delete/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async serviceDelete(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
+        try {
+            const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
+            if (!checkValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service")
+            // remove assigned service
+            const removeAssignedService = await this.organizationService.removeAssignedService(serviceId);
+            if (!removeAssignedService)
+                return ResponseFormatter.errorResponse(res, "Can't remove assigned service, try again later");
+            // remove service settings
+            const removeServiceSettings = await this.organizationService.removeServiceSettings(serviceId);
+            if (!removeServiceSettings)
+                return ResponseFormatter.errorResponse(res, "Can't remove service settings, try again later");
+            // remove service
+            const removeService = await this.organizationService.removeService(serviceId);
+            if (!removeService)
+                return ResponseFormatter.errorResponse(res, "Can't remove service, try again later");
+
+            return ResponseFormatter.successResponse(res, "Successful");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
     @Post("/services-settings")
     @UseBefore(authMiddleware)
     @UseBefore(organizationMiddleware)
@@ -147,49 +174,49 @@ export class AuthController {
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
-        }
+    }
 
-        @Get("/services-settings/:serviceId")
-        @UseBefore(authMiddleware)
-        @UseBefore(organizationMiddleware)
-        async getServiceSettings(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
-            try {
-                const checkIfValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
-                if (!checkIfValidService)
-                    return ResponseFormatter.errorResponse(res, "Not a valid service");
-                const getServiceSettings = await this.organizationService.getServiceSettingsById(serviceId);
-                if (!getServiceSettings)
-                    return ResponseFormatter.errorResponse(res, "No service settings found");
-                const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
-                const customResponse = {
-                    id: getServiceSettings.id,
-                    service_id: getServiceSettings.service,
-                    available_slots: getServiceSettings.available_slots,
-                    service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
-                    contact_email: getServiceSettings.contact_email,
-                    contact_phone: getServiceSettings.contact_phone,
-                    emailReminders: getEmailReminders.map((reminder: any) => {
-                        return ({
-                            id: reminder.id,
-                            email: reminder.email,
-                            day_of_week: reminder.day_of_week.map((day: string) => {
-                                    return {
-                                        id: day,
-                                        name: DaysOfWeek[parseInt(day)]
-                                    };
-                                }
-                            ),
-                            time: reminder.time,
-                            time_zone_id: reminder.time_zone,
-                            time_zone: TimeZone[reminder.time_zone]
-                        });
-                    })
-                }
-                return ResponseFormatter.successResponse(res, "Service settings", customResponse)
-            } catch (error: any) {
-                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+    @Get("/services-settings/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getServiceSettings(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
+        try {
+            const checkIfValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service");
+            const getServiceSettings = await this.organizationService.getServiceSettingsById(serviceId);
+            if (!getServiceSettings)
+                return ResponseFormatter.errorResponse(res, "No service settings found");
+            const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
+            const customResponse = {
+                id: getServiceSettings.id,
+                service_id: getServiceSettings.service,
+                available_slots: getServiceSettings.available_slots,
+                service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
+                contact_email: getServiceSettings.contact_email,
+                contact_phone: getServiceSettings.contact_phone,
+                emailReminders: getEmailReminders.map((reminder: any) => {
+                    return ({
+                        id: reminder.id,
+                        email: reminder.email,
+                        day_of_week: reminder.day_of_week.map((day: string) => {
+                                return {
+                                    id: day,
+                                    name: DaysOfWeek[parseInt(day)]
+                                };
+                            }
+                        ),
+                        time: reminder.time,
+                        time_zone_id: reminder.time_zone,
+                        time_zone: TimeZone[reminder.time_zone]
+                    });
+                })
             }
+            return ResponseFormatter.successResponse(res, "Service settings", customResponse)
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
+    }
 
     @Get("/details")
     @UseBefore(authMiddleware)
@@ -396,7 +423,7 @@ export class AuthController {
     @UseBefore(organizationMiddleware)
     async getClients(@Req() req: Request, @Res() res: Response) {
         try {
-            const getClients = await this.advocateService.getClients(req.user.id);
+            const getClients = await this.organizationService.getClientsByOrganization(req.user.organization_id);
             const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
@@ -409,7 +436,11 @@ export class AuthController {
     @UseBefore(organizationMiddleware)
     async getClientsById(@Req() req: Request, @Res() res: Response, @Param("clientId") clientId: number) {
         try {
-            const customResponse = await getClientsById(clientId, req.user.id);
+            const checkIfOrganizationClientExists = await this.organizationService.checkIfOrganizationClientExists(req.user.organization_id, clientId);
+            if (!checkIfOrganizationClientExists) {
+                return ResponseFormatter.errorResponse(res, "Not a valid client");
+            }
+            const customResponse = await getClientsById(clientId, req.user.id, req.user.organization_id);
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

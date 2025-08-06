@@ -140,10 +140,10 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
 }
 export async function getServiceRequestsUser(serviceRequest: any) {
     return {
-        client_service_id: serviceRequest.client_service.id,
-        service_status_id: serviceRequest.status,
-        service_status: ClientStatus[Number(serviceRequest.status)],
-        service_name: serviceRequest.service.name,
-        service_type: (await configService.getServiceOptionsById(serviceRequest.service.service_type)).name,
+        client_service_id: serviceRequest ? serviceRequest.client_service.id : null,
+        service_status_id: serviceRequest ? serviceRequest.status : null,
+        service_status: serviceRequest ? ClientStatus[Number(serviceRequest.status)] : null,
+        service_name: serviceRequest ? serviceRequest.service.name : null,
+        service_type: serviceRequest ? (await configService.getServiceOptionsById(serviceRequest.service.service_type)).name : null,
     }
 }
