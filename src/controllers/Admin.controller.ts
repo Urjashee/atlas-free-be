@@ -13,7 +13,7 @@ import {
     getOrganizationsDetails,
     getOrganizationsServiceDetails, getServiceRequestDetails,
     getServiceRequests,
-    getUserDetails
+    getUserDetails, removeOrganizationUser
 } from "../util/Organization.util";
 import {getRoleIdByName} from "../util/Common.util";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
@@ -328,241 +328,75 @@ export class AdminController {
         }
     }
 
-//     Remove service manager
-    @Post("/organization/remove/service-manager")
-    @UseBefore(authMiddleware)
-    @UseBefore(adminMiddleware)
-    async removeServiceManager(@Req() req: Request, @Res() res: Response) {
-        try {
-            if (!req.body) {
-                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+    //     Remove service manager
+        @Post("/organization/remove/service-manager")
+        @UseBefore(authMiddleware)
+        @UseBefore(adminMiddleware)
+        async removeServiceManager(@Req() req: Request, @Res() res: Response) {
+            try {
+                if (!req.body) {
+                    return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+                }
+                const {error} = removeUserSchema.validate(req.body);
+                if (error) {
+                    return ResponseFormatter.errorResponse(res, error.details[0].message);
+                }
+                const {organization_id, user_id, email} = req.body;
+
+                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
+
+                return ResponseFormatter.successResponse(res, 'Service manager deleted');
+
+            } catch (error: any) {
+                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
             }
-            const {error} = removeUserSchema.validate(req.body);
-            if (error) {
-                return ResponseFormatter.errorResponse(res, error.details[0].message);
-            }
-            const {organization_id, user_id, email} = req.body;
-            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
-            if (!checkIfServiceManager) {
-                return ResponseFormatter.errorResponse(res, 'User not found in organization');
-            }
-
-            if (checkIfServiceManager.role.id != Constants.ROLE_SERVICE_MANAGER) {
-                return ResponseFormatter.errorResponse(res, 'Not a valid user type');
-            }
-            const checkIfEmail = await this.organizationService.checkIfEmailIsRoleUser(email, user_id, organization_id, Constants.ROLE_SERVICE_MANAGER);
-            if (!checkIfEmail) {
-                return ResponseFormatter.errorResponse(res, 'Email provided is not a service manager');
-            }
-
-            //     replace service manager from service settings
-            const removeServiceManagerFromSettings = await this.organizationService.removeUserFromSettings(user_id, checkIfEmail.id);
-            if (!removeServiceManagerFromSettings) {
-                return ResponseFormatter.errorResponse(res, "Can't remove service manager from service settings. Try again later");
-            }
-
-            //     replace service request
-            const removeServiceManagerServiceRequest = await this.organizationService.removeUserServiceRequest(user_id, checkIfEmail.id);
-            if (!removeServiceManagerServiceRequest) {
-                return ResponseFormatter.errorResponse(res, "Can't remove service manager from service request. Try again later");
-            }
-
-            //     replace client
-            const removeServiceManagerClients = await this.organizationService.removeUserClients(user_id, checkIfEmail.id);
-            if (!removeServiceManagerClients) {
-                return ResponseFormatter.errorResponse(res, "Can't remove service manager from clients. Try again later");
-            }
-
-            //     replace service details
-            const removeServiceDetails = await this.organizationService.removeServiceDetails(user_id, checkIfEmail.id);
-            if (!removeServiceDetails) {
-                return ResponseFormatter.errorResponse(res, "Can't remove service details. Try again later");
-            }
-
-            // remove reported user
-
-            const removeReportedUser = await this.organizationService.removeReportedUser(user_id, req.user.id);
-            if (!removeReportedUser) {
-                return ResponseFormatter.errorResponse(res, "Can't remove reported user. Try again later");
-            }
-
-            // remove reported service
-            const removeReportedService = await this.organizationService.removeReportedService(user_id, req.user.id);
-            if (!removeReportedService) {
-                return ResponseFormatter.errorResponse(res, "Can't remove reported service. Try again later");
-            }
-
-            // delete password reset
-            await this.userService.passwordResetDelete(user_id)
-
-            // delete device token
-            await this.userService.deleteDeviceTokenForAllUser(user_id)
-
-            //     delete service manager
-            const deleteServiceManager = await this.userService.deleteUser(user_id, Constants.ROLE_SERVICE_MANAGER);
-            if (!deleteServiceManager) {
-                return ResponseFormatter.errorResponse(res, "Can't remove service manager. Try again later");
-            }
-
-            return ResponseFormatter.successResponse(res, 'Service manager deleted');
-
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
-    }
 
-//     Remove advocate
-    @Post("/organization/remove/advocate")
-    @UseBefore(authMiddleware)
-    @UseBefore(adminMiddleware)
-    async removeAdvocate(@Req() req: Request, @Res() res: Response) {
-        try {
-            if (!req.body) {
-                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+    //     Remove advocate
+        @Post("/organization/remove/advocate")
+        @UseBefore(authMiddleware)
+        @UseBefore(adminMiddleware)
+        async removeAdvocate(@Req() req: Request, @Res() res: Response) {
+            try {
+                if (!req.body) {
+                    return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+                }
+                const {error} = removeUserSchema.validate(req.body);
+                if (error) {
+                    return ResponseFormatter.errorResponse(res, error.details[0].message);
+                }
+                const {organization_id, user_id, email} = req.body;
+
+                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
+
+                return ResponseFormatter.successResponse(res, 'Advocate deleted');
+            } catch (error: any) {
+                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
             }
-            const {error} = removeUserSchema.validate(req.body);
-            if (error) {
-                return ResponseFormatter.errorResponse(res, error.details[0].message);
-            }
-            const {organization_id, user_id, email} = req.body;
-            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
-            if (!checkIfServiceManager) {
-                return ResponseFormatter.errorResponse(res, 'User not found in organization');
-            }
-
-            if (checkIfServiceManager.role.id != Constants.ROLE_ADVOCATE) {
-                return ResponseFormatter.errorResponse(res, 'Not a valid user type');
-            }
-            const checkIfEmail = await this.organizationService.checkIfEmailIsRoleUser(email, user_id, organization_id, Constants.ROLE_ADVOCATE);
-            if (!checkIfEmail) {
-                return ResponseFormatter.errorResponse(res, 'Email provided is not an advocate');
-            }
-
-            //     replace service request
-            const removeAdvocateServiceRequest = await this.organizationService.removeUserServiceRequest(user_id, checkIfEmail.id);
-            if (!removeAdvocateServiceRequest) {
-                return ResponseFormatter.errorResponse(res, "Can't remove advocate from service request. Try again later");
-            }
-
-            //     replace client
-            const removeAdvocateClients = await this.organizationService.removeUserClients(user_id, checkIfEmail.id);
-            if (!removeAdvocateClients) {
-                return ResponseFormatter.errorResponse(res, "Can't remove advocate from clients. Try again later");
-            }
-
-            //     replace service details
-            const removeAdvocateServiceDetails = await this.organizationService.removeServiceDetails(user_id, checkIfEmail.id);
-            if (!removeAdvocateServiceDetails) {
-                return ResponseFormatter.errorResponse(res, "Can't remove service details. Try again later");
-            }
-
-            // remove reported user
-
-            const removeReportedUser = await this.organizationService.removeReportedUser(user_id, req.user.id);
-            if (!removeReportedUser) {
-                return ResponseFormatter.errorResponse(res, "Can't remove reported user. Try again later");
-            }
-
-            // remove reported service
-            const removeReportedService = await this.organizationService.removeReportedService(user_id, req.user.id);
-            if (!removeReportedService) {
-                return ResponseFormatter.errorResponse(res, "Can't remove reported service. Try again later");
-            }
-
-            // delete password reset
-            await this.userService.passwordResetDelete(user_id)
-
-            // delete device token
-            await this.userService.deleteDeviceTokenForAllUser(user_id)
-
-            //     delete advocate
-            const deleteAdvocate = await this.userService.deleteUser(user_id, Constants.ROLE_ADVOCATE);
-            if (!deleteAdvocate) {
-                return ResponseFormatter.errorResponse(res, "Can't remove advocate. Try again later");
-            }
-
-            return ResponseFormatter.successResponse(res, 'Advocate deleted');
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
-    }
 
-//     Remove org admin
-    @Post("/organization/remove/organization-admin")
-    @UseBefore(authMiddleware)
-    @UseBefore(adminMiddleware)
-    async removeOrganizationAdmin(@Req() req: Request, @Res() res: Response) {
-        try {
-            if (!req.body) {
-                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
-            }
-            const {error} = removeUserSchema.validate(req.body);
-            if (error) {
-                return ResponseFormatter.errorResponse(res, error.details[0].message);
-            }
-            const {organization_id, user_id, email} = req.body;
-            const checkIfServiceManager = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
-            if (!checkIfServiceManager) {
-                return ResponseFormatter.errorResponse(res, 'User not found in organization');
-            }
+    //     Remove org admin
+        @Post("/organization/remove/organization-admin")
+        @UseBefore(authMiddleware)
+        @UseBefore(adminMiddleware)
+        async removeOrganizationAdmin(@Req() req: Request, @Res() res: Response) {
+            try {
+                if (!req.body) {
+                    return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+                }
+                const {error} = removeUserSchema.validate(req.body);
+                if (error) {
+                    return ResponseFormatter.errorResponse(res, error.details[0].message);
+                }
+                const {organization_id, user_id, email} = req.body;
 
-            if (checkIfServiceManager.role.id != Constants.ROLE_ORGANIZATION_ADMIN) {
-                return ResponseFormatter.errorResponse(res, 'Not a valid user type');
-            }
-            const checkIfEmail = await this.organizationService.checkIfEmailIsRoleUser(email, user_id, organization_id, Constants.ROLE_ORGANIZATION_ADMIN);
+                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_ORGANIZATION_ADMIN);
 
-            if (!checkIfEmail) {
-                return ResponseFormatter.errorResponse(res, 'Email provided is not an organization admin');
+                return ResponseFormatter.successResponse(res, 'Organization admin deleted');
+            } catch (error: any) {
+                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
             }
-            console.log("1")
-            //     replace service request
-            const removeAdvocateServiceRequest = await this.organizationService.removeUserServiceRequest(user_id, checkIfEmail.id);
-            if (!removeAdvocateServiceRequest) {
-                return ResponseFormatter.errorResponse(res, "Can't remove organization admin from service request. Try again later");
-            }
-            console.log("2")
-            //     replace client
-            const removeAdvocateClients = await this.organizationService.removeUserClients(user_id, checkIfEmail.id);
-            if (!removeAdvocateClients) {
-                return ResponseFormatter.errorResponse(res, "Can't remove organization admin from clients. Try again later");
-            }
-            console.log("3")
-            //     replace service details
-            const removeAdvocateServiceDetails = await this.organizationService.removeServiceDetails(user_id, checkIfEmail.id);
-            if (!removeAdvocateServiceDetails) {
-                return ResponseFormatter.errorResponse(res, "Can't remove service details. Try again later");
-            }
-
-            // remove reported user
-            console.log("4")
-            const removeReportedUser = await this.organizationService.removeReportedUser(user_id, req.user.id);
-            if (!removeReportedUser) {
-                return ResponseFormatter.errorResponse(res, "Can't remove reported user. Try again later");
-            }
-            console.log("5")
-            // remove reported service
-            const removeReportedService = await this.organizationService.removeReportedService(user_id, req.user.id);
-            if (!removeReportedService) {
-                return ResponseFormatter.errorResponse(res, "Can't remove reported service. Try again later");
-            }
-
-            // delete password reset
-            await this.userService.passwordResetDelete(user_id)
-
-            // delete device token
-            await this.userService.deleteDeviceTokenForAllUser(user_id)
-
-            //     delete organization admin
-            const deleteOrganizationAdmin = await this.userService.deleteUser(user_id, Constants.ROLE_ORGANIZATION_ADMIN);
-            if (!deleteOrganizationAdmin) {
-                return ResponseFormatter.errorResponse(res, "Can't remove organization admin. Try again later");
-            }
-
-            return ResponseFormatter.successResponse(res, 'Organization admin deleted');
-        } catch (error: any) {
-            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
-    }
 
     @Post("/organization/services")
     @UseBefore(authMiddleware)
@@ -672,17 +506,14 @@ export class AdminController {
             const checkIfValidService = await this.organizationService.checkIfValidOrganization(req.body.service_id, req.body.organization_id);
             if (!checkIfValidService)
                 return ResponseFormatter.errorResponse(res, "Not a valid service");
-            const checkIfServiceSettings = await this.organizationService.checkIfServiceSettingsExists(req.body.service_id);
-            if (checkIfServiceSettings) {
+            const checkIfServiceSettings = await this.organizationService.checkIfServiceExists(req.body.service_id);
+            if (!checkIfServiceSettings)
+                return ResponseFormatter.errorResponse(res, "Service not found");
+            else if (checkIfServiceSettings) {
                 const editServiceSettings = await this.organizationService.editServiceSettings(req.body);
                 if (!editServiceSettings)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
-            } else {
-                const addServiceSettings = await this.organizationService.addServiceSettings(req.body);
-                if (!addServiceSettings)
-                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
             }
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
@@ -702,9 +533,8 @@ export class AdminController {
                 return ResponseFormatter.errorResponse(res, "No service settings found");
             const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
             const customResponse = {
-                id: getServiceSettings.id,
-                service_id: getServiceSettings.service,
-                available_slots: getServiceSettings.available_slots,
+                service_id: getServiceSettings.id,
+                available_slots: getServiceSettings.slots_available,
                 service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
                 contact_email: getServiceSettings.contact_email,
                 contact_phone: getServiceSettings.contact_phone,

@@ -11,10 +11,10 @@ import {
     getOrganizationsDetails,
     getOrganizationsServiceDetails,
     getServiceRequestDetails,
-    getServiceRequests
+    getServiceRequests, removeOrganizationUser
 } from "../util/Organization.util";
 import {upload} from "../helper/MulterConfig.helper";
-import {clientServiceSchema, servicesSchema} from "../schema/Services.schema";
+import {clientServiceSchema, removeUserSchema, servicesSchema} from "../schema/Services.schema";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 import {Constants} from "../helper/Constants.helper";
 import {advocateMiddleware} from "../middleware/Advocate.middleware";
@@ -27,6 +27,7 @@ import {ServiceManagerService} from "../services/ServiceManager.service";
 import {addClientService, reportUser} from "../util/Common.util";
 import {reportSchema, sendInvitationSchema, serviceSettingsSchema} from "../schema/Organization.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
+import {adminMiddleware} from "../middleware/Admin.middleware";
 
 
 const organizationEditSchema = Joi.object({
@@ -159,17 +160,14 @@ export class AuthController {
             const checkIfValidService = await this.organizationService.checkIfValidOrganization(req.body.service_id, req.user.organization_id);
             if (!checkIfValidService)
                 return ResponseFormatter.errorResponse(res, "Not a valid service");
-            const checkIfServiceSettings = await this.organizationService.checkIfServiceSettingsExists(req.body.service_id);
-            if (checkIfServiceSettings) {
+            const checkIfService = await this.organizationService.checkIfServiceExists(req.body.service_id);
+            if (!checkIfService)
+                return ResponseFormatter.errorResponse(res, "Service not found");
+            else if (checkIfService) {
                 const editServiceSettings = await this.organizationService.editServiceSettings(req.body);
                 if (!editServiceSettings)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
-            } else {
-                const addServiceSettings = await this.organizationService.addServiceSettings(req.body);
-                if (!addServiceSettings)
-                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
             }
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
@@ -189,9 +187,8 @@ export class AuthController {
                 return ResponseFormatter.errorResponse(res, "No service settings found");
             const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
             const customResponse = {
-                id: getServiceSettings.id,
-                service_id: getServiceSettings.service,
-                available_slots: getServiceSettings.available_slots,
+                service_id: getServiceSettings.id,
+                available_slots: getServiceSettings.slots_available,
                 service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
                 contact_email: getServiceSettings.contact_email,
                 contact_phone: getServiceSettings.contact_phone,
@@ -461,6 +458,77 @@ export class AuthController {
             }
             await addClientService(req.body, req.user.role.id)
             return ResponseFormatter.successResponse(res, "Successful");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+
+//     Remove service manager
+    @Post("/remove/service-manager")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeServiceManager(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {user_id, email} = req.body;
+
+            await removeOrganizationUser(req.user.organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
+
+            return ResponseFormatter.successResponse(res, 'Service manager deleted');
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+//     Remove advocate
+    @Post("/remove/advocate")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeAdvocate(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {user_id, email} = req.body;
+
+            await removeOrganizationUser(req.user.organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
+
+            return ResponseFormatter.successResponse(res, 'Advocate deleted');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+//     Remove org admin
+    @Post("/remove/organization-admin")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeOrganizationAdmin(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {user_id, email} = req.body;
+
+            await removeOrganizationUser(req.user.organization_id, user_id, email, req.user.id, Constants.ROLE_ORGANIZATION_ADMIN);
+
+            return ResponseFormatter.successResponse(res, 'Organization admin deleted');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

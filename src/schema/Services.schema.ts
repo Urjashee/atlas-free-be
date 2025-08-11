@@ -12,7 +12,7 @@ export const servicesSchema = Joi.object({
     disclose_address: Joi.boolean().required(),
     is_organization_address: Joi.boolean().required(),
     service_type: Joi.number(),
-    client_slots: Joi.number(),
+    total_available_slots: Joi.number(),
     slots_beds: Joi.number(),
     start_day_of_service: Joi.date(),
     service_limited: Joi.boolean(),

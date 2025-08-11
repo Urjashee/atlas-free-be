@@ -70,7 +70,7 @@ export class ServiceManagerController {
             let customResponse = [];
             const getOrganizationServices = await this.serviceManagerService.getServiceManagerService(req.user.id);
             for (const service of getOrganizationServices) {
-                const data = await getOrganizationsServiceDetails(service.service)
+                const data = await getOrganizationsServiceDetails(service)
                 customResponse.push(data)
             }
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
@@ -113,17 +113,12 @@ export class ServiceManagerController {
             const checkIfValidServiceManager = await this.serviceManagerService.checkIfValidService(req.body.service_id, req.user.organization_id, req.user.id)
             if (!checkIfValidServiceManager)
                 return ResponseFormatter.errorResponse(res, "Not a valid service manager");
-            const checkIfServiceSettings = await this.organizationService.checkIfServiceSettingsExists(req.body.service_id);
+            const checkIfServiceSettings = await this.organizationService.checkIfServiceExists(req.body.service_id);
             if (checkIfServiceSettings) {
                 const editServiceSettings = await this.serviceManagerService.editServiceSettings(req.body);
                 if (!editServiceSettings)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
-            } else {
-                const addServiceSettings = await this.serviceManagerService.addServiceSettings(req.body);
-                if (!addServiceSettings)
-                    return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added service settings.");
             }
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

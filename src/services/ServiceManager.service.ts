@@ -10,14 +10,7 @@ import {ServiceSetting} from "../entity/ServiceSetting.entity";
 import {Like, Raw} from "typeorm";
 
 export class ServiceManagerService {
-    private userRepository = AppDataSource.getRepository(Users);
-    private organizationRepository = AppDataSource.getRepository(Organization);
-    private deviceTokenRepository = AppDataSource.getRepository(DeviceToken);
-    private affiliationRepository = AppDataSource.getRepository(Affiliations);
-    private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
-    private serviceSettingRepository = AppDataSource.getRepository(ServiceSetting);
-    private s3UploadService = new s3UploadService
 
     async checkIfService(service_id: number) {
         return await this.serviceDetailsRepository.findOne({
@@ -29,20 +22,19 @@ export class ServiceManagerService {
 
     async checkIfValidService(service_id: number, organization_id: number, user_id: number) {
         console.log("Checking if valid service", user_id)
-        return await this.serviceSettingRepository.findOne({
+        return await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: service_id},
+                id: service_id,
                 service_manager: Raw(alias => `FIND_IN_SET(:user_id, ${alias}) > 0`, { user_id })
             },
             relations: ["service"]
         })
     }
     async getServiceManagerService(user_id: number) {
-        return await this.serviceSettingRepository.find({
+        return await this.serviceDetailsRepository.find({
             where: {
                 service_manager: Raw(alias => `FIND_IN_SET(:user_id, ${alias}) > 0`, { user_id })
             },
-            relations: ["service"]
         })
     }
     async getServiceManagerServiceById(id: number, user_id: number) {
@@ -53,25 +45,16 @@ export class ServiceManagerService {
         })
     }
 
-    async addServiceSettings(body: any) {
-        const serviceSetting = await this.serviceSettingRepository.create({
-            service: {id: body.service_id},
-            available_slots: body.available_slots,
-        })
-        return await this.serviceSettingRepository.save(serviceSetting)
-    }
-
     async editServiceSettings(body: any) {
-        const serviceSetting = await this.serviceSettingRepository.findOne({
+        const serviceSetting = await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: body.service_id}
+                id: body.service_id
             },
-            relations: ["service"]
         })
         // console.log(serviceSetting)
         if (serviceSetting) {
-            serviceSetting.available_slots = body.available_slots;
-            return await this.serviceSettingRepository.save(serviceSetting);
+            serviceSetting.slots_available = body.available_slots;
+            return await this.serviceDetailsRepository.save(serviceSetting);
         } else {
             return false;
         }

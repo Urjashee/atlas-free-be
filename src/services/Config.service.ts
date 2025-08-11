@@ -11,7 +11,6 @@ export class ConfigService {
     private registrationOptionRepository = AppDataSource.getRepository(RegistrationOption);
     private advocateServiceRepository = AppDataSource.getRepository(AdvocateService);
     private stateRepository = AppDataSource.getRepository(State);
-    private serviceSettingRepository = AppDataSource.getRepository(ServiceSetting);
 
     async getState() {
         return await this.stateRepository.find()
@@ -52,14 +51,6 @@ export class ConfigService {
         return await this.serviceDetailOptionRepository.findOne({
             where: {
                 id: id
-            }
-        })
-    }
-
-    async getServiceAvailability(service_id: number) {
-        return await this.serviceSettingRepository.findOne({
-            where: {
-                service: { id: service_id }
             }
         })
     }

@@ -381,32 +381,34 @@ export class ConfigController {
 
             const customResponse = [];
 
-            for (const service of data) {
-                let availability
-                const serviceType = await this.configService.getServiceOptionsById(service.service_type);
-                const getAvailability = await this.configService.getServiceAvailability(service.id);
-                if (service.waitlist == false) {
-                    availability = 1
-                } else {
-                    if (service.client_slots > getAvailability.available_slots) {
-                        availability = 0
+            if (data.length > 0) {
+                for (const service of data) {
+                    let availability
+                    const serviceType = await this.configService.getServiceOptionsById(service.service_type);
+                    if (service.waitlist == false) {
+                        availability = 1
+                    } else {
+                        if (service.total_available_slots > service.slots_available) {
+                            availability = 0
+                        }
+                        if (service.total_available_slots == service.slots_available) {
+                            availability = 2
+                        }
                     }
-                    if (service.client_slots == getAvailability.available_slots) {
-                        availability = 2
-                    }
-                }
 
-                customResponse.push({
-                    id: service.id,
-                    name: service.name,
-                    service_type: serviceType.name,
-                    address: service.disclose_address === false
-                        ? "-"
-                        : `${service.street} ${service.city}, ${service.state} ${service.zipcode}`,
-                    availability_id: availability,
-                    availability: ServiceStatus[availability],
-                });
+                    customResponse.push({
+                        id: service.id,
+                        name: service.name,
+                        service_type: serviceType.name,
+                        address: service.disclose_address === false
+                            ? "-"
+                            : `${service.street} ${service.city}, ${service.state} ${service.zipcode}`,
+                        availability_id: availability,
+                        availability: ServiceStatus[availability],
+                    });
+                }
             }
+
             return ResponseFormatter.successResponse(res, "Successful", {
                 current_page: page_number,
                 page_size,

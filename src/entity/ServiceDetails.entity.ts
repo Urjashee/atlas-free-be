@@ -85,13 +85,13 @@ export class ServiceDetails {
     service_type!: number
 
     @Column({nullable: true})
-    client_slots!: number
+    total_available_slots!: number
 
     @Column({nullable: true})
     slots_beds!: number
 
-    @Column({nullable: true})
-    client_slots_available!: number
+    @Column({nullable: true, default: 0})
+    slots_available!: number
 
     @Column({ type: 'timestamp', nullable: true })
     start_day_of_service!: Date | null
@@ -228,6 +228,15 @@ export class ServiceDetails {
     @ManyToOne(() => Users, (user) => user.id)
     @JoinColumn({ name: "user_id" })
     user!: Users;
+
+    @Column({ type: "simple-array", nullable: true })
+    service_manager!: number[];
+
+    @Column({ nullable: true})
+    contact_email!: string;
+
+    @Column({ nullable: true})
+    contact_phone!: string;
 
     @CreateDateColumn()
     created_at!: Date;

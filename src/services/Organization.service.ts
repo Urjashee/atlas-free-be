@@ -29,7 +29,6 @@ export class OrganizationService {
     private organizationRepository = AppDataSource.getRepository(Organization);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
-    private serviceSettingRepository = AppDataSource.getRepository(ServiceSetting);
     private emailReminderRepository = AppDataSource.getRepository(EmailReminder);
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
     private reportUserRepository = AppDataSource.getRepository(ReportUser);
@@ -148,8 +147,8 @@ export class OrganizationService {
             disclose_address: body.disclose_address === true || body.disclose_address === 'true',
             is_organization_address: body.is_organization_address === true || body.is_organization_address === 'true',
             service_type: body.service_type,
-            client_slots: body.client_slots,
-            client_slots_available: body.client_slots,
+            total_available_slots: body.total_available_slots,
+            slots_available: body.slots_available,
             slots_beds: body.slots_beds,
             start_day_of_service: body.start_day_of_service,
             service_limited: body.service_limited === true || body.service_limited === 'true',
@@ -218,7 +217,7 @@ export class OrganizationService {
             getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
             getService.is_organization_address = body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type
-            getService.client_slots = body.client_slots
+            getService.total_available_slots = body.client_slots
             getService.slots_beds = body.slots_beds
             getService.start_day_of_service = body.start_day_of_service
             getService.service_limited = body.service_limited === true || body.service_limited === 'true';
@@ -414,23 +413,23 @@ export class OrganizationService {
         };
         let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
 
-        // // City
-        // if (city) {
-        //     baseWhere.city = city;
-        // }
-        // // State
-        // if (state) {
-        //     baseWhere.state = state;
-        // }
-        // // Zipcode
-        // if (zipcode) {
-        //     baseWhere.zipcode = zipcode;
-        // }
+        // City
+        if (city) {
+            baseWhere.city = city;
+        }
+        // State
+        if (state) {
+            baseWhere.state = state;
+        }
+        // Zipcode
+        if (zipcode) {
+            baseWhere.zipcode = zipcode;
+        }
         // // Availability
         // if (availability === "true") {
-        //     baseWhere.waitlist = true;
-        // } else if (availability === "false") {
         //     baseWhere.waitlist = false;
+        // } else if (availability === "false") {
+        //     baseWhere.waitlist = true;
         // }
         // // Structure
         // if (Array.isArray(structure) && structure.length > 0) {
@@ -534,50 +533,27 @@ export class OrganizationService {
         })
     }
 
-    async checkIfServiceSettingsExists(service_id: number) {
-        return await this.serviceSettingRepository.findOne({
+    async checkIfServiceExists(service_id: number) {
+        return await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: service_id}
+                id: service_id
             }
         })
     }
 
-    async addServiceSettings(body: any) {
-        const serviceSetting = await this.serviceSettingRepository.create({
-            service: {id: body.service_id},
-            available_slots: body.available_slots,
-            service_manager: body.service_manager,
-            contact_email: body.contact_email,
-            contact_phone: body.contact_phone,
-        })
-        const addServiceSetting = await this.serviceSettingRepository.save(serviceSetting);
-        console.log(body.emailReminders)
-        for (const emailReminder of body.emailReminders) {
-            const email = await this.emailReminderRepository.create({
-                service: {id: body.service_id},
-                email: emailReminder.email,
-                day_of_week: emailReminder.day_of_week,
-                time: emailReminder.time,
-                time_zone: emailReminder.time_zone,
-            })
-            await this.emailReminderRepository.save(email);
-        }
-        return addServiceSetting
-    }
-
     async editServiceSettings(body: any) {
-        const serviceSetting = await this.serviceSettingRepository.findOne({
+        const serviceSetting = await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: body.service_id}
+                id: body.service_id
             }
         })
         console.log(serviceSetting)
         if (serviceSetting) {
-            serviceSetting.available_slots = body.available_slots;
+            serviceSetting.slots_available = body.available_slots;
             serviceSetting.service_manager = body.service_manager;
             serviceSetting.contact_email = body.contact_email;
             serviceSetting.contact_phone = body.contact_phone;
-            await this.serviceSettingRepository.save(serviceSetting);
+            await this.serviceDetailsRepository.save(serviceSetting);
         } else {
             return false;
         }
@@ -592,7 +568,7 @@ export class OrganizationService {
 
         for (const reminder of incoming) {
             if (reminder.id) {
-                const reminderId = parseInt(reminder.id); // ✅ ensure numeric ID
+                const reminderId = parseInt(reminder.id);
 
                 // Check if this ID actually exists
                 const existing = existingReminders.find(er => er.id === reminderId);
@@ -631,9 +607,9 @@ export class OrganizationService {
     }
 
     async getServiceSettingsById(service_id: number) {
-        return await this.serviceSettingRepository.findOne({
+        return await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: service_id}
+                id: service_id
             },
         })
     }
@@ -789,21 +765,21 @@ export class OrganizationService {
     }
 
     async getOrganizationServicesByUserId(service_manager_id: number) {
-        return await this.serviceSettingRepository.find({
+        return await this.serviceDetailsRepository.find({
             where: {
                 service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, {service_manager_id})
             },
-            relations: ["service", "service.state"]
+            relations: [ "state"]
         });
     }
 
     async checkIfUserInService(service_manager_id: number, service_id: number) {
-        return await this.serviceSettingRepository.findOne({
+        return await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: service_id},
+                id: service_id,
                 service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, {service_manager_id})
             },
-            relations: ["service", "service.state"]
+            relations: ["state"]
         });
     }
 
@@ -837,14 +813,14 @@ export class OrganizationService {
     }
 
     async removeUserFromService(service_manager_id: number, service_id: number) {
-        const serviceSetting = await this.serviceSettingRepository.findOne({
+        const serviceSetting = await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: service_id},
+                id: service_id,
                 service_manager: Raw(() => `FIND_IN_SET(:idStr, service_manager) > 0`, {
                     idStr: service_manager_id.toString(),
                 }),
             },
-            relations: ["service", "service.state"],
+            relations: ["state"],
         });
 
         if (!serviceSetting) {
@@ -865,7 +841,7 @@ export class OrganizationService {
 
         console.log("After replacement:", serviceSetting.service_manager);
 
-        const settings = await this.serviceSettingRepository.save(serviceSetting);
+        const settings = await this.serviceDetailsRepository.save(serviceSetting);
         console.log(`Removed service_manager_id ${service_manager_id} from serviceSetting ${serviceSetting.id}`);
         return settings;
     }
@@ -898,13 +874,13 @@ export class OrganizationService {
             }
         })
         if (checkIfWaitlist.waitlist == true) {
-            const checkIfSlotsAvailable = await this.serviceSettingRepository.findOne({
+            const checkIfSlotsAvailable = await this.serviceDetailsRepository.findOne({
                 where: {
-                    service: {id: service_id},
+                    id: service_id,
                 }
             })
             if (checkIfSlotsAvailable) {
-                if (checkIfSlotsAvailable.available_slots == checkIfWaitlist.client_slots_available) {
+                if (checkIfSlotsAvailable.slots_available == checkIfWaitlist.slots_available) {
                     return false;
                 } else {
                     return true;
@@ -925,13 +901,13 @@ export class OrganizationService {
     }
 
     async removeUserFromSettings(service_manager_id: number, assigned_user_id: number) {
-        const serviceSettings = await this.serviceSettingRepository.find({
+        const serviceSettings = await this.serviceDetailsRepository.find({
             where: {
                 service_manager: Raw(() => `FIND_IN_SET(:idStr, service_manager) > 0`, {
                     idStr: service_manager_id.toString(),
                 }),
             },
-            relations: ["service", "service.state"],
+            relations: ["state"],
         });
 
         if (!serviceSettings) {
@@ -952,7 +928,7 @@ export class OrganizationService {
 
             console.log("After replacement:", serviceSetting.service_manager);
 
-            await this.serviceSettingRepository.save(serviceSetting);
+            await this.serviceDetailsRepository.save(serviceSetting);
             console.log(`Removed service_manager_id ${service_manager_id} from serviceSetting ${serviceSetting.id}`);
         }
         return true
@@ -1084,16 +1060,15 @@ export class OrganizationService {
     }
 
     async removeServiceSettings(service_id: number) {
-        const serviceSetting = await this.serviceSettingRepository.findOne({
+        const serviceSetting = await this.serviceDetailsRepository.findOne({
             where: {
-                service: {id: service_id}
+                id: service_id
             },
-            relations: ["service"]
         });
         console.log("serviceSetting: ", serviceSetting)
         if (serviceSetting) {
-            if (serviceSetting.service.id == service_id) {
-                await this.serviceSettingRepository.delete(serviceSetting.id);
+            if (serviceSetting.id == service_id) {
+                await this.serviceDetailsRepository.delete(serviceSetting.id);
             }
         }
 

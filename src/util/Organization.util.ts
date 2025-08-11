@@ -220,10 +220,10 @@ export async function getUserDetails(user: any) {
             role: getRoleNameById(user.role.id),
             services: await Promise.all(
                 getServices.map(async (item) => ({
-                    id: item.service.id,
-                    name: item.service.name,
-                    service_type: (await configService.getServiceOptionsById(item.service.service_type)).name,
-                    address: item.service.disclose_address == false ? `${item.service.address} ${item.service.street} ${item.service.city} ${item.service.state.name} ${item.service.zipcode}` : "",
+                    id: item.id,
+                    name: item.name,
+                    service_type: (await configService.getServiceOptionsById(item.service_type)).name,
+                    address: item.disclose_address == false ? `${item.address} ${item.street} ${item.city} ${item.state.name} ${item.zipcode}` : "",
                 }))
             ),
             created_at: new Date(user.created_at).toISOString().split('T')[0],
@@ -348,5 +348,81 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
     return  {
         client: client,
         form: form,
+    }
+}
+
+export async function removeOrganizationUser(organization_id: number, user_id: number, email: string, user: number, role_id: number) {
+
+    const checkIfValidUser = await organizationService.checkIfOrganizationUser(user_id, organization_id);
+    if (!checkIfValidUser) {
+        throw new Error("User not found in organization")
+    }
+
+    if (checkIfValidUser.role.id != role_id) {
+        throw new Error("Not a valid user type")
+    }
+
+    const checkIfEmail = await organizationService.checkIfEmailIsRoleUser(email, user_id, organization_id, role_id);
+
+    if (!checkIfEmail) {
+        if (role_id === Constants.ROLE_ORGANIZATION_ADMIN) {
+            throw new Error("Email provided is not an organization admin")
+        }
+        if (role_id === Constants.ROLE_SERVICE_MANAGER) {
+            throw new Error("Email provided is not a service manager")
+        }
+        if (role_id === Constants.ROLE_ADVOCATE) {
+            throw new Error("Email provided is not an advocate")
+        }
+    }
+
+    //     replace service manager from service settings
+    if (role_id == Constants.ROLE_SERVICE_MANAGER) {
+        const removeServiceManagerFromSettings = await organizationService.removeUserFromSettings(user_id, checkIfEmail.id);
+        if (!removeServiceManagerFromSettings) {
+            throw new Error("Can't remove service manager from service settings. Try again later")
+        }
+    }
+
+    //     replace service request
+    const removeAdvocateServiceRequest = await organizationService.removeUserServiceRequest(user_id, checkIfEmail.id);
+    if (!removeAdvocateServiceRequest) {
+        throw new Error("Can't remove user from service request. Try again later")
+    }
+
+    //     replace client
+    const removeAdvocateClients = await organizationService.removeUserClients(user_id, checkIfEmail.id);
+    if (!removeAdvocateClients) {
+        throw new Error("Can't remove user from clients. Try again later")
+    }
+
+    //     replace service details
+    const removeAdvocateServiceDetails = await organizationService.removeServiceDetails(user_id, checkIfEmail.id);
+    if (!removeAdvocateServiceDetails) {
+        throw new Error("Can't remove service details. Try again later")
+    }
+
+    // remove reported user
+    const removeReportedUser = await organizationService.removeReportedUser(user_id, user);
+    if (!removeReportedUser) {
+        throw new Error("Can't remove reported user. Try again later")
+    }
+
+    // remove reported service
+    const removeReportedService = await organizationService.removeReportedService(user_id, user);
+    if (!removeReportedService) {
+        throw new Error("Can't remove reported service. Try again laterr")
+    }
+
+    // delete password reset
+    await userService.passwordResetDelete(user_id)
+
+    // delete device token
+    await userService.deleteDeviceTokenForAllUser(user_id)
+
+    //     delete organization admin
+    const deleteOrganizationAdmin = await userService.deleteUser(user_id, role_id);
+    if (!deleteOrganizationAdmin) {
+        throw new Error("Can't remove organization admin. Try again later")
     }
 }
