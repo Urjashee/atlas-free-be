@@ -789,42 +789,42 @@ async function seedGeneralDetails() {
 }
 
 async function seedState() {
-    await new Promise<void>((resolve, reject) => {
-        connection.query('SET FOREIGN_KEY_CHECKS = 0', (err) => {
-            if (err) {
-                console.error('Error disabling foreign key checks:', err);
-                reject(err);
-                return;
-            }
-        })
-        connection.query('TRUNCATE TABLE service_headings', (err) => {
-            if (err) {
-                console.error('Error truncating service_headings table:', err);
-                reject(err);
-                return;
-            }
-            console.log('service_headings table truncated');
-            resolve();
-        });
-        connection.query('SET FOREIGN_KEY_CHECKS = 1', (err) => {
-            if (err) {
-                console.error('Error disabling foreign key checks:', err);
-                reject(err);
-                return;
-            }
-        })
-    });
-    await new Promise<void>((resolve, reject) => {
-        connection.query('TRUNCATE TABLE state', (err) => {
-            if (err) {
-                console.error('Error truncating state table:', err);
-                reject(err);
-                return;
-            }
-            console.log('state table truncated');
-            resolve();
-        });
-    });
+    // await new Promise<void>((resolve, reject) => {
+    //     connection.query('SET FOREIGN_KEY_CHECKS = 0', (err) => {
+    //         if (err) {
+    //             console.error('Error disabling foreign key checks:', err);
+    //             reject(err);
+    //             return;
+    //         }
+    //     })
+    //     connection.query('TRUNCATE TABLE service_headings', (err) => {
+    //         if (err) {
+    //             console.error('Error truncating service_headings table:', err);
+    //             reject(err);
+    //             return;
+    //         }
+    //         console.log('service_headings table truncated');
+    //         resolve();
+    //     });
+    //     connection.query('SET FOREIGN_KEY_CHECKS = 1', (err) => {
+    //         if (err) {
+    //             console.error('Error disabling foreign key checks:', err);
+    //             reject(err);
+    //             return;
+    //         }
+    //     })
+    // });
+    // await new Promise<void>((resolve, reject) => {
+    //     connection.query('TRUNCATE TABLE state', (err) => {
+    //         if (err) {
+    //             console.error('Error truncating state table:', err);
+    //             reject(err);
+    //             return;
+    //         }
+    //         console.log('state table truncated');
+    //         resolve();
+    //     });
+    // });
     for (const data of state) {
         const query = 'INSERT INTO state (id, name) VALUES (?, ?)';
         await new Promise<void>((resolve, reject) => {
@@ -855,13 +855,13 @@ connection.connect((err) => {
     }
     console.log('Connected to MySQL!');
 
-    seedRoles()
+    seedState()
+        .then(seedRoles)
         .then(seedUsers)
         .then(seedServiceTypes)
         .then(seedGeneralDetails)
         .then(seedAdvocateServices)
         .then(seedRegistrationOption)
-        .then(seedState)
         .finally(() => {
             connection.end((err) => {
                 if (err) {

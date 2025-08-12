@@ -50,7 +50,9 @@ export class UserService {
             tax_exemption: body.tax_exemption,
             ein: body.ein,
             primary_purpose: body.primary_purpose,
-            platform_purpose: body.platform_purpose
+            platform_purpose: body.platform_purpose,
+            under_review: true,
+            is_active: true,
         })
         const org = await this.organizationRepository.save(profile)
         const user = await this.userRepository.create({

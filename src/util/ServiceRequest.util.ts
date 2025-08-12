@@ -8,6 +8,17 @@ const advocateService = new AdvocateService();
 const organizationService = new OrganizationService();
 
 export async function clients(body: any, user_id: number, organization_id: number) {
+    // for (const service of body.service) {
+    //
+    //     const checkIfValidService = await organizationService.checkIfValidOrganization(service, organization_id);
+    //
+    //     if (!checkIfValidService) {
+    //         throw new Error('Invalid service');
+    //     }
+    //     if (!checkIfValidService.is_submitted) {
+    //         throw new Error('Invalid service');
+    //     }
+    // }
     if (body.id) {
         const checkIfValidOrganization = await advocateService.checkIfValidClient(body.id, user_id);
         if (!checkIfValidOrganization)

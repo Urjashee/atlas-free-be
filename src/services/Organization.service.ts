@@ -57,7 +57,7 @@ export class OrganizationService {
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .andWhere('organization.under_review = :underReview', {underReview: false})
-                .andWhere('user.is_active = :userActive', {userActive: true})
+                // .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
         }
         if (filter === "pending") {
@@ -69,7 +69,7 @@ export class OrganizationService {
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: true})
-                .andWhere('user.is_active = :userActive', {userActive: true})
+                // .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
         }
     }
@@ -83,12 +83,12 @@ export class OrganizationService {
             relations: ['organization']
         })
         if (organization) {
-            if (organization.organization.is_active == true) {
+            if (organization.organization.is_active == true && organization.organization.under_review == false) {
                 organization.organization.is_active = false
                 await this.organizationRepository.save(organization.organization);
                 return organization.organization;
             }
-            if (organization.organization.is_active == false) {
+            if ((organization.organization.is_active == false) || (organization.organization.is_active == true && organization.organization.under_review == true)) {
                 organization.organization.is_active = true
                 organization.organization.under_review = false
                 const token = randomBytes(32).toString('hex');
@@ -1060,18 +1060,6 @@ export class OrganizationService {
     }
 
     async removeServiceSettings(service_id: number) {
-        const serviceSetting = await this.serviceDetailsRepository.findOne({
-            where: {
-                id: service_id
-            },
-        });
-        console.log("serviceSetting: ", serviceSetting)
-        if (serviceSetting) {
-            if (serviceSetting.id == service_id) {
-                await this.serviceDetailsRepository.delete(serviceSetting.id);
-            }
-        }
-
         const emailReminders = await this.emailReminderRepository.find({
             where: {
                 service: {id: service_id}
