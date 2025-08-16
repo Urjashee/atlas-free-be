@@ -726,7 +726,8 @@ export class OrganizationService {
             where: {
                 id,
                 user: {id: user_id},
-            }
+            },
+            relations: ["user", "organization"]
         })
     }
 
@@ -874,18 +875,11 @@ export class OrganizationService {
             }
         })
         if (checkIfWaitlist.waitlist == true) {
-            const checkIfSlotsAvailable = await this.serviceDetailsRepository.findOne({
-                where: {
-                    id: service_id,
-                }
-            })
-            if (checkIfSlotsAvailable) {
-                if (checkIfSlotsAvailable.slots_available == checkIfWaitlist.slots_available) {
+                if (checkIfWaitlist.slots_available >= checkIfWaitlist.total_available_slots) {
                     return false;
                 } else {
                     return true;
                 }
-            }
         }
         return true
     }

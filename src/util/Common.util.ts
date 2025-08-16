@@ -18,7 +18,9 @@ export async function addClientService(body: any, role: number) {
     const checkIfAdvocate = await organizationService.checkIfOrganizationRoleUser(body.user_id, role);
     if (!checkIfAdvocate)
         throw new Error('Invalid user');
-    const checkIfClient = await organizationService.checkIfOrganizationClient(body.user_id, body.client_id)
+    console.log(body.user_id, body.client_service_id)
+    const checkIfClient = await organizationService.checkIfOrganizationClient(body.user_id, body.client_service_id)
+    // console.log(checkIfClient)
     if (!checkIfClient)
         throw new Error('Invalid client');
     const checkIfService = await serviceManagerService.checkIfService(body.service_id);

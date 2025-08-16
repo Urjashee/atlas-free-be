@@ -1,0 +1,53 @@
+{
+  "info": {
+    "name": "Fluid Pay API",
+    "_postman_id": "12345678-abcd-efgh-ijkl-987654321000",
+    "description": "Postman collection for Fluid Pay API testing (sandbox & production).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "APIKey", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@email.com\",\n  \"phone\": \"5551234567\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/customer/create",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "customer", "create"]
+        }
+      }
+    },
+    {
+      "name": "Add Payment Method",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "APIKey", "value": "{{API_KEY}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customer_id\": \"{{CUSTOMER_ID}}\",\n  \"payment_method\": {\n    \"credit_card\": {\n      \"card_number\": \"4111111111111111\",\n      \"expiration_date\": \"12/26\",\n      \"cvv\": \"123\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/api/customer/payment/create",
+          "host": ["{{BASE_URL}}"],
+          "path": ["api", "customer", "payment", "create"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "BASE_URL", "value": "https://sandbox.fluidpay.com" },
+    { "key": "API_KEY", "value": "YOUR_FLUIDPAY_API_KEY" },
+    { "key": "CUSTOMER_ID", "value": "" }
+  ]
+}

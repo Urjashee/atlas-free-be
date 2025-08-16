@@ -26,8 +26,7 @@ export class ServiceManagerService {
             where: {
                 id: service_id,
                 service_manager: Raw(alias => `FIND_IN_SET(:user_id, ${alias}) > 0`, { user_id })
-            },
-            relations: ["service"]
+            }
         })
     }
     async getServiceManagerService(user_id: number) {
