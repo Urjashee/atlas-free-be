@@ -42,7 +42,7 @@ const loginSchema = Joi.object({
     email: Joi.string().pattern(/^\S+$/).required(),
     password: Joi.string().required(),
     device_token: Joi.string().allow(null, ""),
-    device_type: Joi.string().required(),
+    device_type: Joi.string().valid("web").required(),
 });
 
 const forgotPasswordSchema = Joi.object({
@@ -259,6 +259,7 @@ export class AuthController {
                     return ResponseFormatter.errorResponse(res, "Password is same as the previous one");
                 } else {
                     const updatePassword = await this.userService.updatePassword(passwordResetToken.email, password, passwordResetToken)
+                    console.log(updatePassword)
                     if (!updatePassword)
                         return ResponseFormatter.errorResponse(res, "Password couldn't be updated");
                     return ResponseFormatter.successResponse(res, "Password updated successfully!")

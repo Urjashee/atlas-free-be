@@ -4,10 +4,16 @@ import AppDataSource from "../ormconfig";
 import dotenv from 'dotenv';
 import express from "express";
 import path from "path";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+
+app.use(cors({
+    origin: "*",
+    credentials: true,
+}));
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use(express.urlencoded({ extended: true }));

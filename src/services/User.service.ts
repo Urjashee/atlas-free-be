@@ -316,7 +316,6 @@ export class UserService {
             where: {
                 email,
                 emailVerifiedAt: Not(IsNull()),
-                mobileVerifiedAt: Not(IsNull())
             }
         });
         if (user) {
