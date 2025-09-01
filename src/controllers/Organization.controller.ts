@@ -321,7 +321,7 @@ export class AuthController {
                         last_name: users.last_name,
                         email: users.email,
                         role_id: users.role.id,
-                        role_name: users.role.name,
+                        role_name: users.role.name == 'organization' ? 'Organization Admin' : users.role.name == 'service_manager' ? 'Service Manager' : users.role.name == 'advocate' ? 'Advocate' : users.role.name,
                     }
                 })
             )

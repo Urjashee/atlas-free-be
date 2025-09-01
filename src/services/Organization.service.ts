@@ -281,7 +281,8 @@ export class OrganizationService {
         return await this.serviceDetailsRepository.find({
             where: {
                 organization: {id: organization}
-            }
+            },
+            relations: ['organization', 'state'],
         })
     }
 

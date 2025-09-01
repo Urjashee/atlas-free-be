@@ -27,6 +27,9 @@ export class Affiliations {
     @Column({nullable: true})
     affiliation_file!: string
 
+    @Column({nullable: true, default: "100 KB"})
+    file_size!: string
+
     @Column({ default: 0 })
     is_active!: boolean;
 

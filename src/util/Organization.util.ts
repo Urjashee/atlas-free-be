@@ -19,8 +19,10 @@ export async function getOrganizationsServiceDetails(service: any) {
     return {
         id: service.id,
         name: service.name,
+        address: service.disclose_address == true ? `${service.address} ${service.street} ${service.city} ${service.state.name} ${service.zipcode}` : "",
         service_type_id: service.service_type,
         service_type: (await configService.getServiceOptionsById(service.service_type)).name,
+        service_type_icon: (await configService.getServiceOptionsById(service.service_type)).icon,
         slots_beds_id: service.slots_beds,
         slots_beds: (await configService.getServiceOptionsById(service.slots_beds)).name,
         client_slots: service.client_slots,
@@ -171,17 +173,29 @@ export async function getOrganizationsDetails(organization: any) {
         zipcode: organization.organization.zipcode,
         website: organization.organization.website,
         year: organization.organization.year,
-        address: organization.organization.address,
+        address: organization.organization.disclose_address == true ? organization.organization.address : "-",
         primary_purpose: purposes.map(purpose => ({
             id: purpose.id,
             name: purpose.name,
         })),
         tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
-        affiliation: organization.organization.affiliations.map(item => ({
-            id: item.affiliation.id,
-            name: item.affiliation.name,
-            file: item.affiliation_file
-        }))
+        affiliation: organization.organization.affiliations.map(item => {
+            const fileUrl = item.affiliation_file;
+            let type = "";
+
+            if (fileUrl) {
+                const parts = fileUrl.split(".");
+                type = parts[parts.length - 1].toUpperCase();
+            }
+
+            return {
+                id: item.affiliation.id,
+                name: item.affiliation.name,
+                file: fileUrl,
+                size: item.file_size,
+                type
+            };
+        })
     }
 }
 

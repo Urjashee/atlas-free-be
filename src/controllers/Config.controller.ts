@@ -90,6 +90,7 @@ export class ConfigController {
             return {
                 id: item.id,
                 name: item.name,
+                icon: item.icon,
             }
         })
         const slotsBedsArray = slotsBeds.map((item) => {

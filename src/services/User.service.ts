@@ -70,12 +70,16 @@ export class UserService {
         for (const affiliation of affiliations) {
             const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
             const buffer = Buffer.from(base64Data, 'base64');
+            const fileSizeBytes = buffer.length;
+            const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
+            const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
             const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
             if (uploadedFile) {
                 const addAffiliation = await this.affiliationRepository.create({
                     organization: {id: org.id},
                     affiliation: {id: affiliation.id},
                     affiliation_file: uploadedFile as string,
+                    file_size: fileSizeKB + " KB",
                 });
                 await this.affiliationRepository.save(addAffiliation);
             }
@@ -172,20 +176,28 @@ export class UserService {
             if (affiliationData) {
                 const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
                 const buffer = Buffer.from(base64Data, 'base64');
+                const fileSizeBytes = buffer.length;
+                const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
+                const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
                 const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
                 if (uploadedFile) {
                     affiliationData.affiliation_file = uploadedFile as string
+                    affiliationData.file_size = fileSizeKB + " KB";
                     await this.affiliationRepository.save(affiliationData)
                 }
             } else {
                 const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
                 const buffer = Buffer.from(base64Data, 'base64');
+                const fileSizeBytes = buffer.length;
+                const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
+                const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
                 const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
                 if (uploadedFile) {
                     const addAffiliation = await this.affiliationRepository.create({
                         organization: {id: organization_id},
                         affiliation: {id: affiliation.id},
                         affiliation_file: uploadedFile as string,
+                        file_size: fileSizeKB + " KB",
                     });
                     await this.affiliationRepository.save(addAffiliation);
                 }

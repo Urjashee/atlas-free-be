@@ -12,6 +12,9 @@ export class ServiceDetailsOptions {
     @Column()
     type!: string;
 
+    @Column()
+    icon!: string;
+
     @ManyToOne(() => ServiceHeadings, { eager: true })
     serviceHeading!: ServiceHeadings;
 }
