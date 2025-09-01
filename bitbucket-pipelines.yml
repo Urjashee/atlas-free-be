@@ -19,7 +19,7 @@ pipelines:
                 - echo $SSH_KEY_BASE64 | base64 -d > keys/family-defender.pem
                 # Set permissions for the SSH key
                 - chmod 600 keys/family-defender.pem
-                # Disable SSH strict host key checking and SSH into the server
+                # Disable SSH strict host key checking and SSH into server
                 - mkdir -p ~/.ssh
                 - echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
                 # Add SSH key for Git authentication
