@@ -16,20 +16,17 @@ pipelines:
               name: Deploy and restart application
               script:
                 # Decode the Base64-encoded SSH key and save it temporarily
-                - mkdir -p keys
-                - echo "$SSH_KEY_BASE64" | base64 -d > keys/family-defender.pem
+                - echo $SSH_KEY_BASE64 | base64 -d > keys/family-defender.pem
                 # Set permissions for the SSH key
                 - chmod 600 keys/family-defender.pem
-                # Disable SSH strict host key checking
+                # Disable SSH strict host key checking and SSH into the server
                 - mkdir -p ~/.ssh
                 - echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
-                # SSH into the server and deploy the application using -i
+                # Add SSH key for Git authentication
+                - eval $(ssh-agent -s)
+                - ssh-add keys/family-defender.pem
+                # SSH into the server and deploy the application
                 - ssh -i keys/family-defender.pem $REMOTE_USER@$REMOTE_HOST "
-                  cd /var/www/atlas-free-be && \
-                  git stash && \
-                  git pull https://$BITBUCKET_USERNAME:$BITBUCKET_APP_PASSWORD@bitbucket.org/Simpalm/atlas-free-be.git staging && \
-                  yarn install && \
-                  yarn build:ubuntu && \
-                  pm2 reload atlas "
+                  cd /var/www/atlas-free-be && git stash && git pull https://$BITBUCKET_USERNAME:$BITBUCKET_APP_PASSWORD@bitbucket.org/Simpalm/atlas-free-be.git staging && yarn install && yarn build:ubuntu && pm2 reload atlas "
                 # Clean up the key after usage
                 - rm -f keys/family-defender.pem
