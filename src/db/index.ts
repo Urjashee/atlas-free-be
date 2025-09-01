@@ -775,7 +775,7 @@ async function seedGeneralDetails() {
         });
     });
     for (const data of service_details_options) {
-        const query = 'INSERT INTO service_details_options (id, name, type, serviceHeadingId) VALUES (?, ?, ?, ?)';
+        const query = 'INSERT INTO service_details_options (id, name, type, serviceHeadingId, icon) VALUES (?, ?, ?, ?, ?)';
         await new Promise<void>((resolve, reject) => {
             connection.query(query, [data.id, data.name, data.type, data.serviceHeading.id], (err) => {
                 if (err) {
