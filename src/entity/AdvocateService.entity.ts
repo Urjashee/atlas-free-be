@@ -6,7 +6,7 @@ export class AdvocateService {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({ length: 500 })
     name!: string;
 
     @Column()
