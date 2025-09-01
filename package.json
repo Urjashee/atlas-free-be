@@ -9,7 +9,7 @@
     "seed": "ts-node-dev src/db/index.ts",
     "build": "tsc && xcopy /E /I src\\\\views dist\\\\src\\\\views",
     "build:windows": "tsc && xcopy /E /I src\\\\views dist\\\\src\\\\views",
-    "build:ubuntu": "tsc && mkdir -p dist/src/views && cp -r src/views/* dist/src/views && mkdir -p dist/src/assets && cp -r src/assets/* dist/src/assets"
+    "build:ubuntu": "tsc && mkdir -p dist/src/assets && cp -r src/assets/* dist/src/assets"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",
