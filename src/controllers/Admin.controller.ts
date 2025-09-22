@@ -60,7 +60,7 @@ export class AdminController {
             const organizations = await this.organizationService.getOrganizations(filter)
             const customResponse = await Promise.all(
                 organizations.map(async (organization: any) => {
-                    return await getOrganizationsDetails(organization);
+                    return await getOrganizationsDetails(organization, filter);
                 })
             )
             return ResponseFormatter.successResponse(res, "Organization list", customResponse)
