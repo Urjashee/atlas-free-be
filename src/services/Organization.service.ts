@@ -1101,4 +1101,20 @@ export class OrganizationService {
         })
     }
 
+    async countOrganizationServices(organization_id: number) {
+        return await this.serviceDetailsRepository.count({
+            where: {
+                organization: {id: organization_id},
+            }
+        })
+    }
+
+    async countOrganizationAdvocate(organization_id: number) {
+        return await this.userRepository.count({
+            where: {
+                organization: {id: organization_id},
+                role: {id: Constants.ROLE_ADVOCATE}
+            }
+        })
+    }
 }

@@ -160,12 +160,12 @@ export async function getOrganizationsServiceDetails(service: any) {
     };
 }
 
-export async function getOrganizationsDetails(organization: any) {
+export async function getOrganizationsDetails(organization: any, filter?: string) {
     const ids = organization.organization.primary_purpose.map(id => Number(id));
     const purposes = await configService.getPrimaryPurposeById(ids);
     return {
         id: organization.organization.id,
-        is_active: organization.organization.is_active,
+        is_active: filter || false,
         name: organization.organization.name,
         email: organization.email,
         country_code: organization.country_code,
@@ -178,6 +178,8 @@ export async function getOrganizationsDetails(organization: any) {
             id: purpose.id,
             name: purpose.name,
         })),
+        advocate: await organizationService.countOrganizationAdvocate(organization.organization.id),
+        services: await organizationService.countOrganizationServices(organization.organization.id),
         tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
         affiliation: organization.organization.affiliations.map(item => {
             const fileUrl = item.affiliation_file;
