@@ -291,7 +291,7 @@ export class OrganizationService {
             where: {
                 id: id
             },
-            relations: ['organization']
+            relations: ['organization', 'state']
         })
     }
 
@@ -299,10 +299,11 @@ export class OrganizationService {
         return await this.userRepository
             .createQueryBuilder('user')
             .leftJoinAndSelect('user.organization', 'organization')
+            .leftJoinAndSelect('organization.state', 'state') // ✅ include state relation
             .leftJoinAndSelect('organization.affiliations', 'affiliations')
             .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-            .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
-            .andWhere('organization.id = :orgId', {orgId: id})
+            .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION_ADMIN })
+            .andWhere('organization.id = :orgId', { orgId: id })
             .getOne();
     }
 

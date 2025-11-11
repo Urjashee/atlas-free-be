@@ -174,6 +174,10 @@ export async function getOrganizationsDetails(organization: any) {
         website: organization.organization.website,
         year: organization.organization.year,
         address: organization.organization.disclose_address == true ? organization.organization.address : "-",
+        street: organization.organization.disclose_address == true ? organization.organization.street : "-",
+        city: organization.organization.disclose_address == true ? organization.organization.city : "-",
+        state_id: organization.organization.disclose_address == true ? organization.organization.state?.id : "-",
+        state: organization.organization.disclose_address == true ? organization.organization.state?.name : "-",
         primary_purpose: purposes.map(purpose => ({
             id: purpose.id,
             name: purpose.name,
