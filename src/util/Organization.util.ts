@@ -170,6 +170,7 @@ export async function getOrganizationsDetails(organization: any, filter?: string
         email: organization.email,
         country_code: organization.country_code,
         phone_no: organization.mobile,
+        disclose_address: organization.organization.disclose_address,
         zipcode: organization.organization.zipcode,
         website: organization.organization.website,
         year: organization.organization.year,
