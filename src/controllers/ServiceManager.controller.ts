@@ -19,12 +19,17 @@ import {reportSchema} from "../schema/Organization.schema";
 import {clientSchema} from "../schema/Client.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
 import {addClientService} from "../util/Common.util";
+import {advocateMiddleware} from "../middleware/Advocate.middleware";
 
 const serviceSettingsSchema = Joi.object({
     service_id: Joi.number().required(),
     available_slots: Joi.number().required(),
 })
 
+const reportServiceSchema = Joi.object({
+    service_request_id: Joi.number().required(),
+    reason: Joi.string().required(),
+});
 
 @JsonController("/api/service-manager")
 export class ServiceManagerController {
@@ -236,6 +241,39 @@ export class ServiceManagerController {
             }
 
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/service-report")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async reportService(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = reportServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const {serviceRequestsId, reason} = req.body;
+
+            const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequests)
+                return ResponseFormatter.errorResponse(res, 'Invalid service request');
+            if (getServiceRequests.user.id !== req.user.id)
+                return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
+            const checkIfService = await this.serviceManagerService.checkIfService(getServiceRequests.service.id);
+            if (!checkIfService)
+                return ResponseFormatter.errorResponse(res, 'Invalid service');
+            const reportService = await this.clientService.reportService(serviceRequestsId, reason, getServiceRequests);
+            if (!reportService)
+                return ResponseFormatter.errorResponse(res, "Can't report, try again later");
+
+            return ResponseFormatter.successResponse(res, "Successful reported service");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
