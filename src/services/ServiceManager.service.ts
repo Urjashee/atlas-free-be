@@ -34,13 +34,15 @@ export class ServiceManagerService {
             where: {
                 service_manager: Raw(alias => `FIND_IN_SET(:user_id, ${alias}) > 0`, { user_id })
             },
+            relations: ['organization', 'state'],
         })
     }
     async getServiceManagerServiceById(id: number, user_id: number) {
         return await this.serviceDetailsRepository.findOne({
             where: {
                 id,
-            }
+            },
+            relations: ['organization', 'state'],
         })
     }
 
