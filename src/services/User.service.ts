@@ -117,6 +117,7 @@ export class UserService {
     }
 
     async updateUser(organization_id: number, body: any, role?: number) {
+        console.log("Body: ", body)
         const user = await this.userRepository.findOne({
             where: {
                 organization: {id: organization_id},
@@ -137,7 +138,7 @@ export class UserService {
             organization.address = body.address
             organization.state = body.state
             organization.city = body.city
-            organization.disclose_address = body.disclose_address
+            organization.disclose_address = body.disclose_address === 'true' ? true : false
             organization.zipcode = body.zipcode
             organization.year = body.year
             organization.website = body.website
@@ -320,6 +321,12 @@ export class UserService {
         if (isMatch) {
             return false
         }
+        return true
+    }
+
+    async checkIfSetup(email: string) {
+        const user = await this.userRepository.findOne({where: {email}});
+        if (user.password == null) return false;
         return true
     }
 

@@ -147,18 +147,17 @@ export class AuthController {
     }
 
     @HttpCode(200)
-    @Post("/:user_type/login")
-    async login(@Req() req: Request, @Res() res: Response, @Param("user_type") user_type: string ) {
+    @Post("/login")
+    async login(@Req() req: Request, @Res() res: Response ) {
         const {error} = loginSchema.validate(req.body);
         if (error) {
             return ResponseFormatter.errorResponse(res, error.details[0].message);
         }
-        const roleId = roleMap[user_type]
-        console.log("user_type: ", user_type)
-        console.log("roleId: ", roleId)
-        const checkIfAdmin = await this.userService.checkIfValidRole(req.body.email, roleId);
-        if (!checkIfAdmin)
-            return ResponseFormatter.errorResponse(res, `Not an ${user_type} user`);
+        // const roleId = roleMap[user_type]
+        //
+        // const checkIfAdmin = await this.userService.checkIfValidRole(req.body.email, roleId);
+        // if (!checkIfAdmin)
+        //     return ResponseFormatter.errorResponse(res, `Not an ${user_type} user`);
         try {
             const checkIsEmail = await this.userService.checkIfEmail(req.body.email)
             if (!checkIsEmail)
@@ -254,6 +253,10 @@ export class AuthController {
                 const checkPasswordLinkExpiry = await this.userService.checkPasswordExpiry(token)
                 if (checkPasswordLinkExpiry)
                     return ResponseFormatter.errorResponse(res, "Password link has expired");
+                const checkIfSetup = await this.userService.checkIfSetup(passwordResetToken.email)
+                if (!checkIfSetup) {
+                    return ResponseFormatter.errorResponse(res, "You have not setup your account. Please contact ATLAS FREE");
+                }
                 const checkPreviousPassword = await this.userService.checkPreviousPassword(passwordResetToken.email, password)
                 if (!checkPreviousPassword) {
                     return ResponseFormatter.errorResponse(res, "Password is same as the previous one");

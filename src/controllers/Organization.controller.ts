@@ -43,7 +43,7 @@ const organizationEditSchema = Joi.object({
     website: Joi.string().min(4).max(100).required(),
     tax_exemption: Joi.number().min(0).max(1).required(),
     primary_purpose: Joi.array().items(Joi.number()).required(),
-    affiliations: Joi.string().required(),
+    affiliations: Joi.string().optional(),
 });
 
 @JsonController("/api/organization")
