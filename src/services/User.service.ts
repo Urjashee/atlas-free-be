@@ -28,6 +28,7 @@ export class UserService {
             }
         })
     }
+
     async findById(id: number): Promise<Users> {
         return await this.userRepository.findOne({
             where: {
@@ -142,70 +143,74 @@ export class UserService {
             organization.zipcode = body.zipcode
             organization.year = body.year
             organization.website = body.website
-            organization.tax_exemption = body.tax_exemption
+            organization.tax_exemption = body.tax_exemption === '1' ? true : false
             organization.primary_purpose = body.primary_purpose
             organization.under_review = true
             await this.organizationRepository.save(organization)
         }
-        const currentAffiliations = await this.affiliationRepository.find({
-            where: {
-                organization: {id: organization_id}
-            },
-        })
 
-        const oldIds = currentAffiliations.map(affiliation => affiliation.affiliation.id)
-        const affiliations = JSON.parse(body.affiliations);
-        const newIds = affiliations.map(a => a.id);
-
-        console.log("oldIds3: ", oldIds)
-        console.log("newIds3: ", newIds)
-
-        const toRemove = currentAffiliations.filter(a => !newIds.includes(a.affiliation.id));
-
-        if (toRemove.length) {
-            await this.affiliationRepository.remove(toRemove);
-        }
-        for (const affiliation of affiliations) {
-            console.log("affiliation: ", affiliation.id)
-            const affiliationData = await this.affiliationRepository.findOne({
+        if (body.affiliations) {
+            const currentAffiliations = await this.affiliationRepository.find({
                 where: {
-                    organization: {id: organization_id},
-                    affiliation: {id: affiliation.id},
+                    organization: {id: organization_id}
                 },
-            });
+            })
 
-            if (affiliationData) {
-                const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
-                const buffer = Buffer.from(base64Data, 'base64');
-                const fileSizeBytes = buffer.length;
-                const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
-                const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
-                const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
-                if (uploadedFile) {
-                    affiliationData.affiliation_file = uploadedFile as string
-                    affiliationData.file_size = fileSizeKB + " KB";
-                    await this.affiliationRepository.save(affiliationData)
-                }
-            } else {
-                const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
-                const buffer = Buffer.from(base64Data, 'base64');
-                const fileSizeBytes = buffer.length;
-                const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
-                const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
-                const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
-                if (uploadedFile) {
-                    const addAffiliation = await this.affiliationRepository.create({
+
+            const oldIds = currentAffiliations.map(affiliation => affiliation.affiliation.id)
+            const affiliations = JSON.parse(body.affiliations);
+            const newIds = affiliations.map(a => a.id);
+
+            console.log("oldIds3: ", oldIds)
+            console.log("newIds3: ", newIds)
+
+            const toRemove = currentAffiliations.filter(a => !newIds.includes(a.affiliation.id));
+
+            if (toRemove.length) {
+                await this.affiliationRepository.remove(toRemove);
+            }
+            for (const affiliation of affiliations) {
+                console.log("affiliation: ", affiliation.id)
+                const affiliationData = await this.affiliationRepository.findOne({
+                    where: {
                         organization: {id: organization_id},
                         affiliation: {id: affiliation.id},
-                        affiliation_file: uploadedFile as string,
-                        file_size: fileSizeKB + " KB",
-                    });
-                    await this.affiliationRepository.save(addAffiliation);
+                    },
+                });
+
+                if (affiliationData) {
+                    const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    const fileSizeBytes = buffer.length;
+                    const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
+                    const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
+                    const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
+                    if (uploadedFile) {
+                        affiliationData.affiliation_file = uploadedFile as string
+                        affiliationData.file_size = fileSizeKB + " KB";
+                        await this.affiliationRepository.save(affiliationData)
+                    }
+                } else {
+                    const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    const fileSizeBytes = buffer.length;
+                    const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
+                    const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
+                    const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
+                    if (uploadedFile) {
+                        const addAffiliation = await this.affiliationRepository.create({
+                            organization: {id: organization_id},
+                            affiliation: {id: affiliation.id},
+                            affiliation_file: uploadedFile as string,
+                            file_size: fileSizeKB + " KB",
+                        });
+                        await this.affiliationRepository.save(addAffiliation);
+                    }
                 }
-            }
-            if (role === Constants.ROLE_ORGANIZATION_ADMIN) {
-                organization.is_active = false
-                await this.organizationRepository.save(organization)
+                if (role === Constants.ROLE_ORGANIZATION_ADMIN) {
+                    organization.is_active = false
+                    await this.organizationRepository.save(organization)
+                }
             }
         }
         return true
@@ -375,6 +380,7 @@ export class UserService {
             return await this.userRepository.save(user);
         }
     }
+
     async checkIfTokenVerified(user_id: number, token: string) {
         const verifyUser = await this.passwordResetRepository.findOne({
             where:
@@ -449,6 +455,7 @@ export class UserService {
             }
         }
     }
+
     async deleteDeviceTokenForAllUser(user_id: number) {
         const device_tokens = await this.deviceTokenRepository.find({
             where: {
@@ -461,6 +468,7 @@ export class UserService {
             }
         }
     }
+
     async deleteUser(user_id: number, role: number) {
         const users = await this.userRepository.find({
             where: {
