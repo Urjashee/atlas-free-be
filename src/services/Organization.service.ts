@@ -370,7 +370,7 @@ export class OrganizationService {
         return await this.userRepository.find({
             where: {
                 organization: {id: organization_id},
-                is_active: true,
+                // is_active: true,
                 is_status: true
             },
             order: {created_at: "DESC"}

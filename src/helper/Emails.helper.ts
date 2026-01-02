@@ -47,7 +47,7 @@ export const CreatePassword = (name: string, email: string, token: string, type:
             <p>Thank you for your patience</p>
             <p>Please click the button below to create a password for your account to login</p>
             <button type="button" class="button">
-            <a href='${process.env.SITE_NAME}/create-password?token=${token}&type=${type}&email=${email}&role=${role}' 
+            <a href='${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}' 
                     style="text-decoration:none;color: #2954FF;">
                 Create Password</a></button>
         </div>
@@ -229,7 +229,7 @@ export const SendInvitationEmail = (email: string, token: string, type: number, 
             <p>You have received an invitation from ${organization_name}</p>
             <p>Please click the button below to set up your account</p>
             <button type="button" class="button">
-            <a href='${process.env.SITE_NAME}/create-password?token=${token}&type=${type}&role=${role}' 
+            <a href='${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}' 
                     style="text-decoration:none;color: #2954FF;">
                 Create Password</a></button>
         </div>
