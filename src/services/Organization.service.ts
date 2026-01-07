@@ -748,7 +748,7 @@ export class OrganizationService {
                 organization: {id: organization_id},
                 is_submitted: true
             },
-            relations: ["organization"]
+            relations: ["organization", "state"]
         })
     }
 

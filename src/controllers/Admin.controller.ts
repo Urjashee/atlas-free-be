@@ -134,7 +134,6 @@ export class AdminController {
                 customUser.push(data);
             }
 
-
             for (const service of getServices) {
                 const data = await getOrganizationsServiceDetails(service)
                 customServices.push(data)
