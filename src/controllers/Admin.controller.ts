@@ -92,12 +92,12 @@ export class AdminController {
         }
     }
 
-    @Patch("/organization/status/:organization_id")
+    @Patch("/organization/status/:organization_id/:status_id")
     @UseBefore(authMiddleware)
     @UseBefore(adminMiddleware)
-    async updateOrganizationStatus(@Req() req: Request, @Res() res: Response, @Param("organization_id") organization_id: number) {
+    async updateOrganizationStatus(@Req() req: Request, @Res() res: Response, @Param("organization_id") organization_id: number, @Param("status_id") status_id: number) {
         try {
-            const organization = await this.organizationService.updateStatus(organization_id)
+            const organization = await this.organizationService.updateStatus(organization_id, status_id)
             if (!organization)
                 return ResponseFormatter.errorResponse(res, 'Not an organization')
             return ResponseFormatter.successResponse(res, 'Status updated')
@@ -115,6 +115,7 @@ export class AdminController {
             let customServices = [];
             let customUser = [];
             let roleId: number | undefined;
+            let filter: string;
             const user = req.query.user as string;
             if (user == "all") {
                 roleId = 0
@@ -125,7 +126,17 @@ export class AdminController {
             if (!checkIfOrganization)
                 return ResponseFormatter.errorResponse(res, 'Not an organization');
 
-            const organizationDetails = await getOrganizationsDetails(checkIfOrganization);
+            if (checkIfOrganization.organization.is_active == true && checkIfOrganization.organization.under_review == false) {
+                filter = "active";
+            }
+            if (checkIfOrganization.organization.is_active == true && checkIfOrganization.organization.under_review == true) {
+                filter = "pending";
+            }
+            if (checkIfOrganization.organization.is_active == false && checkIfOrganization.organization.under_review == false) {
+                filter = "inactive";
+            }
+
+            const organizationDetails = await getOrganizationsDetails(checkIfOrganization, filter);
             const getServices = await this.organizationService.getOrganizationServices(organization_id);
 
             const getUsers = await this.organizationService.getUserByOrganization(organization_id, roleId);

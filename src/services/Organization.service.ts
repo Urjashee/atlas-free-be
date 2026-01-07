@@ -74,7 +74,7 @@ export class OrganizationService {
         }
     }
 
-    async updateStatus(organization_id: number) {
+    async updateStatus(organization_id: number, status_id: number) {
         const organization = await this.userRepository.findOne({
             where: {
                 organization: {id: organization_id},
@@ -83,12 +83,19 @@ export class OrganizationService {
             relations: ['organization']
         })
         if (organization) {
-            if (organization.organization.is_active == true && organization.organization.under_review == false) {
-                organization.organization.is_active = false
+            if (status_id == 0) {
+                organization.organization.is_active = true
+                organization.organization.under_review = true
                 await this.organizationRepository.save(organization.organization);
                 return organization.organization;
             }
-            if ((organization.organization.is_active == false) || (organization.organization.is_active == true && organization.organization.under_review == true)) {
+            if (status_id == 2) {
+                organization.organization.is_active = false
+                organization.organization.under_review = false
+                await this.organizationRepository.save(organization.organization);
+                return organization.organization;
+            }
+            if (status_id == 1) {
                 organization.organization.is_active = true
                 organization.organization.under_review = false
                 const token = randomBytes(32).toString('hex');
@@ -117,7 +124,7 @@ export class OrganizationService {
                         type: Constants.CREATE_PASSWORD,
                         user: {id: organization.id}
                     })
-                    const emailContent = ActivateOrganization(organization.user_name, organization.email, token, Constants.ACTIVATE_ORGANIZATION);
+                    const emailContent = ActivateOrganization(organization.user_name || organization.first_name, organization.email, token, Constants.ACTIVATE_ORGANIZATION);
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                         to: organization.email,

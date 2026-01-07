@@ -220,7 +220,8 @@ export class UserService {
         return await this.userRepository.findOne({
             where: {
                 email
-            }
+            },
+            relations: ["organization"]
         });
     }
 
