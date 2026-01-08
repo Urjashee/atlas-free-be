@@ -17,146 +17,103 @@ const advocateService = new AdvocateService();
 
 export async function getOrganizationsServiceDetails(service: any) {
     return {
-        id: service.id,
-        name: service.name,
-        address: service.disclose_address == true ? `${service.address} ${service.street} ${service.city} ${service.state.name} ${service.zipcode}` : "",
-        service_type_id: service.service_type,
-        service_type: (await configService.getServiceOptionsById(service.service_type)).name,
-        service_type_icon: (await configService.getServiceOptionsById(service.service_type)).icon,
-        slots_beds_id: service.slots_beds,
-        slots_beds: (await configService.getServiceOptionsById(service.slots_beds)).name,
-        client_slots: service.client_slots,
-        client_slots_available: service.client_slots_available,
-        start_day_of_service: new Date(service.start_day_of_service).toISOString().split('T')[0],
-        service_limited: service.service_limited,
-        enrollment_type_id: service.enrollment_type,
-        enrollment_type: TimePeriod[service.enrollment_type],
-        enrollment_period: service.enrollment_period,
-        extension: service.extension,
-        waitlist: service.waitlist,
-        service_description: service.service_description,
-        minimum_age: service.minimum_age,
-        maximum_age: service.maximum_age,
-        genders_served: await Promise.all(service.genders_served.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        served_to: await Promise.all(service.served_to.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        minimum_children_age: service.minimum_children_age,
-        maximum_children_age: service.maximum_children_age,
-        maximum_children_intake: service.maximum_children_intake,
-        citizenship_requirement: await Promise.all(service.citizenship_requirement.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        language_requirement: await Promise.all(service.language_requirement.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        out_of_state_relocation: service.out_of_state_relocation,
-        trafficking_status: await Promise.all(service.trafficking_status.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        legal: await Promise.all(service.legal.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        health_needs: await Promise.all(service.health_needs.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        medications: await Promise.all(service.medications.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        mental_health_diagnoses: await Promise.all(service.mental_health_diagnoses.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        physical_accommodations: await Promise.all(service.physical_accommodations.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        smoking_allowed: await Promise.all(service.smoking_allowed.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        entry_requirement: await Promise.all(service.entry_requirement.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        days_sober: service.days_sober,
-        service_model: await Promise.all(service.service_model.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        faith_engagement_id: service.faith_engagement,
-        "faith_engagement": (await configService.getServiceOptionsById(service.faith_engagement)).name,
-        "faith_engagement_practice": service.faith_engagement_practice,
-        service_structure_id: service.service_structure,
-        "service_structure": (await configService.getServiceOptionsById(service.service_structure)).name,
-        sleeping_arrangement_id: service.sleeping_arrangement,
-        "sleeping_arrangement": (await configService.getServiceOptionsById(service.sleeping_arrangement)).name,
-        staffing_level_id: service.staffing_level,
-        "staffing_level": (await configService.getServiceOptionsById(service.staffing_level)).name,
-        "teams_diversity": await Promise.all(service.teams_diversity.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        "service_guidelines": await Promise.all(service.service_guidelines.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        "support_provided": await Promise.all(service.support_provided.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        "support_offered": await Promise.all(service.support_offered.map(async (item) => {
-            return {
-                id: item,
-                name: (await configService.getServiceOptionsById(item)).name
-            }
-        })),
-        intake_process: service.intake_process,
-        additional_requirements: service.additional_requirements,
-        reason_for_removal: service.reason_for_removal,
-        is_submitted: service.is_submitted,
+        id: service?.id ?? null,
+        name: service?.name ?? "",
+
+        address: service?.disclose_address
+            ? `${service.address ?? ""} ${service.street ?? ""} ${service.city ?? ""} ${service.state?.name ?? ""} ${service.zipcode ?? ""}`.trim()
+            : "",
+
+        service_type_id: service?.service_type ?? null,
+        service_type: service?.service_type
+            ? (await configService.getServiceOptionsById(service.service_type))?.name ?? ""
+            : "",
+        service_type_icon: service?.service_type
+            ? (await configService.getServiceOptionsById(service.service_type))?.icon ?? ""
+            : "",
+
+        slots_beds_id: service?.slots_beds ?? null,
+        slots_beds: service?.slots_beds
+            ? (await configService.getServiceOptionsById(service.slots_beds))?.name ?? ""
+            : "",
+
+        client_slots: service?.client_slots ?? null,
+        client_slots_available: service?.client_slots_available ?? null,
+
+        start_day_of_service: service?.start_day_of_service
+            ? new Date(service.start_day_of_service).toISOString().split("T")[0]
+            : "",
+
+        service_limited: service?.service_limited ?? false,
+        enrollment_type_id: service?.enrollment_type ?? null,
+        enrollment_type: service?.enrollment_type
+            ? TimePeriod[service.enrollment_type] ?? ""
+            : "",
+
+        enrollment_period: service?.enrollment_period ?? null,
+        extension: service?.extension ?? false,
+        waitlist: service?.waitlist ?? false,
+
+        service_description: service?.service_description ?? "",
+        minimum_age: service?.minimum_age ?? null,
+        maximum_age: service?.maximum_age ?? null,
+
+        genders_served: await safeOptionsArray(service?.genders_served),
+        served_to: await safeOptionsArray(service?.served_to),
+
+        minimum_children_age: service?.minimum_children_age ?? null,
+        maximum_children_age: service?.maximum_children_age ?? null,
+        maximum_children_intake: service?.maximum_children_intake ?? null,
+
+        citizenship_requirement: await safeOptionsArray(service?.citizenship_requirement),
+        language_requirement: await safeOptionsArray(service?.language_requirement),
+
+        out_of_state_relocation: service?.out_of_state_relocation ?? false,
+
+        trafficking_status: await safeOptionsArray(service?.trafficking_status),
+        legal: await safeOptionsArray(service?.legal),
+        health_needs: await safeOptionsArray(service?.health_needs),
+        medications: await safeOptionsArray(service?.medications),
+        mental_health_diagnoses: await safeOptionsArray(service?.mental_health_diagnoses),
+        physical_accommodations: await safeOptionsArray(service?.physical_accommodations),
+        smoking_allowed: await safeOptionsArray(service?.smoking_allowed),
+        entry_requirement: await safeOptionsArray(service?.entry_requirement),
+
+        days_sober: service?.days_sober ?? "",
+
+        service_model: await safeOptionsArray(service?.service_model),
+
+        faith_engagement_id: service?.faith_engagement ?? null,
+        faith_engagement: service?.faith_engagement
+            ? (await configService.getServiceOptionsById(service.faith_engagement))?.name ?? ""
+            : "",
+        faith_engagement_practice: service?.faith_engagement_practice ?? "",
+
+        service_structure_id: service?.service_structure ?? null,
+        service_structure: service?.service_structure
+            ? (await configService.getServiceOptionsById(service.service_structure))?.name ?? ""
+            : "",
+
+        sleeping_arrangement_id: service?.sleeping_arrangement ?? null,
+        sleeping_arrangement: service?.sleeping_arrangement
+            ? (await configService.getServiceOptionsById(service.sleeping_arrangement))?.name ?? ""
+            : "",
+
+        staffing_level_id: service?.staffing_level ?? null,
+        staffing_level: service?.staffing_level
+            ? (await configService.getServiceOptionsById(service.staffing_level))?.name ?? ""
+            : "",
+
+        teams_diversity: await safeOptionsArray(service?.teams_diversity),
+        service_guidelines: await safeOptionsArray(service?.service_guidelines),
+        support_provided: await safeOptionsArray(service?.support_provided),
+        support_offered: await safeOptionsArray(service?.support_offered),
+
+        intake_process: service?.intake_process ?? "",
+        additional_requirements: service?.additional_requirements ?? "",
+        reason_for_removal: service?.reason_for_removal ?? "",
+
+        is_submitted: service?.is_submitted ?? false,
     };
 }
 
@@ -366,7 +323,7 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
         form = await getClientDetails(getClients, Constants.ROLE_SURVIVOR)
     }
 
-    return  {
+    return {
         client: client,
         form: form,
     }
@@ -447,3 +404,20 @@ export async function removeOrganizationUser(organization_id: number, user_id: n
         throw new Error("Can't remove organization admin. Try again later")
     }
 }
+
+export const safeOption = async (id?: number) => {
+    if (!id) return null;
+    const opt = await configService.getServiceOptionsById(id);
+    return opt ? { id, name: opt.name, icon: opt.icon } : null;
+};
+
+export const safeOptionsArray = async (arr?: number[]) => {
+    if (!Array.isArray(arr) || arr.length === 0) return [];
+    return Promise.all(
+        arr.map(async (id) => {
+            const opt = await configService.getServiceOptionsById(id);
+            return opt ? { id, name: opt.name } : null;
+        })
+    ).then(res => res.filter(Boolean));
+};
+
