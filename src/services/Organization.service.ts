@@ -142,15 +142,15 @@ export class OrganizationService {
         }
     }
 
-    async addServiceDetails(organization_id: number, role: number, body: any, user_id?: number) {
+    async addServiceDetails(organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization? : Organization) {
         const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
-            street: body.street,
-            address: body.address,
-            state: body.state,
-            city: body.city,
-            zipcode: body.zipcode,
+            street: body.is_organization_address ? checkIfValidOrganization.street : body.street,
+            address: body.is_organization_address ? checkIfValidOrganization.address : body.address,
+            state: body.is_organization_address ? checkIfValidOrganization.state : body.state,
+            city: body.is_organization_address ? checkIfValidOrganization.city : body.city,
+            zipcode: body.is_organization_address ? checkIfValidOrganization.zipcode : body.zipcode,
             disclose_address: body.disclose_address === true || body.disclose_address === 'true',
             is_organization_address: body.is_organization_address === true || body.is_organization_address === 'true',
             service_type: body.service_type || null,
@@ -207,7 +207,7 @@ export class OrganizationService {
         return await this.serviceDetailsRepository.save(addService)
     }
 
-    async editServiceDetails(id: number, organization_id: number, role: number, body: any, user_id?: number) {
+    async editServiceDetails(id: number, organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization? : any) {
         const getService = await this.serviceDetailsRepository.findOne({
             where: {
                 id: id,
@@ -216,11 +216,11 @@ export class OrganizationService {
         })
         if (getService) {
             getService.name = body.name
-            getService.street = body.street
-            getService.address = body.address
-            getService.state = body.state
-            getService.city = body.city
-            getService.zipcode = body.zipcode
+            getService.street = body.is_organization_address ? checkIfValidOrganization.street : body.street
+            getService.address = body.is_organization_address ? checkIfValidOrganization.address : body.address
+            getService.state = body.is_organization_address ? checkIfValidOrganization.state : body.state
+            getService.city = body.is_organization_address ? checkIfValidOrganization.city : body.city
+            getService.zipcode = body.is_organization_address ? checkIfValidOrganization.zipcode : body.zipcode
             getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
             getService.is_organization_address = body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type || null
