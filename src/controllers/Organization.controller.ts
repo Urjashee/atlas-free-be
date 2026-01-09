@@ -74,12 +74,12 @@ export class AuthController {
                 const settings = await this.organizationService.editServiceDetails(req.body.id, req.user.organization_id, req.user.role, req.body, null, getOrganization)
                 if (!settings)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully updated service.");
+                return ResponseFormatter.successResponse(res, "Successfully updated service.", settings);
             } else {
                 const settings = await this.organizationService.addServiceDetails(req.user.organization_id, req.user.role, req.body, req.user.id, getOrganization)
                 if (!settings)
                     return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added service.");
+                return ResponseFormatter.successResponse(res, "Successfully added service.", settings);
             }
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
