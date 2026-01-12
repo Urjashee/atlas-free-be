@@ -94,7 +94,7 @@ export class AuthController {
             let customResponse = [];
             const getOrganizationServices = await this.organizationService.getOrganizationsService(req.user.organization_id);
             for (const service of getOrganizationServices) {
-                const data = await getOrganizationsServiceDetails(service)
+                const data = await getOrganizationsServiceDetails(service, Constants.ROLE_ORGANIZATION_ADMIN)
                 customResponse.push(data)
             }
             return ResponseFormatter.successResponse(res, "Successful", customResponse);

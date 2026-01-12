@@ -15,14 +15,21 @@ const configService = new ConfigService();
 const clientService = new ClientService();
 const advocateService = new AdvocateService();
 
-export async function getOrganizationsServiceDetails(service: any) {
+export async function getOrganizationsServiceDetails(service: any, roleId?: number) {
     return {
         id: service?.id ?? null,
         name: service?.name ?? "",
 
-        address: service?.disclose_address
-            ? `${service.address ?? ""} ${service.street ?? ""} ${service.city ?? ""} ${service.state?.name ?? ""} ${service.zipcode ?? ""}`.trim()
-            : "",
+        // address: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN)
+        //     ? `${service.address ?? ""} ${service.street ?? ""} ${service.city ?? ""} ${service.state?.name ?? ""} ${service.zipcode ?? ""}`.trim()
+        //     : "",
+
+        address: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.address : "-",
+        street: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.street : "-",
+        city: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.city : "-",
+        state_id: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.id : "-",
+        state: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.name : "-",
+        disclose_address: service?.disclose_address,
 
         service_type_id: service?.service_type ?? null,
         service_type: service?.service_type
