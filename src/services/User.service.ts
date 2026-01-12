@@ -170,6 +170,9 @@ export class UserService {
                 await this.affiliationRepository.remove(toRemove);
             }
             for (const affiliation of affiliations) {
+                if (!affiliation.file || affiliation.file.trim() === "") {
+                    continue;
+                }
                 console.log("affiliation: ", affiliation.id)
                 const affiliationData = await this.affiliationRepository.findOne({
                     where: {

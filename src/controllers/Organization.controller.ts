@@ -11,7 +11,7 @@ import {
     getOrganizationsDetails,
     getOrganizationsServiceDetails,
     getServiceRequestDetails,
-    getServiceRequests, removeOrganizationUser
+    getServiceRequests, getUserDetails, removeOrganizationUser
 } from "../util/Organization.util";
 import {upload} from "../helper/MulterConfig.helper";
 import {clientServiceSchema, removeUserSchema, servicesSchema} from "../schema/Services.schema";
@@ -531,6 +531,21 @@ export class AuthController {
             await removeOrganizationUser(req.user.organization_id, user_id, email, req.user.id, Constants.ROLE_ORGANIZATION_ADMIN);
 
             return ResponseFormatter.successResponse(res, 'Organization admin deleted');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/user-details/:organizationId/:userId")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async getOrganizationUserDetails(@Req() req: Request, @Res() res: Response, @Param("organizationId") organization_id: number, @Param("userId") user_id: number) {
+        try {
+            const checkIfOrganizationUser = await this.organizationService.checkIfOrganizationUser(user_id, organization_id);
+            if (!checkIfOrganizationUser)
+                return ResponseFormatter.errorResponse(res, 'User not found in organization');
+            const User = await getUserDetails(checkIfOrganizationUser);
+            return ResponseFormatter.successResponse(res, 'Users found', User);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
