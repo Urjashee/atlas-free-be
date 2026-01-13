@@ -211,7 +211,7 @@ export class UserService {
                     }
                 }
                 if (role === Constants.ROLE_ORGANIZATION_ADMIN) {
-                    organization.is_active = false
+                    organization.is_active = true
                     await this.organizationRepository.save(organization)
                 }
             }
