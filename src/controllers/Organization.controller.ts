@@ -469,7 +469,7 @@ export class AuthController {
 //     Remove service manager
     @Post("/remove/service-manager")
     @UseBefore(authMiddleware)
-    @UseBefore(adminMiddleware)
+    @UseBefore(organizationMiddleware)
     async removeServiceManager(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
@@ -493,7 +493,7 @@ export class AuthController {
 //     Remove advocate
     @Post("/remove/advocate")
     @UseBefore(authMiddleware)
-    @UseBefore(adminMiddleware)
+    @UseBefore(organizationMiddleware)
     async removeAdvocate(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
@@ -516,7 +516,7 @@ export class AuthController {
 //     Remove org admin
     @Post("/remove/organization-admin")
     @UseBefore(authMiddleware)
-    @UseBefore(adminMiddleware)
+    @UseBefore(organizationMiddleware)
     async removeOrganizationAdmin(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
