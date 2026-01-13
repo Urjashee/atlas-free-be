@@ -779,7 +779,7 @@ export class OrganizationService {
             where: {
                 service_manager: Raw(alias => `FIND_IN_SET(:service_manager_id, ${alias}) > 0`, {service_manager_id})
             },
-            relations: [ "state"]
+            relations: ["state"]
         });
     }
 

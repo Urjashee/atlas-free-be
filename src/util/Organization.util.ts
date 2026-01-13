@@ -206,9 +206,9 @@ export async function getUserDetails(user: any) {
             services: await Promise.all(
                 getServices.map(async (item) => ({
                     id: item.id,
-                    name: item.name,
+                    name: item.name || "",
                     service_type: (await configService.getServiceOptionsById(item.service_type)).name,
-                    address: item.disclose_address == false ? `${item.address} ${item.street} ${item.city} ${item.state.name} ${item.zipcode}` : "",
+                    address: item.disclose_address == false ? `${item.address} ${item.street} ${item.city} ${item.zipcode}` : "",
                 }))
             ),
             created_at: new Date(user.created_at).toISOString().split('T')[0],
