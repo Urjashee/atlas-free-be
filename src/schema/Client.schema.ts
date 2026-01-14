@@ -8,7 +8,7 @@ export const clientSchema = Joi.object({
     zipcode: Joi.string().min(5).max(10),
     dob: Joi.date(),
     english_speaking_ability: Joi.number(),
-    // preferred_language: Joi.string(),
+    preferred_language: Joi.string().optional().allow(""),
     gender: Joi.array().items(Joi.number()),
     race: Joi.array().items(Joi.number()),
     citizenship_status: Joi.number(),
@@ -29,7 +29,7 @@ export const clientSchema = Joi.object({
     mental_health_diagnoses: Joi.array().items(Joi.number()),
     physical_accommodation: Joi.array().items(Joi.number()),
     nicotine_products: Joi.array().items(Joi.number()),
-    specify_physical_accommodation: Joi.string(),
+    specify_physical_accommodation: Joi.string().optional().allow(""),
 })
 
 export const survivorSchema = Joi.object({

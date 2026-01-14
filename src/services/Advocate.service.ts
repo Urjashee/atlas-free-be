@@ -27,7 +27,7 @@ export class AdvocateService {
             zipcode: body.zipcode,
             dob: body.dob,
             english_speaking_ability: body.english_speaking_ability,
-            preferred_language: body.preferred_language,
+            preferred_language: body.preferred_language || "",
             gender: body.gender,
             race: body.race,
             citizenship_status: body.citizenship_status,
@@ -42,7 +42,7 @@ export class AdvocateService {
             medications: body.medications,
             mental_health_diagnoses: body.mental_health_diagnoses,
             physical_accommodation: body.physical_accommodation,
-            specify_physical_accommodation: body.specify_physical_accommodation,
+            specify_physical_accommodation: body.specify_physical_accommodation || "",
             nicotine_products: body.nicotine_products,
         })
 
@@ -63,14 +63,14 @@ export class AdvocateService {
             getClient.zipcode = body.zipcode
             getClient.dob = body.dob
             getClient.english_speaking_ability = body.english_speaking_ability
-            getClient.preferred_language = body.preferred_language
+            getClient.preferred_language = body.preferred_language || ""
             getClient.gender = body.gender
             getClient.race = body.race
             getClient.citizenship_status = body.citizenship_status
             getClient.client_experienced = body.client_experienced
             getClient.pregnant = body.pregnant
-            getClient.pregnant_months = body.pregnant_months
-            getClient.birthdate_status = body.birthdate_status
+            getClient.pregnant_months = body.pregnant_months || null
+            getClient.birthdate_status = body.birthdate_status || null
             getClient.children_accompany = body.children_accompany
             getClient.children_to_accompany = body.children_to_accompany
             getClient.criteria = body.criteria
@@ -78,7 +78,7 @@ export class AdvocateService {
             getClient.medications = body.medications
             getClient.mental_health_diagnoses = body.mental_health_diagnoses
             getClient.physical_accommodation = body.physical_accommodation
-            getClient.specify_physical_accommodation = body.specify_physical_accommodation
+            getClient.specify_physical_accommodation = body.specify_physical_accommodation || ""
             getClient.nicotine_products = body.nicotine_products
             return await this.clientServiceRepository.save(getClient);
         }
