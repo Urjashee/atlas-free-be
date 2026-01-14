@@ -377,7 +377,7 @@ export class AdminController {
                 }
                 const {organization_id, user_id, email} = req.body;
 
-                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
+                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_ADVOCATE);
 
                 return ResponseFormatter.successResponse(res, 'Advocate deleted');
             } catch (error: any) {
