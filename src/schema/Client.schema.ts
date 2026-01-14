@@ -14,7 +14,12 @@ export const clientSchema = Joi.object({
     citizenship_status: Joi.number(),
     client_experienced: Joi.array().items(Joi.number()).optional(),
     pregnant: Joi.boolean().default(false),
-    pregnant_months: Joi.number().optional(),
+    pregnant_months: Joi.number()
+        .when('pregnant', {
+            is: true,
+            then: Joi.required(),
+            otherwise: Joi.optional()
+        }),
     birthdate_status: Joi.number().optional(),
     children_accompany: Joi.number().optional(),
     children_to_accompany: Joi.number().optional(),

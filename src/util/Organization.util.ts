@@ -208,7 +208,7 @@ export async function getUserDetails(user: any) {
                     id: item.id,
                     name: item.name || "",
                     service_type: (await configService.getServiceOptionsById(item.service_type)).name,
-                    address: item.disclose_address == false ? `${item.address} ${item.street} ${item.city} ${item.zipcode}` : "",
+                    address: item.disclose_address == true ? `${item.address} ${item.street} ${item.city} ${item.state.name || ""} ${item.zipcode}` : "",
                 }))
             ),
             created_at: new Date(user.created_at).toISOString().split('T')[0],
