@@ -165,7 +165,7 @@ export class AuthController {
             const checkIsEmailVerified = await this.userService.checkIfVerified(req.body.email)
             if (!checkIsEmailVerified)
                 return ResponseFormatter.errorResponse(res, 'User email is not verified');
-            if (checkIsEmail.role.id != Constants.ROLE_ADMIN) {
+            if (checkIsEmail.role.id != Constants.ROLE_ADMIN || checkIsEmail.role.id != Constants.ROLE_SURVIVOR) {
                 if (!checkIsEmail.organization.is_active) {
                     return ResponseFormatter.errorResponse(res, 'User organization is not active');
                 }
