@@ -20,7 +20,7 @@ export const clientSchema = Joi.object({
             then: Joi.required(),
             otherwise: Joi.optional()
         }).allow(null).empty(""),
-    birthdate_status: Joi.number().optional(),
+    birthdate_status: Joi.number().allow(null).empty("").optional(),
     children_accompany: Joi.number().optional(),
     children_to_accompany: Joi.number().optional(),
     criteria: Joi.array().items(Joi.number()).optional(),
