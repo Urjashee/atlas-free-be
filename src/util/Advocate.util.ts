@@ -34,7 +34,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
-                    race_ethnicity: await Promise.all(clients.race.map(async (item: number) => {
+                    race: await Promise.all(clients.race.map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getAdvocateServiceById(item)).name
