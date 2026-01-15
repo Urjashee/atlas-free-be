@@ -20,7 +20,7 @@ export class Constants {
     static PENDING = 1
     static UNABLE_TO_SERVE = 2
     static WAITLISTED = 3
-
+    static CANCELLED = 4
 
 }
 

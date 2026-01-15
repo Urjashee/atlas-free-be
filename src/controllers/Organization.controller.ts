@@ -166,6 +166,7 @@ export class AuthController {
                 return ResponseFormatter.errorResponse(res, "Service not found");
             else if (checkIfService) {
                 const editServiceSettings = await this.organizationService.editServiceSettings(req.body);
+                console.log("edit service settings", editServiceSettings);
                 if (!editServiceSettings)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
@@ -189,7 +190,8 @@ export class AuthController {
             const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
             const customResponse = {
                 service_id: getServiceSettings.id,
-                available_slots: getServiceSettings.slots_available,
+                total_available_slots: checkIfValidService.total_available_slots || "",
+                available_slots: getServiceSettings.slots_available || "",
                 service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
                 contact_email: getServiceSettings.contact_email,
                 contact_phone: getServiceSettings.contact_phone,
