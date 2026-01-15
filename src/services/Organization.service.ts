@@ -632,6 +632,8 @@ export class OrganizationService {
     }
 
     async getServiceManager(service_managers: any) {
+        if (!service_managers) return [];
+
         const userArray = []
         for (const service_manager of service_managers) {
             const user = await this.userRepository.findOne({
