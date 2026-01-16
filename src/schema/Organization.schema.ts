@@ -36,6 +36,7 @@ export const reportServiceSchema = Joi.object({
 });
 
 export const assignServiceSchema = Joi.object({
+    organization_id: Joi.number().optional(),
     service_id: Joi.number().required(),
     service_manager_id: Joi.number().required(),
 });

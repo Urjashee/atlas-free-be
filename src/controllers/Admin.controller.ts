@@ -17,7 +17,12 @@ import {
 } from "../util/Organization.util";
 import {getRoleIdByName} from "../util/Common.util";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
-import {reportSchema, sendInvitationSchema, serviceSettingsSchema} from "../schema/Organization.schema";
+import {
+    assignServiceSchema,
+    reportSchema,
+    sendInvitationSchema,
+    serviceSettingsSchema
+} from "../schema/Organization.schema";
 import {Constants} from "../helper/Constants.helper";
 import {removeClient, removeUser} from "../schema/Admin.schema";
 import {clientServiceSchema, removeUserSchema, servicesSchema} from "../schema/Services.schema";
@@ -709,4 +714,50 @@ export class AdminController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
+    @Post("/assign-service/:assign")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async assignService(@Req() req: Request, @Res() res: Response, @Param("assign") assign: string) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = assignServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const {service_id, service_manager_id, organization_id} = req.body;
+
+            const checkIfValidService = await this.organizationService.checkIfValidOrganization(service_id, organization_id);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service");
+
+            const checkIfService = await this.organizationService.checkIfServiceExists(req.body.service_id);
+            if (!checkIfService)
+                return ResponseFormatter.errorResponse(res, "Service not found");
+            const checkIfServiceManager = await this.userService.checkIfServiceManager(service_manager_id)
+            if (!checkIfServiceManager)
+                return ResponseFormatter.errorResponse(res, "No service manager found");
+            const getServiceManager = await this.organizationService.getServiceManager(checkIfValidService.service_manager)
+
+            if (assign === "assign") {
+                const assignManager = await this.organizationService.assignServiceToManager(service_manager_id, checkIfValidService);
+                if (!assignManager)
+                    return ResponseFormatter.errorResponse(res, "Service manager not assigned");
+            }
+            if (assign === "remove") {
+                const removeManager = await this.organizationService.removeServiceFromManager(service_manager_id, checkIfValidService);
+                if (!removeManager)
+                    return ResponseFormatter.errorResponse(res, "Service manager not assigned");
+            }
+
+            return ResponseFormatter.successResponse(res, "Successful updated");
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
 }
