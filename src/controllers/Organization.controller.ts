@@ -560,7 +560,7 @@ export class AuthController {
 
     @Post("/service-report")
     @UseBefore(authMiddleware)
-    @UseBefore(advocateMiddleware)
+    @UseBefore(organizationMiddleware)
     async reportService(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {

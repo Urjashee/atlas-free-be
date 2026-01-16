@@ -155,7 +155,7 @@ export class OrganizationService {
             is_organization_address: body.is_organization_address === true || body.is_organization_address === 'true',
             service_type: body.service_type || null,
             total_available_slots: body.total_available_slots || null,
-            slots_available: body.slots_available || null,
+            slots_available: body.slots_available || body.total_available_slots,
             slots_beds: body.slots_beds,
             start_day_of_service: body.start_day_of_service,
             service_limited: body.service_limited === true || body.service_limited === 'true',
