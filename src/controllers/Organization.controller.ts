@@ -576,7 +576,7 @@ export class AuthController {
             const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
             if (!getServiceRequests)
                 return ResponseFormatter.errorResponse(res, 'Invalid service request');
-            console.log("Service ")
+            console.log("Service :", getServiceRequests);
             // if (getServiceRequests.user.id !== req.user.id)
             //     return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
             const checkIfService = await this.organizationService.checkIfServiceExists(getServiceRequests.service.id);

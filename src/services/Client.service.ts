@@ -105,7 +105,7 @@ export class ClientService {
         const createReport = await this.reportServiceRepository.create({
             reason: reason,
             organization: {id: body.organization.id},
-            user: {id: body.advocate.id},
+            user: {id: body.user.id},
             service: {id: body.service.id}
         })
         const reportedService = await this.serviceDetailsRepository.findOne({
