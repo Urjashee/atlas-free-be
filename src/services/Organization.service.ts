@@ -633,6 +633,7 @@ export class OrganizationService {
     }
 
     async getServiceManager(service_managers: any) {
+        console.log("Service manager: ", service_managers)
         if (!service_managers) return [];
 
         const userArray = []
@@ -1127,5 +1128,26 @@ export class OrganizationService {
                 role: {id: Constants.ROLE_ADVOCATE}
             }
         })
+    }
+
+    async assignServiceToManager(service_manager_id: number, service: any) {
+        const managers = service.service_manager ?? [];
+
+        if (!managers.includes(service_manager_id)) {
+            managers.push(service_manager_id);
+        }
+
+        service.service_manager = managers;
+
+        return await this.serviceDetailsRepository.save(service);
+    }
+
+
+    async removeServiceFromManager(service_manager_id: number, service: any) {
+        const managers = service.service_manager ?? [];
+
+        service.service_manager = managers.filter(id => id !== service_manager_id);
+
+        return await this.serviceDetailsRepository.save(service);
     }
 }

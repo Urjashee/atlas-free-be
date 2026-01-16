@@ -433,6 +433,15 @@ export class UserService {
         });
     }
 
+    async checkIfServiceManager(user_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {id: Constants.ROLE_SERVICE_MANAGER},
+            }
+        });
+    }
+
     async updateUserProfile(user_id: number, username: string, email: string) {
         const user = await this.userRepository.findOne({
             where: {

@@ -20,7 +20,6 @@ export const emailReminderSchema = Joi.object({
     time_zone: Joi.string().required()
 });
 
-
 export const serviceSettingsSchema = Joi.object({
     organization_id: Joi.number(),
     service_id: Joi.number().required(),
@@ -34,4 +33,9 @@ export const serviceSettingsSchema = Joi.object({
 export const reportServiceSchema = Joi.object({
     service_request_id: Joi.number().required(),
     reason: Joi.string().required(),
+});
+
+export const assignServiceSchema = Joi.object({
+    service_id: Joi.number().required(),
+    service_manager_id: Joi.number().required(),
 });

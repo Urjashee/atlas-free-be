@@ -26,6 +26,7 @@ import {clientSchema} from "../schema/Client.schema";
 import {ServiceManagerService} from "../services/ServiceManager.service";
 import {addClientService, reportUser} from "../util/Common.util";
 import {
+    assignServiceSchema,
     reportSchema,
     reportServiceSchema,
     sendInvitationSchema,
@@ -197,7 +198,7 @@ export class AuthController {
                 service_id: getServiceSettings.id,
                 total_available_slots: checkIfValidService.total_available_slots || "",
                 available_slots: getServiceSettings.slots_available || "",
-                service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
+                service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager) || [],
                 contact_email: getServiceSettings.contact_email,
                 contact_phone: getServiceSettings.contact_phone,
                 emailReminders: getEmailReminders.map((reminder: any) => {
@@ -576,9 +577,7 @@ export class AuthController {
             const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
             if (!getServiceRequests)
                 return ResponseFormatter.errorResponse(res, 'Invalid service request');
-            console.log("Service :", getServiceRequests);
-            // if (getServiceRequests.user.id !== req.user.id)
-            //     return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
+
             const checkIfService = await this.organizationService.checkIfServiceExists(getServiceRequests.service.id);
             if (!checkIfService)
                 return ResponseFormatter.errorResponse(res, 'Invalid service');
@@ -587,6 +586,51 @@ export class AuthController {
                 return ResponseFormatter.errorResponse(res, "Can't report, try again later");
 
             return ResponseFormatter.successResponse(res, "Successful reported service");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/assign-service/:assign")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async assignService(@Req() req: Request, @Res() res: Response, @Param("assign") assign: string) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = assignServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const {service_id, service_manager_id} = req.body;
+
+            const checkIfValidService = await this.organizationService.checkIfValidOrganization(service_id, req.user.organization_id);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service");
+
+            const checkIfService = await this.organizationService.checkIfServiceExists(req.body.service_id);
+            if (!checkIfService)
+                return ResponseFormatter.errorResponse(res, "Service not found");
+            const checkIfServiceManager = await this.userService.checkIfServiceManager(service_manager_id)
+            if (!checkIfServiceManager)
+                return ResponseFormatter.errorResponse(res, "No service manager found");
+            const getServiceManager = await this.organizationService.getServiceManager(checkIfValidService.service_manager)
+
+            if (assign === "assign") {
+                const assignManager = await this.organizationService.assignServiceToManager(service_manager_id, checkIfValidService);
+                if (!assignManager)
+                    return ResponseFormatter.errorResponse(res, "Service manager not assigned");
+            }
+            if (assign === "remove") {
+                const removeManager = await this.organizationService.removeServiceFromManager(service_manager_id, checkIfValidService);
+                if (!removeManager)
+                    return ResponseFormatter.errorResponse(res, "Service manager not assigned");
+            }
+
+            return ResponseFormatter.successResponse(res, "Successful updated");
+
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
