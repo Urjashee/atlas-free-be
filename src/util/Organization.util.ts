@@ -44,8 +44,8 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
             ? (await configService.getServiceOptionsById(service.slots_beds))?.name ?? ""
             : "",
 
-        client_slots: service?.client_slots ?? null,
-        client_slots_available: service?.client_slots_available ?? null,
+        client_slots: service?.total_available_slots ?? null,
+        client_slots_available: service?.slots_available ?? null,
 
         start_day_of_service: service?.start_day_of_service
             ? new Date(service.start_day_of_service).toISOString().split("T")[0]

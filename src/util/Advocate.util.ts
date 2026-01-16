@@ -28,12 +28,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     english_speaking_ability_id: clients.english_speaking_ability,
                     english_speaking_ability: (await configService.getServiceOptionsById(clients.english_speaking_ability)).name,
                     preferred_language: clients.preferred_language,
-                    genders_served: await Promise.all(clients.gender.map(async (item: number) => {
-                        return {
-                            id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
-                        }
-                    })),
+                    gender: clients.gender,
                     race: await Promise.all(clients.race.map(async (item: number) => {
                         return {
                             id: item,
@@ -138,12 +133,18 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
         );
     }
 }
-export async function getServiceRequestsUser(serviceRequest: any) {
-    return {
-        client_service_id: serviceRequest ? serviceRequest.client_service.id : null,
-        service_status_id: serviceRequest ? serviceRequest.status : null,
-        service_status: serviceRequest ? ClientStatus[Number(serviceRequest.status)] : null,
-        service_name: serviceRequest ? serviceRequest.service.name : null,
-        service_type: serviceRequest ? (await configService.getServiceOptionsById(serviceRequest.service.service_type)).name : null,
+
+export async function getServiceRequestsUser(serviceRequests: any) {
+    if (serviceRequests && serviceRequests.length > 0) {
+        return []
     }
+    serviceRequests.map(async (serviceRequest: any) => {
+        return {
+            client_service_id: serviceRequest ? serviceRequest.client_service.id : null,
+            service_status_id: serviceRequest ? serviceRequest.status : null,
+            service_status: serviceRequest ? ClientStatus[Number(serviceRequest.status)] : null,
+            service_name: serviceRequest ? serviceRequest.service.name : null,
+            service_type: serviceRequest ? (await configService.getServiceOptionsById(serviceRequest.service.service_type)).name : null,
+        }
+    })
 }

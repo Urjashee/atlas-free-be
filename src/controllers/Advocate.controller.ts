@@ -17,11 +17,7 @@ import {ClientService} from "../services/Client.service";
 import {ClientStatus} from "../entity/AssignedServices.entity";
 import {addClientService} from "../util/Common.util";
 import {clientServiceSchema} from "../schema/Services.schema";
-
-const reportServiceSchema = Joi.object({
-    service_request_id: Joi.number().required(),
-    reason: Joi.string().required(),
-});
+import {reportServiceSchema} from "../schema/Organization.schema";
 
 @JsonController("/api/advocate")
 export class AdvocateController {

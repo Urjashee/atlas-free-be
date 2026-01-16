@@ -224,7 +224,7 @@ export class OrganizationService {
             getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
             getService.is_organization_address = body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type || null
-            getService.total_available_slots = body.client_slots || null
+            getService.total_available_slots = body.total_available_slots || null
             getService.slots_beds = body.slots_beds || null
             getService.start_day_of_service = body.start_day_of_service
             getService.service_limited = body.service_limited === true || body.service_limited === 'true';
@@ -698,7 +698,7 @@ export class OrganizationService {
     }
 
     async getServiceRequestsById(client_id: number) {
-        return await this.assignedServiceRepository.findOne({
+        return await this.assignedServiceRepository.find({
             where: {
                 client_service: {id: client_id}
             },

@@ -25,7 +25,12 @@ import {AdvocateService} from "../services/Advocate.service";
 import {clientSchema} from "../schema/Client.schema";
 import {ServiceManagerService} from "../services/ServiceManager.service";
 import {addClientService, reportUser} from "../util/Common.util";
-import {reportSchema, sendInvitationSchema, serviceSettingsSchema} from "../schema/Organization.schema";
+import {
+    reportSchema,
+    reportServiceSchema,
+    sendInvitationSchema,
+    serviceSettingsSchema
+} from "../schema/Organization.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
 import {adminMiddleware} from "../middleware/Admin.middleware";
 
@@ -108,9 +113,9 @@ export class AuthController {
     @UseBefore(organizationMiddleware)
     async getOrganizationsById(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
         try {
-            const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
-            if (!checkValidService)
-                return ResponseFormatter.errorResponse(res, "Not a valid service")
+            // const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
+            // if (!checkValidService)
+            //     return ResponseFormatter.errorResponse(res, "Not a valid service")
             const getOrganizationServices = await this.organizationService.getOrganizationsServiceById(serviceId);
             const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
@@ -548,6 +553,39 @@ export class AuthController {
                 return ResponseFormatter.errorResponse(res, 'User not found in organization');
             const User = await getUserDetails(checkIfOrganizationUser);
             return ResponseFormatter.successResponse(res, 'Users found', User);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/service-report")
+    @UseBefore(authMiddleware)
+    @UseBefore(advocateMiddleware)
+    async reportService(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
+            }
+            const {error} = reportServiceSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const {serviceRequestsId, reason} = req.body;
+
+            const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequests)
+                return ResponseFormatter.errorResponse(res, 'Invalid service request');
+            // if (getServiceRequests.user.id !== req.user.id)
+            //     return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
+            const checkIfService = await this.organizationService.checkIfServiceExists(getServiceRequests.service.id);
+            if (!checkIfService)
+                return ResponseFormatter.errorResponse(res, 'Invalid service');
+            const reportService = await this.clientService.reportService(serviceRequestsId, reason, getServiceRequests);
+            if (!reportService)
+                return ResponseFormatter.errorResponse(res, "Can't report, try again later");
+
+            return ResponseFormatter.successResponse(res, "Successful reported service");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

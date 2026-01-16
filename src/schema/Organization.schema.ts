@@ -30,3 +30,8 @@ export const serviceSettingsSchema = Joi.object({
     contact_phone: Joi.number().required(),
     emailReminders: Joi.array().items(emailReminderSchema).min(1).required()
 })
+
+export const reportServiceSchema = Joi.object({
+    service_request_id: Joi.number().required(),
+    reason: Joi.string().required(),
+});
