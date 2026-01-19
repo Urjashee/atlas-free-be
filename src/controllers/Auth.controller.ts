@@ -26,12 +26,12 @@ const registrationOrganizationSchema = Joi.object({
     zipcode: Joi.string().min(4).max(10).required(),
     year: Joi.string().min(4).max(5).required(),
     website: Joi.string().min(4).max(100).required(),
-    tax_exemption: Joi.number().min(0).max(1).required(),
-    ein: Joi.string().min(5).max(30).required(),
+    tax_exemption: Joi.number().min(0).max(1).optional(),
+    ein: Joi.string().min(5).max(30).optional(),
     primary_purpose: Joi.array().items(Joi.number()).required(),
     platform_purpose: Joi.number().required(),
     // affiliation_license: Joi.array().items(Joi.number()).required(),
-    affiliations: Joi.string().required(),
+    affiliations: Joi.string().optional().allow(""),
 });
 const registrationSurvivor = Joi.object({
     username: Joi.string().required(),
