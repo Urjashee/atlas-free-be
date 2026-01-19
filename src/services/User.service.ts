@@ -67,7 +67,7 @@ export class UserService {
         })
         const savedUser = await this.userRepository.save(user)
 
-        if (body.affiliation || body.affiliation !== "") {
+        if (body.affiliations && body.affiliations !== "") {
             const affiliations = JSON.parse(body.affiliations);
             for (const affiliation of affiliations) {
                 const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
