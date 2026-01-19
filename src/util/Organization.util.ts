@@ -24,11 +24,11 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         //     ? `${service.address ?? ""} ${service.street ?? ""} ${service.city ?? ""} ${service.state?.name ?? ""} ${service.zipcode ?? ""}`.trim()
         //     : "",
 
-        address: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.address : "-",
-        street: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.street : "-",
-        city: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.city : "-",
-        state_id: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.id : "-",
-        state: (service?.disclose_address || roleId === Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.name : "-",
+        address: (Constants.ROLE_ADMIN === Constants.ROLE_ORGANIZATION_ADMIN) ? service.address : "-",
+        street: (Constants.ROLE_ADMIN === Constants.ROLE_ORGANIZATION_ADMIN) ? service.street : "-",
+        city: (Constants.ROLE_ADMIN === Constants.ROLE_ORGANIZATION_ADMIN) ? service.city : "-",
+        state_id: (Constants.ROLE_ADMIN === Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.id : "-",
+        state: (Constants.ROLE_ADMIN === Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.name : "-",
         disclose_address: service?.disclose_address,
 
         service_type_id: service?.service_type ?? null,
