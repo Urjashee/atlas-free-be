@@ -23,6 +23,7 @@ import {AssignedServices, ClientStatus} from "../entity/AssignedServices.entity"
 import {ReportUser} from "../entity/ReportUser";
 import {ClientService} from "../entity/ClientService.entity";
 import {ReportService} from "../entity/ReportService.entity";
+import {Affiliations} from "../entity/Affiliations.entity";
 
 export class OrganizationService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -34,6 +35,7 @@ export class OrganizationService {
     private reportUserRepository = AppDataSource.getRepository(ReportUser);
     private reportServiceRepository = AppDataSource.getRepository(ReportService);
     private clientServiceRepository = AppDataSource.getRepository(ClientService);
+    private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private mailerService = new EmailService();
 
     async getOrganizations(filter: string) {
@@ -82,6 +84,12 @@ export class OrganizationService {
             },
             relations: ['organization']
         })
+        const getAffiliations = await this.affiliationRepository.find({
+            where: {
+                organization: {id: organization_id},
+                is_active: false
+            }
+        })
         if (organization) {
             if (status_id == 0) {
                 organization.organization.is_active = true
@@ -100,6 +108,12 @@ export class OrganizationService {
                 organization.organization.under_review = false
                 const token = randomBytes(32).toString('hex');
                 if (organization.emailVerifiedAt === null) {
+                    if (getAffiliations) {
+                        for (const affiliation of getAffiliations) {
+                            affiliation.is_active = true
+                            await this.affiliationRepository.save(affiliation)
+                        }
+                    }
                     const password_reset_request = this.passwordResetRepository.create({
                         email: organization.email,
                         token,
@@ -124,6 +138,23 @@ export class OrganizationService {
                         type: Constants.CREATE_PASSWORD,
                         user: {id: organization.id}
                     })
+                    if (getAffiliations) {
+                        for (const affiliation of getAffiliations) {
+                            console.log("Affiliation id: ", affiliation.affiliation.id)
+                            const getAffiliation = await this.affiliationRepository.findOne({
+                                where: {
+                                    affiliation: {id: affiliation.affiliation.id},
+                                    is_active: true,
+                                }
+                            })
+                            console.log("getAffiliation: ", getAffiliation)
+                            if (getAffiliation) {
+                                await this.affiliationRepository.delete(getAffiliation.id)
+                            }
+                            affiliation.is_active = true
+                            await this.affiliationRepository.save(affiliation)
+                        }
+                    }
                     const emailContent = ActivateOrganization(organization.user_name || organization.first_name, organization.email, token, Constants.ACTIVATE_ORGANIZATION);
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
