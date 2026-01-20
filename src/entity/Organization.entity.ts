@@ -48,7 +48,7 @@ export class Organization {
     @Column()
     tax_exemption!: boolean;
 
-    @Column()
+    @Column({nullable: true})
     ein!: number
 
     @Column({ type: "simple-array", nullable: true })

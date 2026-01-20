@@ -49,7 +49,7 @@ export class UserService {
             year: body.year,
             website: body.website,
             tax_exemption: body.tax_exemption,
-            ein: body.ein,
+            ein: body.ein || null,
             primary_purpose: body.primary_purpose,
             platform_purpose: body.platform_purpose,
             under_review: true,
