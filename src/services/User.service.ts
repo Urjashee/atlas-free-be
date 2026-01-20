@@ -120,105 +120,116 @@ export class UserService {
     }
 
     async updateUser(organization_id: number, body: any, role?: number) {
-        console.log("Body: ", body)
+        console.log("Body: ", body);
+
         const user = await this.userRepository.findOne({
-            where: {
-                organization: {id: organization_id},
-            }
-        })
+            where: {organization: {id: organization_id}}
+        });
+
         if (user) {
-            user.country_code = body.country_code
-            user.mobile = body.mobile
-            await this.userRepository.save(user)
+            user.country_code = body.country_code;
+            user.mobile = body.mobile;
+            await this.userRepository.save(user);
         }
+
         const organization = await this.organizationRepository.findOne({
-            where: {
-                id: organization_id
-            }
-        })
-        if (organization) {
-            organization.street = body.street
-            organization.address = body.address
-            organization.state = body.state
-            organization.city = body.city
-            organization.disclose_address = body.disclose_address === 'true' ? true : false
-            organization.zipcode = body.zipcode
-            organization.year = body.year
-            organization.website = body.website
-            organization.tax_exemption = body.tax_exemption === '1' ? true : false
-            organization.primary_purpose = body.primary_purpose
-        }
+            where: {id: organization_id}
+        });
+
+        if (!organization) return false;
+
+        organization.street = body.street;
+        organization.address = body.address;
+        organization.state = body.state;
+        organization.city = body.city;
+        organization.disclose_address = body.disclose_address === "true";
+        organization.zipcode = body.zipcode;
+        organization.year = body.year;
+        organization.website = body.website;
+        organization.tax_exemption = body.tax_exemption === "1";
+        organization.primary_purpose = body.primary_purpose;
+
+        /* ================= AFFILIATIONS ================= */
 
         if (body.affiliations) {
-            const currentAffiliations = await this.affiliationRepository.find({
-                where: {
-                    organization: {id: organization_id}
-                },
-            })
-
-            organization.under_review = true
-            const oldIds = currentAffiliations.map(affiliation => affiliation.affiliation.id)
             const affiliations = JSON.parse(body.affiliations);
-            const newIds = affiliations.map(a => a.id);
 
-            console.log("oldIds3: ", oldIds)
-            console.log("newIds3: ", newIds)
+            const currentAffiliations = await this.affiliationRepository.find({
+                where: {organization: {id: organization_id}},
+            });
 
-            const toRemove = currentAffiliations.filter(a => !newIds.includes(a.affiliation.id));
+            /* 🔒 NORMALIZE IDS (CRITICAL FIX) */
+            const oldIds = currentAffiliations
+                .map(a => Number(a.affiliation.id))
+                .sort();
+
+            const newIds = affiliations
+                .map(a => Number(a.id))
+                .sort();
+
+            /* ✅ STRICT EQUALITY CHECK */
+            const sameIds =
+                oldIds.length === newIds.length &&
+                oldIds.every((id, index) => id === newIds[index]);
+
+            /* ✅ FILE EDIT CHECK */
+            const hasFileEdit = affiliations.some(
+                a => typeof a.file === "string" && a.file.trim() !== ""
+            );
+
+            /* ✅ SET UNDER REVIEW ONLY WHEN REAL CHANGE */
+            if (!sameIds || hasFileEdit) {
+                organization.under_review = true;
+            }
+
+            /* ================= DELETE REMOVED ================= */
+            const toRemove = currentAffiliations.filter(
+                a => !newIds.includes(Number(a.affiliation.id))
+            );
 
             if (toRemove.length) {
                 await this.affiliationRepository.remove(toRemove);
             }
-            for (const affiliation of affiliations) {
-                if (!affiliation.file || affiliation.file.trim() === "") {
-                    continue;
-                }
-                console.log("affiliation: ", affiliation.id)
-                const affiliationData = await this.affiliationRepository.findOne({
-                    where: {
-                        organization: {id: organization_id},
-                        affiliation: {id: affiliation.id},
-                    },
-                });
 
-                if (affiliationData) {
-                    const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
-                    const buffer = Buffer.from(base64Data, 'base64');
-                    const fileSizeBytes = buffer.length;
-                    const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
-                    const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
-                    const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
-                    if (uploadedFile) {
-                        affiliationData.affiliation_file = uploadedFile as string
-                        affiliationData.file_size = fileSizeKB + " KB";
-                        await this.affiliationRepository.save(affiliationData)
-                    }
-                } else {
-                    const base64Data = affiliation.file.replace(/^data:application\/pdf;base64,/, '');
-                    const buffer = Buffer.from(base64Data, 'base64');
-                    const fileSizeBytes = buffer.length;
-                    const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
-                    const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
-                    const uploadedFile = await this.s3UploadService.uploadPdfFile(buffer, "affiliation_file");
-                    if (uploadedFile) {
-                        const addAffiliation = await this.affiliationRepository.create({
-                            organization: {id: organization_id},
-                            affiliation: {id: affiliation.id},
-                            affiliation_file: uploadedFile as string,
-                            file_size: fileSizeKB + " KB",
-                        });
-                        await this.affiliationRepository.save(addAffiliation);
-                    }
+            /* ================= ADD / UPDATE ================= */
+            for (const affiliation of affiliations) {
+                if (!affiliation.file || affiliation.file.trim() === "") continue;
+
+                const base64Data = affiliation.file.replace(
+                    /^data:application\/pdf;base64,/,
+                    ""
+                );
+                const buffer = Buffer.from(base64Data, "base64");
+                const fileSizeKB = (buffer.length / 1024).toFixed(2);
+
+                const uploadedFile = await this.s3UploadService.uploadPdfFile(
+                    buffer,
+                    "affiliation_file"
+                );
+
+                if (!uploadedFile) continue;
+
+                if (uploadedFile) {
+                    const addAffiliation = this.affiliationRepository.create({
+                        organization: {id: organization_id},
+                        affiliation: {id: Number(affiliation.id)},
+                        affiliation_file: uploadedFile as string,
+                        file_size: `${fileSizeKB} KB`,
+                    });
+                    await this.affiliationRepository.save(addAffiliation);
                 }
-                if (role === Constants.ROLE_ORGANIZATION_ADMIN) {
-                    organization.is_active = true
-                    await this.organizationRepository.save(organization)
-                }
+
+            }
+
+            if (role === Constants.ROLE_ORGANIZATION_ADMIN) {
+                organization.is_active = true;
             }
         }
-        await this.organizationRepository.save(organization)
-        return true
+
+        await this.organizationRepository.save(organization);
+        return true;
     }
+
 
     async checkIfEmail(email: string) {
         return await this.userRepository.findOne({

@@ -151,7 +151,9 @@ export async function getOrganizationsDetails(organization: any, filter?: string
         advocate: await organizationService.countOrganizationAdvocate(organization.organization.id),
         services: await organizationService.countOrganizationServices(organization.organization.id),
         tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
-        affiliation: organization.organization.affiliations.map(item => {
+        affiliation: organization.organization.affiliations
+            .filter((item: any) => item.is_active === true)
+            .map((item: any) => {
             const fileUrl = item.affiliation_file;
             let type = "";
 
@@ -159,7 +161,6 @@ export async function getOrganizationsDetails(organization: any, filter?: string
                 const parts = fileUrl.split(".");
                 type = parts[parts.length - 1].toUpperCase();
             }
-
             return {
                 id: item.affiliation.id,
                 name: item.affiliation.name,
