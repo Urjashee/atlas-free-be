@@ -48,6 +48,7 @@ export class OrganizationService {
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: false})
+                .orderBy('user.created_at', 'DESC')
                 .getMany();
         }
         if (filter === "inactive") {
@@ -59,6 +60,7 @@ export class OrganizationService {
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .andWhere('organization.under_review = :underReview', {underReview: false})
+                .orderBy('user.created_at', 'DESC')
                 // .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
         }
@@ -71,6 +73,7 @@ export class OrganizationService {
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: true})
+                .orderBy('user.created_at', 'DESC')
                 // .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
         }
