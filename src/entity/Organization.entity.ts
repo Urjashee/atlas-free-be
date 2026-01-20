@@ -45,7 +45,7 @@ export class Organization {
     @Column()
     website!: string;
 
-    @Column()
+    @Column({default: false})
     tax_exemption!: boolean;
 
     @Column({nullable: true})
