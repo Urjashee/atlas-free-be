@@ -141,7 +141,7 @@ export class AdminController {
                 filter = "inactive";
             }
 
-            const organizationDetails = await getOrganizationsDetails(checkIfOrganization, filter);
+            const organizationDetails = await getOrganizationsDetails(checkIfOrganization, filter, Constants.ROLE_ADMIN);
             const getServices = await this.organizationService.getOrganizationServices(organization_id);
 
             const getUsers = await this.organizationService.getUserByOrganization(organization_id, roleId);
