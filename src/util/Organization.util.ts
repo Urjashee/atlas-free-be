@@ -124,7 +124,7 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
     };
 }
 
-export async function getOrganizationsDetails(organization: any, filter?: string) {
+export async function getOrganizationsDetails(organization: any, filter?: string, role?: number) {
     const ids = organization.organization.primary_purpose.map(id => Number(id));
     const purposes = await configService.getPrimaryPurposeById(ids);
     return {
@@ -151,8 +151,8 @@ export async function getOrganizationsDetails(organization: any, filter?: string
         advocate: await organizationService.countOrganizationAdvocate(organization.organization.id),
         services: await organizationService.countOrganizationServices(organization.organization.id),
         tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
-        affiliation: organization.organization.affiliations
-            .filter((item: any) => item.is_active === true)
+        affiliation: role == Constants.ROLE_ADMIN ? (organization.organization.affiliations
+            .filter((item: any) => item.is_active === false)
             .map((item: any) => {
             const fileUrl = item.affiliation_file;
             let type = "";
@@ -168,7 +168,24 @@ export async function getOrganizationsDetails(organization: any, filter?: string
                 size: item.file_size,
                 type
             };
-        })
+        })) : (organization.organization.affiliations
+            .filter((item: any) => item.is_active === true)
+            .map((item: any) => {
+                const fileUrl = item.affiliation_file;
+                let type = "";
+
+                if (fileUrl) {
+                    const parts = fileUrl.split(".");
+                    type = parts[parts.length - 1].toUpperCase();
+                }
+                return {
+                    id: item.affiliation.id,
+                    name: item.affiliation.name,
+                    file: fileUrl,
+                    size: item.file_size,
+                    type
+                };
+            }))
     }
 }
 

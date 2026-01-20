@@ -13,7 +13,7 @@ export const servicesSchema = Joi.object({
     state: Joi.number().allow(null).empty("").optional(),
     zipcode: Joi.string().allow("").optional(),
 
-    disclose_address: Joi.boolean().required(),
+    disclose_address: Joi.boolean().default(true),
     is_organization_address: Joi.boolean().default(false),
 
     service_type: Joi.number().allow(null).empty("").optional(),

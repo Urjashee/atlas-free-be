@@ -11,6 +11,7 @@ import {Organization} from "../entity/Organization.entity";
 import {randomBytes} from "crypto";
 import {VerifyEmail} from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
+import { DataSource } from "typeorm";
 
 export class UserService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -38,6 +39,11 @@ export class UserService {
     }
 
     async createUser(body: any, role: number): Promise<Users> {
+        const queryRunner = AppDataSource.createQueryRunner();
+
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
         const profile = await this.organizationRepository.create({
             street: body.street,
             address: body.address,
@@ -89,6 +95,90 @@ export class UserService {
         }
         return savedUser
     }
+
+    // async createUser(body: any, role: number): Promise<Users> {
+    //     const queryRunner = AppDataSource.createQueryRunner();
+    //
+    //     await queryRunner.connect();
+    //     await queryRunner.startTransaction();
+    //
+    //     try {
+    //         const profile = queryRunner.manager.create(Organization, {
+    //             street: body.street,
+    //             address: body.address,
+    //             state: body.state,
+    //             city: body.city,
+    //             name: body.name,
+    //             disclose_address: body.disclose_address,
+    //             zipcode: body.zipcode,
+    //             year: body.year,
+    //             website: body.website,
+    //             tax_exemption: body.tax_exemption,
+    //             ein: body.ein || null,
+    //             primary_purpose: body.primary_purpose,
+    //             platform_purpose: body.platform_purpose,
+    //             under_review: true,
+    //             is_active: true,
+    //         });
+    //
+    //         const org = await queryRunner.manager.save(profile);
+    //
+    //         const user = queryRunner.manager.create(Users, {
+    //             email: body.email,
+    //             country_code: body.country_code,
+    //             mobile: body.phone_no,
+    //             is_profile: true,
+    //             is_status: true,
+    //             role: { id: role },
+    //             organization: { id: org.id },
+    //         });
+    //
+    //         const savedUser = await queryRunner.manager.save(user);
+    //
+    //         if (body.affiliations && body.affiliations !== "") {
+    //             const affiliations = JSON.parse(body.affiliations);
+    //
+    //             for (const affiliation of affiliations) {
+    //                 const base64Data = affiliation.file.replace(
+    //                     /^data:application\/pdf;base64,/,
+    //                     ""
+    //                 );
+    //                 const buffer = Buffer.from(base64Data, "base64");
+    //                 const fileSizeBytes = buffer.length;
+    //                 const fileSizeKB = (fileSizeBytes / 1024).toFixed(2);
+    //
+    //                 const uploadedFile =
+    //                     await this.s3UploadService.uploadPdfFile(
+    //                         buffer,
+    //                         "affiliation_file"
+    //                     );
+    //
+    //                 if (uploadedFile) {
+    //                     const addAffiliation =
+    //                         queryRunner.manager.create(Affiliations, {
+    //                             organization: { id: org.id },
+    //                             affiliation: { id: affiliation.id },
+    //                             affiliation_file: uploadedFile as string,
+    //                             file_size: fileSizeKB + " KB",
+    //                         });
+    //
+    //                     await queryRunner.manager.save(addAffiliation);
+    //                 }
+    //             }
+    //         }
+    //
+    //         await queryRunner.commitTransaction();
+    //
+    //         return savedUser;
+    //
+    //     } catch (error) {
+    //         await queryRunner.rollbackTransaction();
+    //         throw error;
+    //
+    //     } finally {
+    //         await queryRunner.release();
+    //     }
+    // }
 
     async createSurvivor(body: any, role: number): Promise<Users> {
         const user = await this.userRepository.create({
