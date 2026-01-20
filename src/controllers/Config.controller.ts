@@ -312,6 +312,21 @@ export class ConfigController {
             "staff_diversity": staffDiversityArray,
         }
 
+        const language_text = {
+            "landing_screen": {
+                "sub_title": "So All Can Live in Freedom",
+                "text": "Your work is vital for survivors’ recovery and support. Wayplace simplifies connecting with survivors, so you can achieve your mission."
+            },
+            "org_registration": {
+                "sub_title": "A Safe Haven for Every Survivor",
+                "text": "You are here to offer safety, support, and recovery to human trafficking survivors. We are here to connect you with survivors ready to choose your services, not because they have to, but because you are the best fit for them."
+            },
+            "org_login": {
+                "sub_title": "From Exploitation to Empowerment",
+                "text": "Connect with survivors who have hand-picked your organization. With our streamlined process, Wayplace helps you get to the work of recovery and empowerment for survivors."
+            }
+        }
+
         const customResponse = {
             "roles": rolesArray,
             "states": stateArray,
@@ -349,6 +364,7 @@ export class ConfigController {
             "day_of_the_week": dayOfTheWeekArray,
             "time_zone": timeZoneArray,
             "filter": filter,
+            "language_text": language_text
         }
 
         return ResponseFormatter.successResponse(res, "Configuration data", customResponse);
