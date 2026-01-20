@@ -147,8 +147,6 @@ export class UserService {
             organization.website = body.website
             organization.tax_exemption = body.tax_exemption === '1' ? true : false
             organization.primary_purpose = body.primary_purpose
-            organization.under_review = true
-            await this.organizationRepository.save(organization)
         }
 
         if (body.affiliations) {
@@ -158,7 +156,7 @@ export class UserService {
                 },
             })
 
-
+            organization.under_review = true
             const oldIds = currentAffiliations.map(affiliation => affiliation.affiliation.id)
             const affiliations = JSON.parse(body.affiliations);
             const newIds = affiliations.map(a => a.id);
@@ -218,6 +216,7 @@ export class UserService {
                 }
             }
         }
+        await this.organizationRepository.save(organization)
         return true
     }
 

@@ -129,7 +129,8 @@ export async function getOrganizationsDetails(organization: any, filter?: string
     const purposes = await configService.getPrimaryPurposeById(ids);
     return {
         id: organization.organization.id,
-        is_active: filter || false,
+        is_active: filter || "",
+        under_review: organization.organization.under_review ?? "",
         name: organization.organization.name,
         email: organization.email,
         country_code: organization.country_code,
