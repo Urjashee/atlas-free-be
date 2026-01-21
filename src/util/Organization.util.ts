@@ -151,6 +151,7 @@ export async function getOrganizationsDetails(organization: any, filter?: string
         advocate: await organizationService.countOrganizationAdvocate(organization.organization.id),
         services: await organizationService.countOrganizationServices(organization.organization.id),
         tax_status: organization.organization.tax_exemption == false ? "No" : "Yes",
+        ein: organization.organization.ein,
         affiliation: role == Constants.ROLE_ADMIN ? (organization.organization.affiliations
             .filter((item: any) => item.is_active === false)
             .map((item: any) => {
