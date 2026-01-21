@@ -22,6 +22,8 @@ export class Constants {
     static WAITLISTED = 3
     static CANCELLED = 4
 
+    static MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+
 }
 
 export const roleMap: { [key: string]: number } = {

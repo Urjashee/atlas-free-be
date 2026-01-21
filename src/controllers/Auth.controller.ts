@@ -26,7 +26,7 @@ const registrationOrganizationSchema = Joi.object({
     zipcode: Joi.string().min(4).max(10).required(),
     year: Joi.string().min(4).max(5).required(),
     website: Joi.string().min(4).max(100).required(),
-    tax_exemption: Joi.number().min(0).max(1).optional(),
+    tax_exemption: Joi.number().optional(),
     ein: Joi.string().optional().allow(""),
     primary_purpose: Joi.array().items(Joi.number()).required(),
     platform_purpose: Joi.number().required(),
