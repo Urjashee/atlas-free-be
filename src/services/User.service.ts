@@ -248,6 +248,7 @@ export class UserService {
         organization.zipcode = body.zipcode;
         organization.year = body.year;
         organization.website = body.website;
+        organization.ein = body.ein || null;
         organization.tax_exemption = body.tax_exemption === "1";
         organization.primary_purpose = body.primary_purpose;
 
