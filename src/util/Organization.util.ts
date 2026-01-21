@@ -30,6 +30,7 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         state_id: (Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.id : "-",
         state: (Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.name : "-",
         disclose_address: service?.disclose_address,
+        is_organization_address: service.is_organization_address,
 
         service_type_id: service?.service_type ?? null,
         service_type: service?.service_type
