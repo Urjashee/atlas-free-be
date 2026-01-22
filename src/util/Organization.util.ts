@@ -29,6 +29,7 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         city: (Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) ? service.city : "-",
         state_id: (Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.id : "-",
         state: (Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) ? service.state?.name : "-",
+        zipcode: service.zipcode,
         disclose_address: service?.disclose_address,
         is_organization_address: service.is_organization_address,
 
