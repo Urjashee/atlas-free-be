@@ -3,7 +3,7 @@ import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
 import {getRoleNameById} from "./Common.util";
-import {Constants} from "../helper/Constants.helper";
+import {Constants, statusMap} from "../helper/Constants.helper";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import {getClientDetails} from "./Advocate.util";
 import {ClientService} from "../services/Client.service";
@@ -283,7 +283,11 @@ export async function getServiceRequests(organization_id: number, page_number: n
                 date_time: service.created_at,
                 service_request: service.status,
                 client_service_id: service.client_service.id,
-                user: service.user.id
+                user: service.user.id,
+                status: {
+                    id: service.status,
+                    name: statusMap[service.status] ?? "UNKNOWN",
+                },
             });
         }
 
@@ -298,7 +302,11 @@ export async function getServiceRequests(organization_id: number, page_number: n
                 date_time: service.created_at,
                 service_request: service.status,
                 client_service_id: service.client_service.id,
-                user: service.user.id
+                user: service.user.id,
+                status: {
+                    id: service.status,
+                    name: statusMap[service.status] ?? "UNKNOWN",
+                },
             });
         }
     }
@@ -332,7 +340,11 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
             date_time: getServiceRequest.created_at,
             service_request: getServiceRequest.status,
             client_service_id: getServiceRequest.client_service.id,
-            user: getServiceRequest.user.id
+            user: getServiceRequest.user.id,
+            status: {
+                id: getServiceRequest.status,
+                name: statusMap[getServiceRequest.status] ?? "UNKNOWN",
+            },
         };
         form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
     }

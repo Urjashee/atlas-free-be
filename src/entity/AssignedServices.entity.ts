@@ -36,7 +36,7 @@ export class AssignedServices {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ nullable: true, default: 1 })
+    @Column({ nullable: true, default: 9 })
     status!: number;
 
     @Column({ nullable: true })
