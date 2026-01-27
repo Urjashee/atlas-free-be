@@ -16,7 +16,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
             clientsDetails.map(async (clients: any) => {
                 return {
                     id: clients.id,
-                    services: await Promise.all(clients.service.map(async (item) => {
+                    services: await Promise.all((clients.service ?? []).map(async (item) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
@@ -30,14 +30,14 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     preferred_language: clients.preferred_language,
                     gender: (await configService.getServiceOptionsById(clients.gender)).name,
                     gender_id: clients.gender,
-                    race: await Promise.all(clients.race.map(async (item: number) => {
+                    race: await Promise.all((clients.race ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getAdvocateServiceById(item)).name
                         }
                     })),
                     citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status)).name,
-                    client_experienced: await Promise.all(clients.client_experienced.map(async (item: number) => {
+                    client_experienced: await Promise.all((clients.client_experienced ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
@@ -48,25 +48,25 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     birthdate_status: (await configService.getAdvocateServiceById(clients.birthdate_status)).name,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_to_accompany: clients.children_to_accompany,
-                    criteria: await Promise.all(clients.criteria.map(async (item: number) => {
+                    criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
-                    criteria_add: await Promise.all(clients.criteria_add.map(async (item: number) => {
+                    criteria_add: await Promise.all((clients.criteria_add ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
-                    medications: await Promise.all(clients.medications.map(async (item: number) => {
+                    medications: await Promise.all((clients.medications ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
-                    mental_health_diagnoses: await Promise.all(clients.mental_health_diagnoses.map(async (item: number) => {
+                    mental_health_diagnoses: await Promise.all((clients.mental_health_diagnoses ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
@@ -78,7 +78,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
-                    nicotine_products: await Promise.all(clients.nicotine_products.map(async (item: number) => {
+                    nicotine_products: await Promise.all((clients.nicotine_products ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
@@ -94,7 +94,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
             clientsDetails.map(async (clients: any) => {
                 return {
                     id: clients.id,
-                    services: await Promise.all(clients.service.map(async (item) => {
+                    services: await Promise.all((clients.service ?? []).map(async (item) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
@@ -108,7 +108,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     gender: clients.gender,
                     gender_id: clients.gender,
                     citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status)).name,
-                    client_experienced: await Promise.all(clients.client_experienced.map(async (item: number) => {
+                    client_experienced: await Promise.all((clients.client_experienced ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
@@ -119,7 +119,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     birthdate_status: (await configService.getAdvocateServiceById(clients.birthdate_status)).name,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_to_accompany: clients.children_to_accompany,
-                    criteria: await Promise.all(clients.criteria.map(async (item: number) => {
+                    criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name

@@ -39,7 +39,7 @@ export const survivorSchema = Joi.object({
     zipcode: Joi.string().min(5).max(10),
     dob: Joi.date(),
     english_speaking_ability: Joi.number(),
-    gender: Joi.array().items(Joi.number()),
+    gender: Joi.string().optional().allow(""),
     citizenship_status: Joi.number(),
     client_experienced: Joi.array().items(Joi.number()),
     pregnant: Joi.boolean(),

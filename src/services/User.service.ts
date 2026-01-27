@@ -25,7 +25,16 @@ export class UserService {
     async findByEmail(email: string): Promise<Users> {
         return await this.userRepository.findOne({
             where: {
-                email
+                email,
+            }
+        })
+    }
+
+    async findByEmailVerified(email: string): Promise<Users> {
+        return await this.userRepository.findOne({
+            where: {
+                email,
+                emailVerifiedAt: Not(null)
             }
         })
     }
@@ -201,8 +210,9 @@ export class UserService {
             is_status: true,
             role: {id: role},
         })
-        const token = randomBytes(32).toString('hex');
         const saved_user = await this.userRepository.save(user);
+
+        const token = randomBytes(32).toString('hex');
         const password_reset_request = this.passwordResetRepository.create({
             email: body.email,
             token,
@@ -219,6 +229,25 @@ export class UserService {
         };
         await this.mailerService.sendEmail(mailOptions);
         return saved_user
+    }
+
+    async sendEmail(email: string, username: string, user_id: number) {
+        const token = randomBytes(32).toString('hex');
+        const password_reset_request = this.passwordResetRepository.create({
+            email: email,
+            token,
+            type: Constants.VERIFY_EMAIL,
+            user: {id: user_id}
+        })
+        await this.passwordResetRepository.save(password_reset_request);
+        const emailContent = VerifyEmail(username, user_id, token, Constants.VERIFY_EMAIL, Constants.ROLE_SURVIVOR);
+        const mailOptions = {
+            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            to: email,
+            subject: "Email from Atlas free!",
+            html: emailContent
+        };
+        return await this.mailerService.sendEmail(mailOptions);
     }
 
     async updateUser(organization_id: number, body: any, role?: number) {

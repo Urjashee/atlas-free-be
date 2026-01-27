@@ -131,11 +131,18 @@ export class AuthController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            const roleId = Constants.ROLE_SURVIVOR
             const existingUser = await this.userService.findByEmail(req.body.email);
             if (existingUser) {
-                return ResponseFormatter.errorResponse(res, 'Email already in use');
+                if (existingUser.emailVerifiedAt != null) {
+                    return ResponseFormatter.errorResponse(res, 'Email already in use');
+                }
+                const sendEmail = await this.userService.sendEmail(req.body.email, existingUser.user_name, existingUser.id)
+                if (sendEmail) {
+                    return ResponseFormatter.successResponse(res, 'Verification email sent');
+                }
             }
-            const roleId = Constants.ROLE_SURVIVOR
+
             const user = await this.userService.createSurvivor(req.body, roleId,);
             if (user)
                 return ResponseFormatter.successResponse(res, 'User created')
