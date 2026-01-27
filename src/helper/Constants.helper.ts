@@ -21,6 +21,7 @@ export class Constants {
     static UNABLE_TO_SERVE = 3
     static WAITLISTED = 4
     static CANCELLED = 5
+    static ACCEPTED = 5
 
     static MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
 
@@ -39,4 +40,5 @@ export const statusMap: Record<number, string> = {
     3: "UNABLE_TO_SERVE",
     4: "WAITLISTED",
     5: "CANCELLED",
+    6: "ACCEPTED",
 };
