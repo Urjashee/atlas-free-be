@@ -47,6 +47,6 @@ export async function getClientsById(client_id: number, user_id: number, organiz
     const customResponseService = await getServiceRequestsUser(getServiceRequests)
     return {
         form: form,
-        serviceRequests: customResponseService || []
+        service_requests: customResponseService || []
     }
 }
