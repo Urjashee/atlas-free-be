@@ -359,7 +359,11 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
             date_time: getServiceRequest.created_at,
             service_request: getServiceRequest.status,
             client_service_id: getServiceRequest.client_service.id,
-            user: getServiceRequest.user.id
+            user: getServiceRequest.user.id,
+            status: {
+                id: getServiceRequest.status,
+                name: statusMap[getServiceRequest.status] ?? "UNKNOWN",
+            },
         };
         form = await getClientDetails(getClients, Constants.ROLE_SURVIVOR)
     }
