@@ -11,6 +11,7 @@ import {Users} from "./Users.entity";
 import {Organization} from "./Organization.entity";
 import {ServiceDetails} from "./ServiceDetails.entity";
 import {ClientService} from "./ClientService.entity";
+import {Constants} from "../helper/Constants.helper";
 
 export enum ChildrenToAccompany {
     "Yes" = 1,
@@ -36,7 +37,7 @@ export class AssignedServices {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ nullable: true, default: 9 })
+    @Column({ nullable: true, default: Constants.PENDING })
     status!: number;
 
     @Column({ nullable: true })
