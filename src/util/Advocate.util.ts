@@ -132,16 +132,26 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
 }
 
 export async function getServiceRequestsUser(serviceRequests: any) {
-    if (serviceRequests && serviceRequests.length > 0) {
+    if (!serviceRequests || serviceRequests.length <= 0) {
         return []
     }
-    serviceRequests.map(async (serviceRequest: any) => {
-        return {
-            client_service_id: serviceRequest ? serviceRequest.client_service.id : null,
-            service_status_id: serviceRequest ? serviceRequest.status : null,
-            service_status: serviceRequest ? ClientStatus[Number(serviceRequest.status)] : null,
-            service_name: serviceRequest ? serviceRequest.service.name : null,
-            service_type: serviceRequest ? (await configService.getServiceOptionsById(serviceRequest.service.service_type)).name : null,
-        }
-    })
+
+    return await Promise.all(
+        serviceRequests.map(async (serviceRequest: any) => {
+            return {
+                requested_service_id: serviceRequest?.id ?? null,
+                service_status_id: serviceRequest?.status ?? null,
+                service_status: serviceRequest?.status
+                    ? ClientStatus[Number(serviceRequest.status)]
+                    : null,
+                service_name: serviceRequest?.service?.name ?? null,
+                service_type: serviceRequest?.service?.service_type
+                    ? (await configService.getServiceOptionsById(
+                    serviceRequest.service.service_type
+                ))?.name ?? null
+                    : null,
+            }
+        })
+    )
 }
+
