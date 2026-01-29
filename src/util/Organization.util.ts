@@ -297,6 +297,7 @@ export async function getServiceRequests(organization_id: number, page_number: n
                 id: service.id,
                 service_id: service.service.id,
                 service: service.service.name,
+                case_no: service.case_no || "",
                 client_name: `${user.user_name}`,
                 client_email: user.email,
                 date_time: service.created_at,
