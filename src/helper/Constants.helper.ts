@@ -42,3 +42,8 @@ export const statusMap: Record<number, string> = {
     5: "CANCELLED",
     6: "ACCEPTED",
 };
+export const roleTypeMap = {
+    [Constants.ROLE_ORGANIZATION_ADMIN]: "organization_admin",
+    [Constants.ROLE_ADVOCATE]: "advocate",
+    [Constants.ROLE_SURVIVOR]: "survivor",
+};

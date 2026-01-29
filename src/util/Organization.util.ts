@@ -3,7 +3,7 @@ import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
 import {getRoleNameById} from "./Common.util";
-import {Constants, statusMap} from "../helper/Constants.helper";
+import {Constants, roleMap, roleTypeMap, statusMap} from "../helper/Constants.helper";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import {getClientDetails} from "./Advocate.util";
 import {ClientService} from "../services/Client.service";
@@ -267,49 +267,38 @@ export async function getServiceRequests(organization_id: number, page_number: n
         total
     } = await organizationService.getServiceRequests(organization_id, page_number, page_size, status);
 
-    const customResponse = [];
-
-    for (const service of data) {
-
+    const customResponse = await Promise.all(
+        data.map(async (service: any) => {
         const user = await userService.findById(service.user.id);
-        if (user.role.id != Constants.ROLE_SURVIVOR) {
-            customResponse.push({
-                type: "user",
-                id: service.id,
-                service_id: service.service.id,
-                service: service.service.name,
-                case_no: service.case_no,
-                requested_by: `${user.first_name} ${user.last_name}`,
-                date_time: service.created_at,
-                service_request: service.status,
-                client_service_id: service.client_service.id,
-                user: service.user.id,
-                status: {
-                    id: service.status,
-                    name: statusMap[service.status] ?? "UNKNOWN",
-                },
-            });
-        }
+        const type = roleTypeMap[user.role.id];
 
-        if (user.role.id == Constants.ROLE_SURVIVOR) {
-            customResponse.push({
-                type: "survivor",
-                id: service.id,
-                service_id: service.service.id,
-                service: service.service.name,
-                client_name: `${user.user_name}`,
+        const base = {
+            type,
+            id: service.id,
+            service_id: service.service.id,
+            service: service.service.name,
+            date_time: service.created_at,
+            service_request: service.status,
+            client_service_id: service.client_service.id,
+            user: service.user.id,
+            status: {
+                id: service.status,
+                name: statusMap[service.status] ?? "UNKNOWN",
+            },
+        };
+        if (type === "survivor") {
+            return {
+                ...base,
+                client_name: user.user_name,
                 client_email: user.email,
-                date_time: service.created_at,
-                service_request: service.status,
-                client_service_id: service.client_service.id,
-                user: service.user.id,
-                status: {
-                    id: service.status,
-                    name: statusMap[service.status] ?? "UNKNOWN",
-                },
-            });
+            };
         }
-    }
+        return {
+            ...base,
+            case_no: service.case_no,
+            requested_email: user.email,
+        };
+    }))
 
     return {
         current_page: page_number,
