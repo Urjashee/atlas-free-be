@@ -28,6 +28,7 @@ const reportServiceSchema = Joi.object({
 const profileSchema = Joi.object({
     username: Joi.string().required(),
     email: Joi.string().pattern(/^\S+$/).required(),
+    safe_exit: Joi.string().required(),
 });
 @JsonController("/api/survivor")
 export class AdvocateController {
@@ -103,6 +104,7 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
     @Post("/service-request/add")
     @UseBefore(authMiddleware)
     @UseBefore(survivorMiddleware)
@@ -136,6 +138,7 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
     @Get("/service-requests")
     @UseBefore(authMiddleware)
     @UseBefore(survivorMiddleware)
@@ -264,13 +267,13 @@ export class AdvocateController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const {username, email} = req.body;
+            const {username, email, safe_exit} = req.body;
             const checkIfSurvivor = await this.clientService.checkIfSurvivor(req.user.id)
             if (!checkIfSurvivor) {
                 return ResponseFormatter.errorResponse(res, 'You are not a survivor user');
             }
 
-            const updateProfile = await this.userService.updateUserProfile(req.user.id, username, email);
+            const updateProfile = await this.userService.updateUserProfile(req.user.id, username, email, safe_exit);
             if (!updateProfile) {
                 return ResponseFormatter.errorResponse(res, "Can't update profile, try again later");
             }
@@ -293,6 +296,8 @@ export class AdvocateController {
                 id: req.user.id,
                 username: checkIfSurvivor.user_name,
                 email: checkIfSurvivor.email,
+                safe_exit: checkIfSurvivor.safe_exit,
+
             }
             return ResponseFormatter.successResponse(res, "Profile updated successfully", customResponse);
         } catch (error: any) {

@@ -58,6 +58,9 @@ export class Users {
     @Column({ nullable: true })
     password!: string;
 
+    @Column({ nullable: true, default: 'https://google.com' })
+    safe_exit!: string;
+
     @ManyToOne(() => UserRole, { eager: true })
     @JoinColumn({ name: 'role_id' })
     role!: UserRole;

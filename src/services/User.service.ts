@@ -591,7 +591,7 @@ export class UserService {
         });
     }
 
-    async updateUserProfile(user_id: number, username: string, email: string) {
+    async updateUserProfile(user_id: number, username: string, email: string, safe_exit: string) {
         const user = await this.userRepository.findOne({
             where: {
                 id: user_id
@@ -600,6 +600,7 @@ export class UserService {
         if (user) {
             user.user_name = username;
             user.email = email;
+            user.safe_exit = safe_exit;
             return await this.userRepository.save(user);
         }
         return null;
