@@ -296,6 +296,7 @@ export async function getServiceRequests(organization_id: number, page_number: n
         return {
             ...base,
             case_no: service.case_no,
+            requested_by: `${user.first_name} ${user.last_name}`,
             requested_email: user.email,
         };
     }))
