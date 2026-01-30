@@ -311,58 +311,54 @@ export async function getServiceRequests(organization_id: number, page_number: n
 }
 
 export async function getServiceRequestDetails(serviceRequestsId: number) {
-    const getServiceRequest = await clientService.getServiceRequestById(serviceRequestsId);
-    if (!getServiceRequest) {
-        throw new Error("Service request not found")
-    }
-    let client: any, form: any
-    const user = await userService.findById(getServiceRequest.user.id);
-    const getClients = await advocateService.getClientsById(getServiceRequest.id);
+    const service = await clientService.getServiceRequestById(serviceRequestsId);
+    if (!service) throw new Error("Service request not found");
 
-    if (user.role.id != Constants.ROLE_SURVIVOR) {
-        client = {
-            type: "user",
-            id: getServiceRequest.id,
-            service_id: getServiceRequest.service.id,
-            service: getServiceRequest.service.name,
-            case_no: getServiceRequest.case_no,
-            requested_by: `${user.first_name} ${user.last_name}`,
-            date_time: getServiceRequest.created_at,
-            service_request: getServiceRequest.status,
-            client_service_id: getServiceRequest.client_service.id,
-            user: getServiceRequest.user.id,
-            status: {
-                id: getServiceRequest.status,
-                name: statusMap[getServiceRequest.status] ?? "UNKNOWN",
-            },
-        };
-        form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
-    }
-    if (user.role.id == Constants.ROLE_SURVIVOR) {
-        client = {
-            type: "survivor",
-            id: getServiceRequest.id,
-            service_id: getServiceRequest.service.id,
-            service: getServiceRequest.service.name,
-            client_name: `${user.user_name}`,
+    const user = await userService.findById(service.user.id);
+    const clients = await advocateService.getClientsById(service.id);
+    const type = roleTypeMap[user.role.id];
+
+    const base = {
+        type,
+        id: service.id,
+        service_id: service.service.id,
+        service: service.service.name,
+        date_time: service.created_at,
+        service_request: service.status,
+        client_service_id: service.client_service.id,
+        user: service.user.id,
+        status: {
+            id: service.status,
+            name: statusMap[service.status] ?? "UNKNOWN",
+        },
+    };
+
+    const isSurvivor = user.role.id === Constants.ROLE_SURVIVOR;
+
+    const client = isSurvivor
+        ? {
+            ...base,
+            client_name: user.user_name,
             client_email: user.email,
-            date_time: getServiceRequest.created_at,
-            service_request: getServiceRequest.status,
-            client_service_id: getServiceRequest.client_service.id,
-            user: getServiceRequest.user.id,
-            status: {
-                id: getServiceRequest.status,
-                name: statusMap[getServiceRequest.status] ?? "UNKNOWN",
-            },
+        }
+        : {
+            ...base,
+            case_no: service.case_no,
+            requested_by: `${user.first_name} ${user.last_name}`,
+            requested_email: user.email,
         };
-        form = await getClientDetails(getClients, Constants.ROLE_SURVIVOR)
-    }
+
+    const form = await getClientDetails(
+        clients,
+        isSurvivor ? Constants.ROLE_SURVIVOR : Constants.ROLE_ADVOCATE
+    );
 
     return {
-        client: client,
-        form: form,
-    }
+        client,
+        form,
+    };
 }
+
 
 export async function removeOrganizationUser(organization_id: number, user_id: number, email: string, user: number, role_id: number) {
 
