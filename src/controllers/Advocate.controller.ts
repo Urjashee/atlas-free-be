@@ -82,7 +82,13 @@ export class AdvocateController {
             if (!checkIfValidOrganization)
                 return ResponseFormatter.errorResponse(res, 'Invalid client');
             const getClients = await this.advocateService.getClientsById(clientId);
-            const customResponse = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+            const form = await getClientDetails(getClients, Constants.ROLE_ADVOCATE)
+            const getServiceRequests = await this.organizationService.getServiceRequestsById(clientId);
+            const customResponseService = await getServiceRequestsUser(getServiceRequests)
+            const customResponse = {
+                form: form,
+                service_requests: customResponseService
+            }
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
