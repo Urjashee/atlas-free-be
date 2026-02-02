@@ -53,8 +53,8 @@ export async function reportUser(body: any, user_id: number, organization_id: nu
                 throw new Error("Can't report user, try again later");
         }
     }
-    if (type == 'advocate') {
-        const checkIfAdvocateUser = await userService.checkIfAdvocate(reported_user);
+    if (type == 'advocate' || type == 'organization_admin') {
+        const checkIfAdvocateUser = await userService.checkIfAdvocateForReport(reported_user);
         if (!checkIfAdvocateUser) {
             throw new Error("Not a valid advocate user");
         }

@@ -6,7 +6,7 @@ import {Constants} from "../helper/Constants.helper";
 import {Affiliations} from "../entity/Affiliations.entity";
 import s3UploadService from "../helper/S3UploadService.helper";
 import {PasswordReset} from "../entity/PasswordReset.entity";
-import {IsNull, MoreThan, Not} from "typeorm";
+import {In, IsNull, MoreThan, Not} from "typeorm";
 import {Organization} from "../entity/Organization.entity";
 import {randomBytes} from "crypto";
 import {VerifyEmail} from "../helper/Emails.helper";
@@ -581,6 +581,20 @@ export class UserService {
                 id: user_id,
             },
             relations: ["client"]
+        });
+    }
+
+    async checkIfAdvocateForReport(user_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {
+                    id: In([
+                        Constants.ROLE_ADVOCATE,
+                        Constants.ROLE_ORGANIZATION_ADMIN,
+                    ]),
+                },
+            }
         });
     }
 
