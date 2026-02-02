@@ -5,6 +5,7 @@ export const reportSchema = Joi.object({
     type: Joi.string().valid('survivor', 'advocate').required(),
     reported_user: Joi.number().required(),
     reason: Joi.string().required(),
+    client_service_id: Joi.number().optional(),
 })
 export const sendInvitationSchema = Joi.object({
     email: Joi.string().email().pattern(/^\S+$/).required(),

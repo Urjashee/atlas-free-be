@@ -304,7 +304,7 @@ export class ServiceManagerController {
                     return ResponseFormatter.errorResponse(res, "Not a valid advocate");
                 }
             }
-            const reportUser = await this.organizationService.reportUser(type, reported_user, reason, req.user.id, req.user.organization_id);
+            const reportUser = await this.organizationService.reportAdvocate(type, reported_user, reason, req.user.id, req.user.organization_id);
             if (!reportUser)
                 return ResponseFormatter.errorResponse(res, "Can't report user, try again later");
             return ResponseFormatter.successResponse(res, 'Users reported');

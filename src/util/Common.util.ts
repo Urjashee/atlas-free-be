@@ -33,11 +33,23 @@ export async function addClientService(body: any, role: number) {
 }
 
 export async function reportUser(body: any, user_id: number, organization_id: number) {
-    const {type, reported_user, reason} = body;
+    const {type, reported_user, reason, client_service_id} = body;
     if (type == 'survivor') {
-        const checkIfSurvivorUser = await userService.checkIfSurvivor(reported_user);
+        const checkIfSurvivorUser = await userService.checkIfClientService(client_service_id);
         if (!checkIfSurvivorUser) {
             throw new Error("Not a valid user");
+        }
+        console.log("checkIfSurvivorUser 0: ", checkIfSurvivorUser)
+        if (checkIfSurvivorUser?.user?.id == null) {
+            console.log("checkIfSurvivorUser", checkIfSurvivorUser)
+            const reportUser = await organizationService.reportUser(type, reason, user_id, organization_id, checkIfSurvivorUser.id);
+            if (!reportUser)
+                throw new Error("Can't report user, try again later");
+        }
+        else {
+            const reportUser = await organizationService.reportAdvocate(type, reported_user, reason, user_id, organization_id);
+            if (!reportUser)
+                throw new Error("Can't report user, try again later");
         }
     }
     if (type == 'advocate') {
@@ -45,10 +57,10 @@ export async function reportUser(body: any, user_id: number, organization_id: nu
         if (!checkIfAdvocateUser) {
             throw new Error("Not a valid advocate user");
         }
+        const reportUser = await organizationService.reportAdvocate(type, reported_user, reason, user_id, organization_id);
+        if (!reportUser)
+            throw new Error("Can't report user, try again later");
     }
-    const reportUser = await organizationService.reportUser(type, reported_user, reason, user_id, organization_id);
-    if (!reportUser)
-        throw new Error("Can't report user, try again later");
 
 }
 

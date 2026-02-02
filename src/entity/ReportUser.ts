@@ -9,6 +9,7 @@ import {
 } from "typeorm";
 import {Users} from "./Users.entity";
 import {Organization} from "./Organization.entity";
+import {ClientService} from "./ClientService.entity";
 
 export enum UserType {
     Survivor = "survivor",
@@ -33,6 +34,10 @@ export class ReportUser {
     @ManyToOne(() => Users, (user) => user.id)
     @JoinColumn({ name: "reported_user_id" })
     reported_user!: Users;
+
+    @ManyToOne(() => ClientService, (client) => client.id)
+    @JoinColumn({ name: "reported_client_id" })
+    reported_client!: ClientService;
 
     @ManyToOne(() => Users, (user) => user.id)
     @JoinColumn({ name: "reported_by_id" })

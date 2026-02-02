@@ -707,7 +707,7 @@ export class OrganizationService {
         return {data, total};
     }
 
-    async reportUser(type: any, reported_user: number, reason: string, user_id: number, organization_id: number) {
+    async reportAdvocate(type: any, reported_user: number, reason: string, user_id: number, organization_id?: number) {
         const report = await this.reportUserRepository.create({
             reported_user: {id: reported_user},
             reason: reason,
@@ -730,6 +730,29 @@ export class OrganizationService {
         };
         await this.mailerService.sendEmail(mailOptions)
         return await this.reportUserRepository.save(report);
+    }
+
+    async reportUser(type: any, reason: string, user_id: number, organization_id?: number, client_service_id?: number) {
+            const report = await this.reportUserRepository.create({
+                reported_client: {id: client_service_id},
+                reason: reason,
+                reported_by: {id: user_id},
+                organization: {id: organization_id},
+                type
+            });
+            const reportedUser = await this.clientServiceRepository.findOne({
+                where: {id: client_service_id},
+            });
+
+            const emailContent = ReportUserEmail(reportedUser.client_nick_name, reason, "user");
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: process.env.SUPER_ADMIN_MAIN,
+                subject: "Email from Atlas free!",
+                html: emailContent
+            };
+            await this.mailerService.sendEmail(mailOptions)
+            return await this.reportUserRepository.save(report);
     }
 
     async getServiceRequestsById(client_id: number) {

@@ -12,10 +12,12 @@ import {randomBytes} from "crypto";
 import {VerifyEmail} from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
 import {DataSource} from "typeorm";
+import {ClientService} from "../entity/ClientService.entity";
 
 export class UserService {
     private userRepository = AppDataSource.getRepository(Users);
     private organizationRepository = AppDataSource.getRepository(Organization);
+    private clientServiceRepository = AppDataSource.getRepository(ClientService);
     private deviceTokenRepository = AppDataSource.getRepository(DeviceToken);
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
@@ -569,6 +571,14 @@ export class UserService {
             where: {
                 id: user_id,
                 role: {id: Constants.ROLE_SURVIVOR},
+            }
+        });
+    }
+
+    async checkIfClientService(user_id: number) {
+        return await this.clientServiceRepository.findOne({
+            where: {
+                id: user_id,
             }
         });
     }
