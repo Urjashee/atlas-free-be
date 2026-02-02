@@ -721,6 +721,8 @@ export class OrganizationService {
             select: ["id", "first_name", "last_name", "user_name"]
         });
 
+        console.log("reportedUser: ", reportedUser);
+
         const emailContent = ReportUserEmail(reportedUser.user_name == null ? `${reportedUser.first_name} ${reportedUser.last_name}` : reportedUser.user_name, reason, "user");
         const mailOptions = {
             from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,

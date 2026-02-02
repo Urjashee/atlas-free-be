@@ -3,9 +3,9 @@ import Joi from "joi";
 export const reportSchema = Joi.object({
     organization_id: Joi.number(),
     type: Joi.string().valid('survivor', 'advocate').required(),
-    reported_user: Joi.number().required(),
+    reported_user: Joi.number().optional().allow(""),
     reason: Joi.string().required(),
-    client_service_id: Joi.number().optional(),
+    client_service_id: Joi.number().optional().allow(""),
 })
 export const sendInvitationSchema = Joi.object({
     email: Joi.string().email().pattern(/^\S+$/).required(),

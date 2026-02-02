@@ -579,7 +579,8 @@ export class UserService {
         return await this.clientServiceRepository.findOne({
             where: {
                 id: user_id,
-            }
+            },
+            relations: ["client"]
         });
     }
 

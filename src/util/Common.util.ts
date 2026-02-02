@@ -39,15 +39,16 @@ export async function reportUser(body: any, user_id: number, organization_id: nu
         if (!checkIfSurvivorUser) {
             throw new Error("Not a valid user");
         }
-        console.log("checkIfSurvivorUser 0: ", checkIfSurvivorUser)
-        if (checkIfSurvivorUser?.user?.id == null) {
-            console.log("checkIfSurvivorUser", checkIfSurvivorUser)
+
+        if (checkIfSurvivorUser.client === null) {
+            console.log("checkIfSurvivorUser 1: ", checkIfSurvivorUser)
             const reportUser = await organizationService.reportUser(type, reason, user_id, organization_id, checkIfSurvivorUser.id);
             if (!reportUser)
                 throw new Error("Can't report user, try again later");
         }
         else {
-            const reportUser = await organizationService.reportAdvocate(type, reported_user, reason, user_id, organization_id);
+            console.log("checkIfSurvivorUser 2: ", checkIfSurvivorUser)
+            const reportUser = await organizationService.reportAdvocate(type, checkIfSurvivorUser.client.id, reason, user_id, organization_id);
             if (!reportUser)
                 throw new Error("Can't report user, try again later");
         }
