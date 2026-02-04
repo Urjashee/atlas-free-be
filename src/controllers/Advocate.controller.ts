@@ -1,4 +1,4 @@
-import {Delete, Get, JsonController, Param, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -18,6 +18,7 @@ import {ClientStatus} from "../entity/AssignedServices.entity";
 import {addClientService} from "../util/Common.util";
 import {clientServiceSchema} from "../schema/Services.schema";
 import {reportServiceSchema} from "../schema/Organization.schema";
+import {organizationMiddleware} from "../middleware/Organization.middleware";
 
 @JsonController("/api/advocate")
 export class AdvocateController {
@@ -219,6 +220,27 @@ export class AdvocateController {
             }
 
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Patch("/service-requests/:serviceRequestsId/:status")
+    @UseBefore(authMiddleware)
+    @UseBefore(organizationMiddleware)
+    async changeServiceRequestStatus(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number, @Param("status") status: number) {
+        try {
+            const getServiceRequest = await this.clientService.getServiceRequestById(serviceRequestsId);
+            if (!getServiceRequest) {
+                return ResponseFormatter.errorResponse(res, "Service request not found");
+            }
+            if (status != Constants.CANCELLED) {
+                return ResponseFormatter.errorResponse(res, "Status not valid");
+            }
+            const updatedAssignedServiceStatus = await this.clientService.updateServiceRequestStatus(serviceRequestsId, status);
+            if (!updatedAssignedServiceStatus)
+                return ResponseFormatter.errorResponse(res, "Failed to update service request status");
+            return ResponseFormatter.successResponse(res, "Successfully updated service request status");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
