@@ -134,6 +134,8 @@ export class AdvocateController {
     async getServiceDetails(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
         try {
             const getServices = await this.organizationService.getOrganizationsServiceById(serviceId)
+            if (!getServices)
+                return ResponseFormatter.errorResponse(res, 'Invalid service');
             const customResponseService = await getOrganizationsServiceDetails(getServices)
             const organization = await this.organizationService.getOrganizationsById(getServices.organization.id);
             const customResponseOrganization = await getOrganizationsDetails(organization);
