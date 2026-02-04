@@ -760,4 +760,46 @@ export class AdminController {
         }
     }
 
+
+    @Get("/analytics")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getAnalytics(@Req() req: Request, @Res() res: Response) {
+        try {
+            const from_date = req.query.from_date as string | undefined;
+            const to_date = req.query.to_date as string | undefined;
+
+            if ((from_date && !to_date) || (!from_date && to_date)) {
+                return ResponseFormatter.errorResponse(
+                    res,
+                    "from_date and to_date must be provided together"
+                );
+            }
+
+            const totalOrganizations =
+                await this.organizationService.getOrganizationAnalytics(
+                    from_date,
+                    to_date
+                );
+
+            const customResponse = {
+                app_engagement: {
+                    total_organization: totalOrganizations
+                }
+            };
+
+            return ResponseFormatter.successResponse(
+                res,
+                "Analytics fetched successfully",
+                customResponse
+            );
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(
+                res,
+                error.message || "An error occurred"
+            );
+        }
+    }
+
 }
