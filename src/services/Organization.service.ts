@@ -1210,22 +1210,5 @@ export class OrganizationService {
         return await this.serviceDetailsRepository.save(service);
     }
 
-    async getOrganizationAnalytics(from_date?: string, to_date?: string) {
-        const query = this.organizationRepository.createQueryBuilder("org");
-
-        if (from_date && to_date) {
-            query.andWhere(
-                "org.created_at BETWEEN :from AND :to",
-                {
-                    from: new Date(from_date),
-                    to: new Date(to_date),
-                }
-            );
-        }
-
-        return await query.getCount();
-        // return count;
-    }
-
 }
 

@@ -34,6 +34,7 @@ import {getClientDetails} from "../util/Advocate.util";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
 import {AdvocateService} from "../services/Advocate.service";
 import {addClientService} from "../util/Common.util"
+import {AnalyticsService} from "../services/Analytics.service";
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -56,6 +57,7 @@ export class AdminController {
     private userService = new UserService();
     private clientService = new ClientService();
     private advocateService = new AdvocateService();
+    private analyticService = new AnalyticsService();
 
     @Get("/organization/list/:filter")
     @UseBefore(authMiddleware)
@@ -776,15 +778,31 @@ export class AdminController {
                 );
             }
 
-            const totalOrganizations =
-                await this.organizationService.getOrganizationAnalytics(
-                    from_date,
-                    to_date
-                );
+            const totalOrganizations = await this.analyticService.getOrganizationCount(from_date, to_date);
+            const totalServices = await this.analyticService.getServiceCount(from_date, to_date);
+            const totalAdvocate = await this.analyticService.getUserCount(Constants.ROLE_ADVOCATE, from_date, to_date);
+            const totalSurvivor = await this.analyticService.getUserCount(Constants.ROLE_SURVIVOR, from_date, to_date);
+            const totalServiceRequest = await this.analyticService.getServiceRequestCount(null, from_date, to_date);
+            const serviceRequestPending = await this.analyticService.getServiceRequestCount(Constants.PENDING, from_date, to_date);
+            const serviceRequestPlaced = await this.analyticService.getServiceRequestCount(Constants.PLACED, from_date, to_date);
+            const serviceRequestUnableToServed = await this.analyticService.getServiceRequestCount(Constants.UNABLE_TO_SERVE, from_date, to_date);
+            const serviceRequestWaitlisted = await this.analyticService.getServiceRequestCount(Constants.WAITLISTED, from_date, to_date);
+            const serviceRequestCancelled = await this.analyticService.getServiceRequestCount(Constants.CANCELLED, from_date, to_date);
+            const serviceRequestAccepted = await this.analyticService.getServiceRequestCount(Constants.ACCEPTED, from_date, to_date);
 
             const customResponse = {
                 app_engagement: {
-                    total_organization: totalOrganizations
+                    total_organization: totalOrganizations,
+                    total_services: totalServices,
+                    total_advocate: totalAdvocate,
+                    total_survivor: totalSurvivor,
+                    total_service_requests: totalServiceRequest,
+                    service_requests_pending: serviceRequestPending,
+                    service_requests_placed: serviceRequestPlaced,
+                    service_requests_unable_to_serve: serviceRequestUnableToServed,
+                    service_requests_waitlisted: serviceRequestWaitlisted,
+                    service_requests_cancelled: serviceRequestCancelled,
+                    service_requests_accepted: serviceRequestAccepted,
                 }
             };
 

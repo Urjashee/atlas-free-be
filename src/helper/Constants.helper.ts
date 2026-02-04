@@ -21,7 +21,7 @@ export class Constants {
     static UNABLE_TO_SERVE = 3
     static WAITLISTED = 4
     static CANCELLED = 5
-    static ACCEPTED = 5
+    static ACCEPTED = 6
 
     static MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
 
