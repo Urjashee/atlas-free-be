@@ -227,7 +227,7 @@ export class AdvocateController {
 
     @Patch("/service-requests/:serviceRequestsId/:status")
     @UseBefore(authMiddleware)
-    @UseBefore(organizationMiddleware)
+    @UseBefore(advocateMiddleware)
     async changeServiceRequestStatus(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number, @Param("status") status: number) {
         try {
             const getServiceRequest = await this.clientService.getServiceRequestById(serviceRequestsId);
