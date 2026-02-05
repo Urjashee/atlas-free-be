@@ -143,11 +143,12 @@ export async function getServiceRequestsUser(serviceRequests: any) {
 
     return Promise.all(
         requestsArray.map(async (serviceRequest: any) => ({
-            requested_service_id: serviceRequest?.id ?? null,
+            client_id: serviceRequest?.id ?? null,
             service_status_id: serviceRequest?.status ?? null,
             service_status: serviceRequest?.status
                 ? ClientStatus[Number(serviceRequest.status)]
                 : null,
+            requested_service_id: serviceRequest?.service?.id ?? null,
             service_name: serviceRequest?.service?.name ?? null,
             service_type: serviceRequest?.service?.service_type
                 ? (await configService.getServiceOptionsById(
