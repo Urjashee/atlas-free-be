@@ -136,28 +136,44 @@ export async function getServiceRequestsUser(serviceRequests: any) {
 
     // Normalize to array
     const requestsArray = Array.isArray(serviceRequests)
-        ? serviceRequests
-        : [serviceRequests];
-
-    if (requestsArray.length === 0) return [];
-
-    return Promise.all(
-        requestsArray.map(async (serviceRequest: any) => ({
-            client_id: serviceRequest?.id ?? null,
-            service_status_id: serviceRequest?.status ?? null,
-            service_status: serviceRequest?.status
-                ? ClientStatus[Number(serviceRequest.status)]
+    if (!requestsArray) {
+        return {
+            client_id: serviceRequests?.id ?? null,
+            service_status_id: serviceRequests?.status ?? null,
+            service_status: serviceRequests?.status
+                ? ClientStatus[Number(serviceRequests.status)]
                 : null,
-            requested_service_id: serviceRequest?.service?.id ?? null,
-            service_name: serviceRequest?.service?.name ?? null,
-            service_type: serviceRequest?.service?.service_type
+            requested_service_id: serviceRequests?.service?.id ?? null,
+            service_name: serviceRequests?.service?.name ?? null,
+            service_type: serviceRequests?.service?.service_type
                 ? (await configService.getServiceOptionsById(
-                serviceRequest.service.service_type
+                serviceRequests.service.service_type
             ))?.name ?? null
                 : null,
-            date: serviceRequest?.created_at ?? null,
-        }))
-    );
+            date: serviceRequests?.created_at ?? null,
+        }
+    }
+    else {
+        if (serviceRequests.length === 0) return [];
+
+        return Promise.all(
+            serviceRequests.map(async (serviceRequest: any) => ({
+                client_id: serviceRequest?.id ?? null,
+                service_status_id: serviceRequest?.status ?? null,
+                service_status: serviceRequest?.status
+                    ? ClientStatus[Number(serviceRequest.status)]
+                    : null,
+                requested_service_id: serviceRequest?.service?.id ?? null,
+                service_name: serviceRequest?.service?.name ?? null,
+                service_type: serviceRequest?.service?.service_type
+                    ? (await configService.getServiceOptionsById(
+                    serviceRequest.service.service_type
+                ))?.name ?? null
+                    : null,
+                date: serviceRequest?.created_at ?? null,
+            }))
+        );
+    }
 }
 
 
