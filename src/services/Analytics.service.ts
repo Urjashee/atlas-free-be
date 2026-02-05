@@ -113,5 +113,16 @@ export class AnalyticsService {
         // return count;
     }
 
+    async getServiceRequestDemo(status?: number, from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .innerJoin("as.service", "service")
+            .select("service.service_type", "service_type")
+            .addSelect("COUNT(as.id)", "count")
+            .groupBy("service.service_type");
+
+        return await qb.getRawMany();
+    }
+
 }
 

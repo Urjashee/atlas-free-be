@@ -789,6 +789,8 @@ export class AdminController {
             const serviceRequestWaitlisted = await this.analyticService.getServiceRequestCount(Constants.WAITLISTED, from_date, to_date);
             const serviceRequestCancelled = await this.analyticService.getServiceRequestCount(Constants.CANCELLED, from_date, to_date);
             const serviceRequestAccepted = await this.analyticService.getServiceRequestCount(Constants.ACCEPTED, from_date, to_date);
+            const serviceRequestDemo = await this.analyticService.getServiceRequestDemo(Constants.ACCEPTED, from_date, to_date);
+
 
             const customResponse = {
                 app_engagement: {
@@ -803,6 +805,7 @@ export class AdminController {
                     service_requests_waitlisted: serviceRequestWaitlisted,
                     service_requests_cancelled: serviceRequestCancelled,
                     service_requests_accepted: serviceRequestAccepted,
+                    service_requests_demographics: serviceRequestDemo,
                 }
             };
 
