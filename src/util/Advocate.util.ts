@@ -155,6 +155,7 @@ export async function getServiceRequestsUser(serviceRequests: any) {
                 serviceRequest.service.service_type
             ))?.name ?? null
                 : null,
+            date: serviceRequest?.created_at ?? null,
         }))
     );
 }
