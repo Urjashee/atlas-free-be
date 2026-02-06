@@ -3,7 +3,7 @@ import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
 import {TimePeriod} from "../entity/ServiceDetails.entity";
 import {ChildrenToAccompany} from "../entity/ClientService.entity";
-import {Constants, statusMap} from "../helper/Constants.helper";
+import {Constants} from "../helper/Constants.helper";
 import {ClientStatus} from "../entity/AssignedServices.entity";
 
 const userService = new UserService();
@@ -139,12 +139,10 @@ export async function getServiceRequestsUser(serviceRequests: any) {
     if (!requestsArray) {
         return {
             client_id: serviceRequests?.id ?? null,
-            status: {
-                id: serviceRequests?.status ?? null,
-                name: serviceRequests?.status
-                    ? statusMap[Number(serviceRequests.status)]
-                    : null,
-            },
+            service_status_id: serviceRequests?.status ?? null,
+            service_status: serviceRequests?.status
+                ? ClientStatus[Number(serviceRequests.status)]
+                : null,
             requested_service_id: serviceRequests?.service?.id ?? null,
             service_name: serviceRequests?.service?.name ?? null,
             service_type: serviceRequests?.service?.service_type
@@ -162,12 +160,9 @@ export async function getServiceRequestsUser(serviceRequests: any) {
             serviceRequests.map(async (serviceRequest: any) => ({
                 client_id: serviceRequest?.id ?? null,
                 service_status_id: serviceRequest?.status ?? null,
-                status: {
-                    id: serviceRequest?.status ?? null,
-                    name: serviceRequest?.status
-                        ? statusMap[Number(serviceRequest.status)]
-                        : null,
-                },
+                service_status: serviceRequest?.status
+                    ? ClientStatus[Number(serviceRequest.status)]
+                    : null,
                 requested_service_id: serviceRequest?.service?.id ?? null,
                 service_name: serviceRequest?.service?.name ?? null,
                 service_type: serviceRequest?.service?.service_type

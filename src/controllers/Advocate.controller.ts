@@ -11,7 +11,7 @@ import {clientSchema} from "../schema/Client.schema";
 import {AdvocateService} from "../services/Advocate.service";
 import {getOrganizationsDetails, getOrganizationsServiceDetails} from "../util/Organization.util";
 import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
-import {Constants, statusMap} from "../helper/Constants.helper";
+import {Constants} from "../helper/Constants.helper";
 import Joi from "joi";
 import {ClientService} from "../services/Client.service";
 import {ClientStatus} from "../entity/AssignedServices.entity";
@@ -189,10 +189,7 @@ export class AdvocateController {
                 client_id: service.client_service.id,
                 case_no: service.case_no,
                 client_nick_name: service.client_service.client_nick_name,
-                status: {
-                    id: service.status,
-                    name: statusMap[service.status] ?? "UNKNOWN",
-                },
+                service_request: service.status
             }));
 
             return ResponseFormatter.successResponse(res, "Successful", {
