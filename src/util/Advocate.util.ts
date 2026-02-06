@@ -162,9 +162,12 @@ export async function getServiceRequestsUser(serviceRequests: any) {
             serviceRequests.map(async (serviceRequest: any) => ({
                 client_id: serviceRequest?.id ?? null,
                 service_status_id: serviceRequest?.status ?? null,
-                service_status: serviceRequest?.status
-                    ? ClientStatus[Number(serviceRequest.status)]
-                    : null,
+                status: {
+                    id: serviceRequest?.status ?? null,
+                    name: serviceRequest?.status
+                        ? statusMap[Number(serviceRequest.status)]
+                        : null,
+                },
                 requested_service_id: serviceRequest?.service?.id ?? null,
                 service_name: serviceRequest?.service?.name ?? null,
                 service_type: serviceRequest?.service?.service_type
