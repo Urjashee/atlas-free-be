@@ -24,6 +24,7 @@ import {ReportUser} from "../entity/ReportUser";
 import {ClientService} from "../entity/ClientService.entity";
 import {ReportService} from "../entity/ReportService.entity";
 import {Affiliations} from "../entity/Affiliations.entity";
+import {ConfigService} from "./Config.service";
 
 export class AnalyticsService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -37,6 +38,7 @@ export class AnalyticsService {
     private clientServiceRepository = AppDataSource.getRepository(ClientService);
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private mailerService = new EmailService();
+    private configService = new ConfigService();
 
     async getOrganizationCount(from_date?: string, to_date?: string) {
         const query = this.organizationRepository.createQueryBuilder("org");
@@ -113,16 +115,384 @@ export class AnalyticsService {
         // return count;
     }
 
-    async getServiceRequestDemo(status?: number, from_date?: string, to_date?: string) {
-        const qb = this.assignedServiceRepository
+    async getServiceRequestDemo() {
+        // Aggregate from DB
+        const raw = await this.assignedServiceRepository
             .createQueryBuilder("as")
             .innerJoin("as.service", "service")
-            .select("service.service_type", "service_type")
+            .select("service.service_type", "data")
             .addSelect("COUNT(as.id)", "count")
-            .groupBy("service.service_type");
+            .groupBy("service.service_type")
+            .getRawMany();
 
-        return await qb.getRawMany();
+        // Total count
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        // Convert raw result to lookup map
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
+
+        // Your master service types
+        const serviceTypes = await this.configService.getServiceOptions("service_type");
+        const dataArray = serviceTypes.map((item) => ({
+            id: item.id,
+            name: item.name,
+            icon: item.icon,
+        }));
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getEnglishSpeakingAbilityDistribution() {
+        // Aggregate from DB
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.english_speaking_ability", "data")
+            .addSelect("COUNT(as.id)", "count")
+            .where("cs.english_speaking_ability IS NOT NULL")
+            .groupBy("cs.english_speaking_ability")
+            .getRawMany();
+
+        // Total count
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        // Convert raw result to lookup map
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
+
+        // Master speaking ability list
+        const dataArray = [
+            { id: 1, name: "Fluent" },
+            { id: 2, name: "Limited" },
+            { id: 3, name: "None" },
+        ];
+
+        // Merge + percentage
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getGenderDistribution() {
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.gender", "data")
+            .addSelect("COUNT(*)", "count")
+            .where("cs.gender IS NOT NULL")
+            .groupBy("cs.gender")
+            .getRawMany();
+
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count); // 🔑 fix
+            return acc;
+        }, {});
+
+        const dataArray = [
+            { id: 11, name: "Female" },
+            { id: 12, name: "Male" },
+            { id: 13, name: "Non-Binary" },
+            { id: 14, name: "Transgender" },
+            { id: 15, name: "Two-Spirit" },
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getCitizenshipStatusDistribution() {
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.citizenship_status", "data")
+            .addSelect("COUNT(*)", "count")
+            .where("cs.citizenship_status IS NOT NULL")
+            .groupBy("cs.citizenship_status")
+            .getRawMany();
+
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count); // 🔑 fix
+            return acc;
+        }, {});
+
+        const dataArray = [
+            {
+                "id": 10,
+                "name": "US Citizen"
+            },
+            {
+                "id": 11,
+                "name": "Documented foreign national"
+            },
+            {
+                "id": 12,
+                "name": "Undocumented foreign national"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getClientExperienceDistribution() {
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.client_experienced", "data")
+            .where("cs.client_experienced IS NOT NULL")
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            { id: 27, name: "Sex Trafficking" },
+            { id: 28, name: "Labor Trafficking" },
+            { id: 29, name: "Prostitution" },
+            { id: 30, name: "Survival Sex" },
+            { id: 31, name: "Other forms of commercial sex" },
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getPregnancyDistribution() {
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.pregnant", "data")
+            .addSelect("COUNT(*)", "count")
+            .where("cs.pregnant IS NOT NULL")
+            .groupBy("cs.pregnant")
+            .getRawMany();
+
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
+
+        const dataArray = [
+            {
+                "id": 0,
+                "name": "No"
+            },
+            {
+                "id": 1,
+                "name": "Yes"
+            },
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getBirthdateDistribution() {
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.birthdate_status", "data")
+            .addSelect("COUNT(*)", "count")
+            .where("cs.birthdate_status IS NOT NULL")
+            .groupBy("cs.birthdate_status")
+            .getRawMany();
+
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count); // 🔑 fix
+            return acc;
+        }, {});
+
+        const dataArray = [
+            {
+                "id": 13,
+                "name": "Emancipated"
+            },
+            {
+                "id": 14,
+                "name": "Ward of the State"
+            },
+            {
+                "id": 15,
+                "name": "About to age-out"
+            },
+            {
+                "id": 16,
+                "name": "Parent or guardian consent"
+            },
+            {
+                "id": 17,
+                "name": "Determination in Process"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getChildrenAccompanyDistribution() {
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.children_accompany", "data")
+            .addSelect("COUNT(*)", "count")
+            .where("cs.children_accompany IS NOT NULL")
+            .groupBy("cs.children_accompany")
+            .getRawMany();
+
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count); // 🔑 fix
+            return acc;
+        }, {});
+
+        const dataArray = [
+            {
+                "id": 13,
+                "name": "Emancipated"
+            },
+            {
+                "id": 14,
+                "name": "Ward of the State"
+            },
+            {
+                "id": 15,
+                "name": "About to age-out"
+            },
+            {
+                "id": 16,
+                "name": "Parent or guardian consent"
+            },
+            {
+                "id": 17,
+                "name": "Determination in Process"
+            }
+        ];
+
+        return dataArray.map((item) => {
+            const count = countMap[item.id] ?? 0;
+
+            return {
+                id: item.id,
+                name: item.name,
+                count,
+                percentage: total > 0
+                    ? Number(((count / total) * 100).toFixed(2))
+                    : 0,
+            };
+        });
+    }
+
+    async getCriteriaDistribution() {
+        const raw = await this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.criteria", "data")
+            .where("cs.criteria IS NOT NULL")
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            {
+                "id": 32,
+                "name": "have an abuser actively looking for them"
+            },
+            {
+                "id": 33,
+                "name": "have outstanding warrants or legal obligations"
+            },
+            {
+                "id": 34,
+                "name": "are involved in open or pending investigations or cases"
+            },
+            {
+                "id": 35,
+                "name": "are currently incarcerated"
+            },
+            {
+                "id": 36,
+                "name": "were recently incarcerated"
+            },
+            {
+                "id": 37,
+                "name": "will be on parole or probation"
+            },
+            {
+                "id": 38,
+                "name": "are part of a diversion program with court requirements"
+            },
+            {
+                "id": 39,
+                "name": "have a history of criminal charges"
+            },
+            {
+                "id": 40,
+                "name": "are registered sex offenders"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
     }
 
 }
+
+const returnFormat = (data: any, total: number, countMap: Record<string, number>) => {
+    const distribution = data.map((type) => {
+        const count = countMap[type.id] || 0;
+
+        return {
+            id: type.id,
+            name: type.name,
+            icon: type.icon,
+            count,
+            percentage: total > 0
+                ? Number(((count / total) * 100).toFixed(2))
+                : 0,
+        };
+    });
+
+    return {
+        total,
+        data: distribution
+    };
+}
+
 

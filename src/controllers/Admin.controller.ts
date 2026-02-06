@@ -789,7 +789,15 @@ export class AdminController {
             const serviceRequestWaitlisted = await this.analyticService.getServiceRequestCount(Constants.WAITLISTED, from_date, to_date);
             const serviceRequestCancelled = await this.analyticService.getServiceRequestCount(Constants.CANCELLED, from_date, to_date);
             const serviceRequestAccepted = await this.analyticService.getServiceRequestCount(Constants.ACCEPTED, from_date, to_date);
-            const serviceRequestDemo = await this.analyticService.getServiceRequestDemo(Constants.ACCEPTED, from_date, to_date);
+            const serviceRequestDemo = await this.analyticService.getServiceRequestDemo();
+            const serviceRequestSpeakingAbilityDemo = await this.analyticService.getEnglishSpeakingAbilityDistribution();
+            const serviceRequestGenderDemo = await this.analyticService.getGenderDistribution();
+            const serviceRequestCitizenshipStatusDemo = await this.analyticService.getCitizenshipStatusDistribution();
+            const serviceRequestClientExperienceDemo = await this.analyticService.getClientExperienceDistribution();
+            const serviceRequestPregnantDemo = await this.analyticService.getPregnancyDistribution();
+            const serviceChildrenAccompanyDemo = "";
+            const serviceBirthdateDemo = await this.analyticService.getBirthdateDistribution();
+            const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution();
 
 
             const customResponse = {
@@ -805,7 +813,17 @@ export class AdminController {
                     service_requests_waitlisted: serviceRequestWaitlisted,
                     service_requests_cancelled: serviceRequestCancelled,
                     service_requests_accepted: serviceRequestAccepted,
+                },
+                survivor_demographics: {
                     service_requests_demographics: serviceRequestDemo,
+                    speaking_ability_demographics: serviceRequestSpeakingAbilityDemo,
+                    gender_demographics: serviceRequestGenderDemo,
+                    citizenship_status_demographics: serviceRequestCitizenshipStatusDemo,
+                    client_experience_demographics: serviceRequestClientExperienceDemo,
+                    pregnancy_demographics: serviceRequestPregnantDemo,
+                    children_accompany: serviceChildrenAccompanyDemo,
+                    birthdate_status_demographics: serviceBirthdateDemo,
+                    client_criteria_demographics: serviceCriteriaDemo,
                 }
             };
 
