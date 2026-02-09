@@ -624,7 +624,6 @@ export class UserService {
         });
         if (user) {
             user.user_name = username;
-            user.email = email;
             user.safe_exit = safe_exit;
             return await this.userRepository.save(user);
         }
