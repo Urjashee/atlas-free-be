@@ -30,6 +30,7 @@ const profileSchema = Joi.object({
     email: Joi.string().pattern(/^\S+$/).required(),
     safe_exit: Joi.string().required(),
 });
+
 @JsonController("/api/survivor")
 export class AdvocateController {
     private userService = new UserService();
@@ -242,8 +243,8 @@ export class AdvocateController {
             const getServiceRequests = await this.clientService.getServiceRequestById(serviceRequestsId);
             if (!getServiceRequests)
                 return ResponseFormatter.errorResponse(res, 'Invalid service request');
-            if (getServiceRequests.user.id !== req.user.id)
-                return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
+            // if (getServiceRequests.user.id !== req.user.id)
+            //     return ResponseFormatter.errorResponse(res, 'You are not authorized to report this service request');
             const checkIfService = await this.serviceManagerService.checkIfService(getServiceRequests.service.id);
             if (!checkIfService)
                 return ResponseFormatter.errorResponse(res, 'Invalid service');
