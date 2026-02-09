@@ -248,13 +248,15 @@ export class OrganizationService {
                 organization: {id: organization_id},
             }
         })
+        console.log("org", organization_id)
+        console.log("getService 1:", getService)
         if (getService) {
             getService.name = body.name
-            getService.street = body.is_organization_address ? checkIfValidOrganization.street : body.street
-            getService.address = body.is_organization_address ? checkIfValidOrganization.address : body.address
-            getService.state = body.is_organization_address ? checkIfValidOrganization.state : body.state
-            getService.city = body.is_organization_address ? checkIfValidOrganization.city : body.city
-            getService.zipcode = body.is_organization_address ? checkIfValidOrganization.zipcode : body.zipcode
+            getService.street = body.is_organization_address == true ? checkIfValidOrganization?.organization.street : body.street
+            getService.address = body.is_organization_address == true ? checkIfValidOrganization?.organization.address : body.address
+            getService.state = body.is_organization_address == true ? checkIfValidOrganization?.organization.state : body.state
+            getService.city = body.is_organization_address == true ? checkIfValidOrganization?.organization.city : body.city
+            getService.zipcode = body.is_organization_address == true ? checkIfValidOrganization?.organization.zipcode : body.zipcode
             getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
             getService.is_organization_address = body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type || null
