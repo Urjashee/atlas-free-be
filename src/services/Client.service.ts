@@ -151,7 +151,7 @@ export class ClientService {
             pregnant_months: body.pregnant_months,
             birthdate_status: body.birthdate_status,
             children_accompany: body.children_accompany,
-            children_to_accompany: body.children_to_accompany,
+            children_to_accompany: body.children_to_accompany || null,
             criteria: body.criteria,
         })
 
@@ -177,7 +177,7 @@ export class ClientService {
             getClient.pregnant_months = body.pregnant_months
             getClient.birthdate_status = body.birthdate_status
             getClient.children_accompany = body.children_accompany
-            getClient.children_to_accompany = body.children_to_accompany
+            getClient.children_to_accompany = body.children_to_accompany || null
             getClient.criteria = body.criteria
             return await this.clientServiceRepository.save(getClient);
         }
