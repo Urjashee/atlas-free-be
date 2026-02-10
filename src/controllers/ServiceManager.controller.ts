@@ -18,7 +18,7 @@ import {AdvocateService} from "../services/Advocate.service";
 import {reportSchema} from "../schema/Organization.schema";
 import {clientSchema} from "../schema/Client.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
-import {addClientService} from "../util/Common.util";
+import {addClientService, reportUser} from "../util/Common.util";
 import {advocateMiddleware} from "../middleware/Advocate.middleware";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 
@@ -185,7 +185,7 @@ export class ServiceManagerController {
             const {
                 data,
                 total
-            } = await this.organizationService.getServiceRequests(req.user.organization_id, page_number, page_size, status);
+            } = await this.serviceManagerService.getServiceRequests(req.user.organization_id, page_number, page_size, status);
 
             const customResponse = [];
 
@@ -334,22 +334,7 @@ export class ServiceManagerController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const {type, reported_user, reason} = req.body;
-            if (type == 'survivor') {
-                const checkIfSurvivorUser = await this.userService.checkIfSurvivor(reported_user);
-                if (!checkIfSurvivorUser) {
-                    return ResponseFormatter.errorResponse(res, "Not a valid user");
-                }
-            }
-            if (type == 'advocate') {
-                const checkIfAdvocateUser = await this.userService.checkIfAdvocate(reported_user);
-                if (!checkIfAdvocateUser) {
-                    return ResponseFormatter.errorResponse(res, "Not a valid advocate");
-                }
-            }
-            const reportUser = await this.organizationService.reportAdvocate(type, reported_user, reason, req.user.id, req.user.organization_id);
-            if (!reportUser)
-                return ResponseFormatter.errorResponse(res, "Can't report user, try again later");
+            await reportUser(req.body, req.user.id, req.user.organization_id);
             return ResponseFormatter.successResponse(res, 'Users reported');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

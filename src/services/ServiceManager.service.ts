@@ -8,9 +8,11 @@ import s3UploadService from "../helper/S3UploadService.helper";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import {ServiceSetting} from "../entity/ServiceSetting.entity";
 import {Like, Raw} from "typeorm";
+import {AssignedServices, ClientStatus} from "../entity/AssignedServices.entity";
 
 export class ServiceManagerService {
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
+    private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
 
     async checkIfService(service_id: number) {
         return await this.serviceDetailsRepository.findOne({
@@ -45,6 +47,39 @@ export class ServiceManagerService {
             relations: ['organization', 'state'],
         })
     }
+
+    async getServiceRequests(
+        user_id: number,
+        page_number = 1,
+        page_size = 10,
+        status?: number
+    ) {
+        const skip = (page_number - 1) * page_size;
+
+        const qb = this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoinAndSelect("as.organization", "organization")
+            .leftJoinAndSelect("as.service", "service")
+            .leftJoinAndSelect("service.state", "state")
+            .leftJoinAndSelect("as.client_service", "client_service")
+            .leftJoinAndSelect("as.user", "user")
+            .where(
+                "FIND_IN_SET(:user_id, service.service_manager) > 0",
+                { user_id }
+            )
+            .orderBy("as.created_at", "DESC")
+            .skip(skip)
+            .take(page_size);
+
+        if (typeof status === "number" && status !== ClientStatus.All) {
+            qb.andWhere("as.status = :status", { status });
+        }
+
+        const [data, total] = await qb.getManyAndCount();
+
+        return { data, total };
+    }
+
 
     async editServiceSettings(body: any) {
         const serviceSetting = await this.serviceDetailsRepository.findOne({

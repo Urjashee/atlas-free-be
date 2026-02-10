@@ -770,53 +770,30 @@ export class AnalyticsService {
     }
 
     async getServicesBySlotsBeds(from_date?: string, to_date?: string) {
-        const typeCase = `
-        CASE 
-            WHEN sd.slots_beds IS NOT NULL THEN 8
-            ELSE 9
-        END
-    `;
-
-        const nameCase = `
-        CASE 
-            WHEN sd.slots_beds IS NOT NULL THEN 'Total beds'
-            ELSE 'Total slots'
-        END
-    `;
-
-        const qb = this.serviceDetailsRepository
+        const slots = await this.serviceDetailsRepository
             .createQueryBuilder("sd")
-            .select(typeCase, "id")
-            .addSelect(nameCase, "name")
-            .addSelect("SUM(sd.slots_available)", "total_available")
-            .addSelect("AVG(sd.slots_available)", "average_available")
-            .where("sd.slots_available IS NOT NULL")
-            .groupBy(typeCase)
-            .addGroupBy(nameCase);
+            .select("sd.slots_beds", "slots_beds")
+            .addSelect("SUM(sd.slots_available)", "total")
+            .addSelect("AVG(sd.slots_available)", "average")
+            .groupBy("sd.slots_beds")
+            .where("sd.slots_beds IS NOT NULL")
+            .addSelect("COUNT(*)", "count")
+            .getRawMany();
 
-        // Optional date filters (safe)
-        if (from_date && to_date) {
-            qb.andWhere(
-                "sd.created_at BETWEEN :from_date AND :to_date",
-                {
-                    from_date: `${from_date} 00:00:00`,
-                    to_date: `${to_date} 23:59:59`,
-                }
-            );
-        } else {
-            if (from_date) {
-                qb.andWhere("sd.created_at >= :from_date", {
-                    from_date: `${from_date} 00:00:00`,
-                });
+        let total = 0;
+        let data
+        for (const slot of slots) {
+            total += slot.total;
+            if (slot.slot_beds == 8) {
+
+
             }
-            if (to_date) {
-                qb.andWhere("sd.created_at <= :to_date", {
-                    to_date: `${to_date} 23:59:59`,
-                });
+            if (slot.slot_beds == 9) {
+
             }
+
         }
 
-        return qb.getRawMany();
     }
 
 }
