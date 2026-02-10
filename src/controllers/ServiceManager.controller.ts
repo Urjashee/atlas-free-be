@@ -20,6 +20,7 @@ import {clientSchema} from "../schema/Client.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
 import {addClientService} from "../util/Common.util";
 import {advocateMiddleware} from "../middleware/Advocate.middleware";
+import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 
 const serviceSettingsSchema = Joi.object({
     service_id: Joi.number().required(),
@@ -125,6 +126,48 @@ export class ServiceManagerController {
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
             }
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Get("/services-settings/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(serviceManagerMiddleware)
+    async getServiceSettings(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
+        try {
+            const checkIfValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
+            if (!checkIfValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service");
+            const getServiceSettings = await this.organizationService.getServiceSettingsById(serviceId);
+            if (!getServiceSettings)
+                return ResponseFormatter.errorResponse(res, "No service settings found");
+            const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
+            const customResponse = {
+                service_id: getServiceSettings.id,
+                total_available_slots: checkIfValidService.total_available_slots || "",
+                available_slots: getServiceSettings.slots_available || "",
+                service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager) || [],
+                contact_email: getServiceSettings.contact_email,
+                contact_phone: getServiceSettings.contact_phone,
+                emailReminders: getEmailReminders.map((reminder: any) => {
+                    return ({
+                        id: reminder.id,
+                        email: reminder.email,
+                        day_of_week: reminder.day_of_week.map((day: string) => {
+                                return {
+                                    id: day,
+                                    name: DaysOfWeek[parseInt(day)]
+                                };
+                            }
+                        ),
+                        time: reminder.time,
+                        time_zone_id: reminder.time_zone,
+                        time_zone: TimeZone[reminder.time_zone]
+                    });
+                })
+            }
+            return ResponseFormatter.successResponse(res, "Service settings", customResponse)
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
@@ -375,6 +418,7 @@ export class ServiceManagerController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
     @Post("/service-request/add")
     @UseBefore(authMiddleware)
     @UseBefore(serviceManagerMiddleware)

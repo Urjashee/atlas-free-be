@@ -625,6 +625,200 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
+    async getServicesByStatus(from_date?: string, to_date?: string) {
+        const qb = this.serviceDetailsRepository
+            .createQueryBuilder("sd")
+            .select("sd.waitlist", "data")
+            .addSelect("COUNT(*)", "count")
+            .where("sd.waitlist IS NOT NULL");
+
+        if (from_date) {
+            qb.andWhere("sd.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("sd.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "sd.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .groupBy("sd.waitlist")
+            .getRawMany();
+
+
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
+
+
+        const dataArray = [
+            {
+                "id": 0,
+                "name": "Open"
+            },
+            {
+                "id": 1,
+                "name": "Waitlist"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getServicesByServiceModel(from_date?: string, to_date?: string) {
+        const qb = this.serviceDetailsRepository
+            .createQueryBuilder("sd")
+            .select("sd.service_model", "data")
+            .addSelect("COUNT(*)", "count")
+            .where("sd.service_model IS NOT NULL");
+
+
+        if (from_date) {
+            qb.andWhere("sd.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("sd.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "sd.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .groupBy("sd.service_model")
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            {
+                "id": 96,
+                "name": "Person-Centered/Individualized"
+            },
+            {
+                "id": 97,
+                "name": "Survivor-Informed"
+            },
+            {
+                "id": 98,
+                "name": "Program-Centered/curriculum-based"
+            },
+            {
+                "id": 99,
+                "name": "Faith-based"
+            },
+            {
+                "id": 100,
+                "name": "Trauma-Informed"
+            },
+            {
+                "id": 101,
+                "name": "Clean and sober"
+            },
+            {
+                "id": 102,
+                "name": "Evidence-Based"
+            },
+            {
+                "id": 103,
+                "name": "Harm Reduction"
+            },
+            {
+                "id": 104,
+                "name": "Strengths-Based"
+            },
+            {
+                "id": 105,
+                "name": "Recovery-Focused"
+            },
+            {
+                "id": 106,
+                "name": "Survivor-Led"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getServicesBySlotsBeds(from_date?: string, to_date?: string) {
+        const typeCase = `
+        CASE 
+            WHEN sd.slots_beds IS NOT NULL THEN 8
+            ELSE 9
+        END
+    `;
+
+        const nameCase = `
+        CASE 
+            WHEN sd.slots_beds IS NOT NULL THEN 'Total beds'
+            ELSE 'Total slots'
+        END
+    `;
+
+        const qb = this.serviceDetailsRepository
+            .createQueryBuilder("sd")
+            .select(typeCase, "id")
+            .addSelect(nameCase, "name")
+            .addSelect("SUM(sd.slots_available)", "total_available")
+            .addSelect("AVG(sd.slots_available)", "average_available")
+            .where("sd.slots_available IS NOT NULL")
+            .groupBy(typeCase)
+            .addGroupBy(nameCase);
+
+        // Optional date filters (safe)
+        if (from_date && to_date) {
+            qb.andWhere(
+                "sd.created_at BETWEEN :from_date AND :to_date",
+                {
+                    from_date: `${from_date} 00:00:00`,
+                    to_date: `${to_date} 23:59:59`,
+                }
+            );
+        } else {
+            if (from_date) {
+                qb.andWhere("sd.created_at >= :from_date", {
+                    from_date: `${from_date} 00:00:00`,
+                });
+            }
+            if (to_date) {
+                qb.andWhere("sd.created_at <= :to_date", {
+                    to_date: `${to_date} 23:59:59`,
+                });
+            }
+        }
+
+        return qb.getRawMany();
+    }
+
 }
 
 const returnFormat = (data: any, total: number, countMap: Record<string, number>) => {

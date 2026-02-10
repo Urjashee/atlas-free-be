@@ -346,74 +346,74 @@ export class AdminController {
     }
 
     //     Remove service manager
-        @Post("/organization/remove/service-manager")
-        @UseBefore(authMiddleware)
-        @UseBefore(adminMiddleware)
-        async removeServiceManager(@Req() req: Request, @Res() res: Response) {
-            try {
-                if (!req.body) {
-                    return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
-                }
-                const {error} = removeUserSchema.validate(req.body);
-                if (error) {
-                    return ResponseFormatter.errorResponse(res, error.details[0].message);
-                }
-                const {organization_id, user_id, email} = req.body;
-
-                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
-
-                return ResponseFormatter.successResponse(res, 'Service manager deleted');
-
-            } catch (error: any) {
-                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+    @Post("/organization/remove/service-manager")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeServiceManager(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {organization_id, user_id, email} = req.body;
+
+            await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
+
+            return ResponseFormatter.successResponse(res, 'Service manager deleted');
+
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
+    }
 
     //     Remove advocate
-        @Post("/organization/remove/advocate")
-        @UseBefore(authMiddleware)
-        @UseBefore(adminMiddleware)
-        async removeAdvocate(@Req() req: Request, @Res() res: Response) {
-            try {
-                if (!req.body) {
-                    return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
-                }
-                const {error} = removeUserSchema.validate(req.body);
-                if (error) {
-                    return ResponseFormatter.errorResponse(res, error.details[0].message);
-                }
-                const {organization_id, user_id, email} = req.body;
-
-                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_ADVOCATE);
-
-                return ResponseFormatter.successResponse(res, 'Advocate deleted');
-            } catch (error: any) {
-                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+    @Post("/organization/remove/advocate")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeAdvocate(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {organization_id, user_id, email} = req.body;
+
+            await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_ADVOCATE);
+
+            return ResponseFormatter.successResponse(res, 'Advocate deleted');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
+    }
 
     //     Remove org admin
-        @Post("/organization/remove/organization-admin")
-        @UseBefore(authMiddleware)
-        @UseBefore(adminMiddleware)
-        async removeOrganizationAdmin(@Req() req: Request, @Res() res: Response) {
-            try {
-                if (!req.body) {
-                    return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
-                }
-                const {error} = removeUserSchema.validate(req.body);
-                if (error) {
-                    return ResponseFormatter.errorResponse(res, error.details[0].message);
-                }
-                const {organization_id, user_id, email} = req.body;
-
-                await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_ORGANIZATION_ADMIN);
-
-                return ResponseFormatter.successResponse(res, 'Organization admin deleted');
-            } catch (error: any) {
-                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+    @Post("/organization/remove/organization-admin")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async removeOrganizationAdmin(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
+            const {error} = removeUserSchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+            const {organization_id, user_id, email} = req.body;
+
+            await removeOrganizationUser(organization_id, user_id, email, req.user.id, Constants.ROLE_ORGANIZATION_ADMIN);
+
+            return ResponseFormatter.successResponse(res, 'Organization admin deleted');
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
+    }
 
     @Post("/organization/services")
     @UseBefore(authMiddleware)
@@ -798,6 +798,9 @@ export class AdminController {
             const serviceChildrenAccompanyDemo = "";
             const serviceBirthdateDemo = await this.analyticService.getBirthdateDistribution(from_date, to_date);
             const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution(from_date, to_date);
+            const organizationServiceStatus = await this.analyticService.getServicesByStatus(from_date, to_date);
+            const organizationServiceModel = await this.analyticService.getServicesByServiceModel(from_date, to_date);
+            const organizationSlotsBeds = await this.analyticService.getServicesBySlotsBeds(from_date, to_date);
 
 
             const customResponse = {
@@ -824,6 +827,11 @@ export class AdminController {
                     children_accompany: serviceChildrenAccompanyDemo,
                     birthdate_status_demographics: serviceBirthdateDemo,
                     client_criteria_demographics: serviceCriteriaDemo,
+                },
+                organization: {
+                    service_status: organizationServiceStatus,
+                    service_model: organizationServiceModel,
+                    slots_beds: organizationSlotsBeds,
                 }
             };
 
