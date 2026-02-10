@@ -115,13 +115,30 @@ export class AnalyticsService {
         // return count;
     }
 
-    async getServiceRequestDemo() {
+    async getServiceRequestDemo(from_date?: string, to_date?: string) {
         // Aggregate from DB
-        const raw = await this.assignedServiceRepository
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .innerJoin("as.service", "service")
             .select("service.service_type", "data")
-            .addSelect("COUNT(as.id)", "count")
+            .addSelect("COUNT(as.id)", "count");
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .groupBy("service.service_type")
             .getRawMany();
 
@@ -145,14 +162,31 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
-    async getEnglishSpeakingAbilityDistribution() {
+    async getEnglishSpeakingAbilityDistribution(from_date?: string, to_date?: string) {
         // Aggregate from DB
-        const raw = await this.assignedServiceRepository
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.english_speaking_ability", "data")
             .addSelect("COUNT(as.id)", "count")
             .where("cs.english_speaking_ability IS NOT NULL")
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .groupBy("cs.english_speaking_ability")
             .getRawMany();
 
@@ -176,13 +210,30 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
-    async getGenderDistribution() {
-        const raw = await this.assignedServiceRepository
+    async getGenderDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.gender", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.gender IS NOT NULL")
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .groupBy("cs.gender")
             .getRawMany();
 
@@ -204,13 +255,30 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
-    async getCitizenshipStatusDistribution() {
-        const raw = await this.assignedServiceRepository
+    async getCitizenshipStatusDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.citizenship_status", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.citizenship_status IS NOT NULL")
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .groupBy("cs.citizenship_status")
             .getRawMany();
 
@@ -239,14 +307,30 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
-    async getClientExperienceDistribution() {
-        const raw = await this.assignedServiceRepository
+    async getClientExperienceDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.client_experienced", "data")
             .where("cs.client_experienced IS NOT NULL")
-            .getRawMany();
 
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .getRawMany();
 
         const countMap: Record<number, number> = {};
 
@@ -276,13 +360,30 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
-    async getPregnancyDistribution() {
-        const raw = await this.assignedServiceRepository
+    async getPregnancyDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.pregnant", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.pregnant IS NOT NULL")
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .groupBy("cs.pregnant")
             .getRawMany();
 
@@ -307,13 +408,30 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
-    async getBirthdateDistribution() {
-        const raw = await this.assignedServiceRepository
+    async getBirthdateDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.birthdate_status", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.birthdate_status IS NOT NULL")
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .groupBy("cs.birthdate_status")
             .getRawMany();
 
@@ -350,13 +468,30 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
-    async getChildrenAccompanyDistribution() {
-        const raw = await this.assignedServiceRepository
+    async getChildrenAccompanyDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.children_accompany", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.children_accompany IS NOT NULL")
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .groupBy("cs.children_accompany")
             .getRawMany();
 
@@ -404,12 +539,30 @@ export class AnalyticsService {
         });
     }
 
-    async getCriteriaDistribution() {
-        const raw = await this.assignedServiceRepository
+    async getCriteriaDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
             .select("cs.criteria", "data")
             .where("cs.criteria IS NOT NULL")
+
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
             .getRawMany();
 
 

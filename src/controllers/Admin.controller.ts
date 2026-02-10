@@ -789,7 +789,7 @@ export class AdminController {
             const serviceRequestWaitlisted = await this.analyticService.getServiceRequestCount(Constants.WAITLISTED, from_date, to_date);
             const serviceRequestCancelled = await this.analyticService.getServiceRequestCount(Constants.CANCELLED, from_date, to_date);
             const serviceRequestAccepted = await this.analyticService.getServiceRequestCount(Constants.ACCEPTED, from_date, to_date);
-            const serviceRequestDemo = await this.analyticService.getServiceRequestDemo();
+            const serviceRequestDemo = await this.analyticService.getServiceRequestDemo(from_date, to_date);
             const serviceRequestSpeakingAbilityDemo = await this.analyticService.getEnglishSpeakingAbilityDistribution();
             const serviceRequestGenderDemo = await this.analyticService.getGenderDistribution();
             const serviceRequestCitizenshipStatusDemo = await this.analyticService.getCitizenshipStatusDistribution();
