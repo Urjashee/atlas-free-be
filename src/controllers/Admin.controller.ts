@@ -790,14 +790,14 @@ export class AdminController {
             const serviceRequestCancelled = await this.analyticService.getServiceRequestCount(Constants.CANCELLED, from_date, to_date);
             const serviceRequestAccepted = await this.analyticService.getServiceRequestCount(Constants.ACCEPTED, from_date, to_date);
             const serviceRequestDemo = await this.analyticService.getServiceRequestDemo(from_date, to_date);
-            const serviceRequestSpeakingAbilityDemo = await this.analyticService.getEnglishSpeakingAbilityDistribution();
-            const serviceRequestGenderDemo = await this.analyticService.getGenderDistribution();
-            const serviceRequestCitizenshipStatusDemo = await this.analyticService.getCitizenshipStatusDistribution();
-            const serviceRequestClientExperienceDemo = await this.analyticService.getClientExperienceDistribution();
-            const serviceRequestPregnantDemo = await this.analyticService.getPregnancyDistribution();
+            const serviceRequestSpeakingAbilityDemo = await this.analyticService.getEnglishSpeakingAbilityDistribution(from_date, to_date);
+            const serviceRequestGenderDemo = await this.analyticService.getGenderDistribution(from_date, to_date);
+            const serviceRequestCitizenshipStatusDemo = await this.analyticService.getCitizenshipStatusDistribution(from_date, to_date);
+            const serviceRequestClientExperienceDemo = await this.analyticService.getClientExperienceDistribution(from_date, to_date);
+            const serviceRequestPregnantDemo = await this.analyticService.getPregnancyDistribution(from_date, to_date);
             const serviceChildrenAccompanyDemo = "";
-            const serviceBirthdateDemo = await this.analyticService.getBirthdateDistribution();
-            const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution();
+            const serviceBirthdateDemo = await this.analyticService.getBirthdateDistribution(from_date, to_date);
+            const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution(from_date, to_date);
 
 
             const customResponse = {
