@@ -1,4 +1,4 @@
-import {Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Patch, Post, Req, Res, UseBefore} from "routing-controllers";
 import {authMiddleware} from "../middleware/Auth.middleware";
 import {organizationMiddleware} from "../middleware/Organization.middleware";
 import {Request, Response} from "express";
@@ -15,7 +15,7 @@ import {Constants} from "../helper/Constants.helper";
 import {getClientDetails} from "../util/Advocate.util";
 import {ClientService} from "../services/Client.service";
 import {AdvocateService} from "../services/Advocate.service";
-import {reportSchema} from "../schema/Organization.schema";
+import {emailReminderSchema, reportSchema} from "../schema/Organization.schema";
 import {clientSchema} from "../schema/Client.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
 import {addClientService, reportUser} from "../util/Common.util";
@@ -23,8 +23,12 @@ import {advocateMiddleware} from "../middleware/Advocate.middleware";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 
 const serviceSettingsSchema = Joi.object({
+    organization_id: Joi.number(),
     service_id: Joi.number().required(),
     available_slots: Joi.number().required(),
+    contact_email: Joi.string().required(),
+    contact_phone: Joi.number().required(),
+    emailReminders: Joi.array().items(emailReminderSchema).min(1).required()
 })
 
 const reportServiceSchema = Joi.object({
@@ -422,4 +426,37 @@ export class ServiceManagerController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
+    @Delete("/service-delete/:serviceId")
+    @UseBefore(authMiddleware)
+    @UseBefore(serviceManagerMiddleware)
+    async serviceDelete(@Req() req: Request, @Res() res: Response, @Param("serviceId") serviceId: number) {
+        try {
+            const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, req.user.organization_id);
+            if (!checkValidService)
+                return ResponseFormatter.errorResponse(res, "Not a valid service")
+            const checkIfValidServiceManager = await this.serviceManagerService.checkIfValidService(serviceId, req.user.organization_id, req.user.id)
+
+            if (!checkIfValidServiceManager)
+                return ResponseFormatter.errorResponse(res, "Not a valid service manager");
+
+            // remove assigned service
+            const removeAssignedService = await this.organizationService.removeAssignedService(serviceId);
+            if (!removeAssignedService)
+                return ResponseFormatter.errorResponse(res, "Can't remove assigned service, try again later");
+            // remove service settings
+            const removeServiceSettings = await this.organizationService.removeServiceSettings(serviceId);
+            if (!removeServiceSettings)
+                return ResponseFormatter.errorResponse(res, "Can't remove service settings, try again later");
+            // remove service
+            const removeService = await this.organizationService.removeService(serviceId);
+            if (!removeService)
+                return ResponseFormatter.errorResponse(res, "Can't remove service, try again later");
+
+            return ResponseFormatter.successResponse(res, "Successful");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
 }
