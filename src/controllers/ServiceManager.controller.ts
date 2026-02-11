@@ -341,7 +341,7 @@ export class ServiceManagerController {
         }
     }
 
-    @Patch("/service-request/:serviceRequestsId/:status")
+    @Patch("/service-requests/:serviceRequestsId/:status")
     @UseBefore(authMiddleware)
     @UseBefore(serviceManagerMiddleware)
     async changeServiceRequestStatus(@Req() req: Request, @Res() res: Response, @Param("serviceRequestsId") serviceRequestsId: number, @Param("status") status: number) {
