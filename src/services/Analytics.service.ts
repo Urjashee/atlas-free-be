@@ -1508,9 +1508,9 @@ export class AnalyticsService {
     async getServicesByPhysicalAccommodations(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
-            .select("sd.physical_accommodation", "data")
+            .select("sd.physical_accommodations", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.physical_accommodation IS NOT NULL");
+            .where("sd.physical_accommodations IS NOT NULL");
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1528,7 +1528,7 @@ export class AnalyticsService {
         }
 
         const raw = await qb
-            .groupBy("sd.mental_health_diagnoses")
+            .groupBy("sd.physical_accommodations")
             .getRawMany();
 
 
@@ -1902,9 +1902,9 @@ export class AnalyticsService {
     async getServicesByTeamDiversity(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
-            .select("sd.team_diversity", "data")
+            .select("sd.teams_diversity", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.team_diversity IS NOT NULL");
+            .where("sd.teams_diversity IS NOT NULL");
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1922,7 +1922,7 @@ export class AnalyticsService {
         }
 
         const raw = await qb
-            .groupBy("sd.team_diversity")
+            .groupBy("sd.teams_diversity")
             .getRawMany();
 
 
@@ -1975,9 +1975,9 @@ export class AnalyticsService {
     async getServicesByServiceGuidelines(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
-            .select("sd.service_guideline", "data")
+            .select("sd.service_guidelines", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.service_guideline IS NOT NULL");
+            .where("sd.service_guidelines IS NOT NULL");
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1995,7 +1995,7 @@ export class AnalyticsService {
         }
 
         const raw = await qb
-            .groupBy("sd.service_guideline")
+            .groupBy("sd.service_guidelines")
             .getRawMany();
 
 
