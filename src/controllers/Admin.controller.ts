@@ -801,6 +801,23 @@ export class AdminController {
             const organizationServiceStatus = await this.analyticService.getServicesByStatus(from_date, to_date);
             const organizationServiceModel = await this.analyticService.getServicesByServiceModel(from_date, to_date);
             const organizationSlotsBeds = await this.analyticService.getServicesBySlotsBeds(from_date, to_date);
+            const organizationGendersServed = await this.analyticService.getServicesByGenderServed(from_date, to_date);
+            const organizationServedTo = await this.analyticService.getServicesByServedTo(from_date, to_date);
+            const organizationCitizenshipRequirements = await this.analyticService.getServicesByCitizenshipRequirements(from_date, to_date);
+            const organizationLanguageRequirements = await this.analyticService.getServicesByLanguageRequirements(from_date, to_date);
+            const organizationTrafficking = await this.analyticService.getServicesByTraffickingStatus(from_date, to_date);
+            const organizationLegal = await this.analyticService.getServicesByLegal(from_date, to_date);
+            const organizationHealthNeeds = await this.analyticService.getServicesByHealthNeeds(from_date, to_date);
+            const organizationMedication = await this.analyticService.getServicesByMedications(from_date, to_date);
+            const organizationMentalHealth = await this.analyticService.getServicesByMentalHealth(from_date, to_date);
+            const organizationPhysicalAccommodations = await this.analyticService.getServicesByPhysicalAccommodations(from_date, to_date);
+            const organizationEntryRequirements = await this.analyticService.getServicesByEntryRequirements(from_date, to_date);
+            const organizationFaithEngagement = await this.analyticService.getServicesByFaithEngagement(from_date, to_date);
+            const organizationServiceStructure = await this.analyticService.getServicesByServiceStructure(from_date, to_date);
+            const organizationSleepingArrangement = await this.analyticService.getServicesBySleepingArrangement(from_date, to_date);
+            const organizationStaffingLevel = await this.analyticService.getServicesByStaffingLevel(from_date, to_date);
+            const organizationTeamDiversity = await this.analyticService.getServicesByTeamDiversity(from_date, to_date);
+            const organizationServiceGuidelines = await this.analyticService.getServicesByServiceGuidelines(from_date, to_date);
 
 
             const customResponse = {
@@ -832,6 +849,23 @@ export class AdminController {
                     service_status: organizationServiceStatus,
                     service_model: organizationServiceModel,
                     slots_beds: organizationSlotsBeds,
+                    genders_served: organizationGendersServed,
+                    served_to: organizationServedTo,
+                    citizenship_requirement: organizationCitizenshipRequirements,
+                    language_requirement: organizationLanguageRequirements,
+                    trafficking_status: organizationTrafficking,
+                    legal: organizationLegal,
+                    health_needs: organizationHealthNeeds,
+                    medication: organizationMedication,
+                    mental_health_diagnoses: organizationMentalHealth,
+                    physical_accommodation: organizationPhysicalAccommodations,
+                    entry_requirement: organizationEntryRequirements,
+                    faith_engagement: organizationFaithEngagement,
+                    service_structure: organizationServiceStructure,
+                    sleeping_arrangement: organizationSleepingArrangement,
+                    staffing_level: organizationStaffingLevel,
+                    team_diversity: organizationTeamDiversity,
+                    service_guidelines: organizationServiceGuidelines,
                 }
             };
 
