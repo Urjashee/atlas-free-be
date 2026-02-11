@@ -189,7 +189,7 @@ export class ServiceManagerController {
             const {
                 data,
                 total
-            } = await this.serviceManagerService.getServiceRequests(req.user.organization_id, page_number, page_size, status);
+            } = await this.serviceManagerService.getServiceRequests(req.user.id, page_number, page_size, status);
 
             const customResponse = [];
 
