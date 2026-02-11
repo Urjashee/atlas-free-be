@@ -59,10 +59,10 @@ export class ServiceManagerService {
             .leftJoinAndSelect("service.state", "state")
             .leftJoinAndSelect("as.client_service", "client_service")
             .leftJoinAndSelect("as.user", "user")
-            .where(
-                "FIND_IN_SET(:user_id, service.service_manager) > 0",
-                { user_id }
-            )
+            // .where(
+            //     "FIND_IN_SET(:user_id, service.service_manager) > 0",
+            //     { user_id }
+            // )
             .orderBy("as.created_at", "DESC")
             .skip(skip)
             .take(page_size);
