@@ -53,10 +53,8 @@ const adminOrgEditSchema = Joi.object({
 @JsonController("/api/admin")
 export class AdminController {
     private organizationService = new OrganizationService();
-    private configService = new ConfigService();
     private userService = new UserService();
     private clientService = new ClientService();
-    private advocateService = new AdvocateService();
     private analyticService = new AnalyticsService();
 
     @Get("/organization/list/:filter")
@@ -761,7 +759,6 @@ export class AdminController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
-
 
     @Get("/analytics")
     @UseBefore(authMiddleware)

@@ -414,7 +414,8 @@ export class OrganizationService {
             where: {
                 organization: {id: organization_id},
                 // is_active: true,
-                is_status: true
+                is_status: true,
+                emailVerifiedAt: Not(null)
             },
             order: {created_at: "DESC"}
         })
