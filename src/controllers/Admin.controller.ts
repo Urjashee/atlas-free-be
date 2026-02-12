@@ -880,4 +880,17 @@ export class AdminController {
         }
     }
 
+    @Get("/organization/details/:organizationId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getOrganizationById(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number) {
+        try {
+            const organization = await this.organizationService.getOrganizationsById(organizationId);
+            const customResponse = await getOrganizationsDetails(organization);
+            return ResponseFormatter.successResponse(res, "Organization list", customResponse)
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
 }
