@@ -72,7 +72,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
-                    physical_accommodation: await Promise.all(clients.physical_accommodation.map(async (item: number) => {
+                    physical_accommodation: await Promise.all((clients.physical_accommodation ?? []).map(async (item: number) => {
                         return {
                             id: item,
                             name: (await configService.getServiceOptionsById(item)).name
