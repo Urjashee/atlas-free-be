@@ -800,7 +800,6 @@ export class OrganizationService {
         return await this.clientServiceRepository.findOne({
             where: {
                 id,
-                user: {id: user_id},
             },
             relations: ["user", "organization"]
         })
