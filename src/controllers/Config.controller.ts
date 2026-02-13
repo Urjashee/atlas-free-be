@@ -406,11 +406,11 @@ export class ConfigController {
                         if (service.slots_available <= 0) {
                             availability = 1 //Full
                         }
-                        if (service.total_available_slots >= service.slots_available) {
+                        if (service.slots_available > 0) {
                             availability = 0 //Open
                         }
                     } else {
-                        if (service.total_available_slots >= service.slots_available) {
+                        if (service.slots_available > 0) {
                             availability = 0 //Open
                         }
                         if (service.slots_available <= 0) {
