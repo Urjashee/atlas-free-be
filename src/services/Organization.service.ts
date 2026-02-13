@@ -950,7 +950,7 @@ export class OrganizationService {
             }
         })
         if (checkIfWaitlist.waitlist == true) {
-                if (checkIfWaitlist.slots_available >= checkIfWaitlist.total_available_slots) {
+                if (checkIfWaitlist.total_available_slots <= 0) {
                     return false;
                 } else {
                     return true;
