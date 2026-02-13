@@ -427,6 +427,9 @@ export class ConfigController {
                             : `${service.street} ${service.city}, ${service.state} ${service.zipcode}`,
                         availability_id: availability,
                         availability: ServiceStatus[availability],
+                        waitlist: service.waitlist,
+                        total_available_slots: service.total_available_slots,
+                        slots_available: service.slots_available,
                     });
                 }
             }
