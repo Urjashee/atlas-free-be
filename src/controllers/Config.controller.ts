@@ -403,13 +403,15 @@ export class ConfigController {
                     let availability
                     const serviceType = await this.configService.getServiceOptionsById(service.service_type);
                     if (service.waitlist == false) {
-                        availability = 1
+                        if (service.slots_available <= 0) {
+                            availability = 1 //Waitlist only
+                        }
                     } else {
                         if (service.total_available_slots > service.slots_available) {
-                            availability = 0
+                            availability = 0 //Open
                         }
-                        if (service.total_available_slots == service.slots_available) {
-                            availability = 2
+                        if (service.slots_available <= 0) {
+                            availability = 2 //Waitlist only
                         }
                     }
 
