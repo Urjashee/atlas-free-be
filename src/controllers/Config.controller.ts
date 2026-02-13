@@ -407,7 +407,7 @@ export class ConfigController {
                             availability = 1 //Waitlist only
                         }
                     } else {
-                        if (service.total_available_slots > service.slots_available) {
+                        if (service.total_available_slots >= service.slots_available) {
                             availability = 0 //Open
                         }
                         if (service.slots_available <= 0) {
