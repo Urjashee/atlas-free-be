@@ -44,7 +44,7 @@ export const survivorSchema = Joi.object({
     client_experienced: Joi.array().items(Joi.number()),
     pregnant: Joi.boolean(),
     pregnant_months: Joi.number(),
-    birthdate_status: Joi.number(),
+    birthdate_status: Joi.number().optional(),
     children_accompany: Joi.number(),
     children_to_accompany: Joi.number().optional(),
     criteria: Joi.array().items(Joi.number()),
