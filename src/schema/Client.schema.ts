@@ -4,7 +4,7 @@ export const clientSchema = Joi.object({
     id: Joi.number(),
     organization_id: Joi.number(),
     service: Joi.array().items(Joi.number()),
-    client_nick_name: Joi.string(),
+    client_nick_name: Joi.string().optional().allow(""),
     zipcode: Joi.string().min(5).max(10),
     dob: Joi.date(),
     english_speaking_ability: Joi.number(),

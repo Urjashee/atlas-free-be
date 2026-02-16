@@ -141,7 +141,7 @@ export class ClientService {
         const addService = await this.clientServiceRepository.create({
             client: {id: user_id},
             service: body.service,
-            // client_nick_name: body.client_nick_name,
+            client_nick_name: body.client_nick_name || "",
             zipcode: body.zipcode,
             dob: body.dob,
             english_speaking_ability: body.english_speaking_ability,
@@ -176,7 +176,7 @@ export class ClientService {
         })
         if (getClient) {
             getClient.service = body.service
-            getClient.client_nick_name = body.client_nick_name
+            getClient.client_nick_name = body.client_nick_name || ""
             getClient.zipcode = body.zipcode
             getClient.dob = body.dob
             getClient.english_speaking_ability = body.english_speaking_ability
