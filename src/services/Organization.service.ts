@@ -835,7 +835,8 @@ export class OrganizationService {
 
         return await this.userRepository.find({
             where: whereCondition,
-            order: {created_at: "DESC"}
+            order: {created_at: "DESC"},
+            // relations: ["roles"]
         });
     }
 

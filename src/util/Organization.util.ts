@@ -204,7 +204,7 @@ export async function getUserDetails(user: any) {
             email: user.email,
             phone_no: user.mobile,
             country_code: user.country_code,
-            role: getRoleNameById(user.role.id),
+            role: user.role.name == 'organization' ? 'Organization Admin' : user.role.name == 'service_manager' ? 'Service Manager' : user.role.name == 'advocate' ? 'Advocate' : user.role.name,
             client: await Promise.all(getClients.map((item) => ({
                 id: item.id,
                 client_number: item.case_no,
@@ -225,7 +225,7 @@ export async function getUserDetails(user: any) {
             email: user.email,
             phone_no: user.mobile,
             country_code: user.country_code,
-            role: getRoleNameById(user.role.id),
+            role: user.role.name == 'organization' ? 'Organization Admin' : user.role.name == 'service_manager' ? 'Service Manager' : user.role.name == 'advocate' ? 'Advocate' : user.role.name,
             services: await Promise.all(
                 getServices.map(async (item) => ({
                     id: item.id,
@@ -245,7 +245,7 @@ export async function getUserDetails(user: any) {
         email: user.email,
         phone_no: user.mobile,
         country_code: user.country_code,
-        role: getRoleNameById(user.role.id),
+        role: user.role.name == 'organization' ? 'Organization Admin' : user.role.name == 'service_manager' ? 'Service Manager' : user.role.name == 'advocate' ? 'Advocate' : user.role.name,
         created_at: new Date(user.created_at).toISOString().split('T')[0],
     }
 }
