@@ -59,12 +59,12 @@ export class AdvocateController {
                 const editClientDetails = await this.clientService.editClient(req.body.id, req.user.id, req.user.organization_id, req.body)
                 if (!editClientDetails)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully updated service.");
+                return ResponseFormatter.successResponse(res, "Successfully updated client.");
             } else {
                 const addClientDetails = await this.clientService.addClient(req.user.id, req.user.organization_id, req.body)
                 if (!addClientDetails)
                     return ResponseFormatter.errorResponse(res, "Can't add, try again later");
-                return ResponseFormatter.successResponse(res, "Successfully added service.");
+                return ResponseFormatter.successResponse(res, "Successfully added client.");
             }
 
         } catch (error: any) {
