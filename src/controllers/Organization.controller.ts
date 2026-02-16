@@ -23,7 +23,6 @@ import {ClientService} from "../services/Client.service";
 import {survivorMiddleware} from "../middleware/Survivor.middleware";
 import {AdvocateService} from "../services/Advocate.service";
 import {clientSchema} from "../schema/Client.schema";
-import {ServiceManagerService} from "../services/ServiceManager.service";
 import {addClientService, reportUser} from "../util/Common.util";
 import {
     assignServiceSchema,
@@ -33,7 +32,6 @@ import {
     serviceSettingsSchema
 } from "../schema/Organization.schema";
 import {clients, getClientsById} from "../util/ServiceRequest.util";
-import {adminMiddleware} from "../middleware/Admin.middleware";
 
 
 const organizationEditSchema = Joi.object({

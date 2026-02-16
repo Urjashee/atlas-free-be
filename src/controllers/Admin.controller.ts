@@ -40,17 +40,22 @@ const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
     country_code: Joi.string().min(2).max(5).required(),
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
+    street: Joi.string().min(3).max(1600).required(),
     address: Joi.string().min(3).max(1600).required(),
+    state: Joi.number().required(),
+    city: Joi.string().min(3).max(100).required(),
     disclose_address: Joi.boolean().required(),
     zipcode: Joi.string().min(4).max(10).required(),
     year: Joi.string().min(4).max(5).required(),
     website: Joi.string().min(4).max(100).required(),
     tax_exemption: Joi.number().min(0).max(1).required(),
+    ein: Joi.string().optional().allow(""),
     primary_purpose: Joi.array().items(Joi.number()).required(),
-    affiliations: Joi.string().required(),
+    affiliations: Joi.string().optional(),
 });
 
 @JsonController("/api/admin")
+
 export class AdminController {
     private organizationService = new OrganizationService();
     private userService = new UserService();
