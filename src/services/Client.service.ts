@@ -141,18 +141,27 @@ export class ClientService {
         const addService = await this.clientServiceRepository.create({
             client: {id: user_id},
             service: body.service,
+            // client_nick_name: body.client_nick_name,
             zipcode: body.zipcode,
             dob: body.dob,
             english_speaking_ability: body.english_speaking_ability,
+            preferred_language: body.preferred_language || "",
             gender: body.gender,
+            race: body.race,
             citizenship_status: body.citizenship_status,
             client_experienced: body.client_experienced,
             pregnant: body.pregnant,
-            pregnant_months: body.pregnant_months,
-            birthdate_status: body.birthdate_status,
-            children_accompany: body.children_accompany,
+            pregnant_months: body.pregnant_months || null,
+            birthdate_status: body.birthdate_status || null,
+            children_accompany: body.children_accompany || null,
             children_to_accompany: body.children_to_accompany || null,
             criteria: body.criteria,
+            criteria_add: body.criteria_add,
+            medications: body.medications,
+            mental_health_diagnoses: body.mental_health_diagnoses,
+            physical_accommodation: body.physical_accommodation,
+            specify_physical_accommodation: body.specify_physical_accommodation || "",
+            nicotine_products: body.nicotine_products,
         })
 
         return await this.clientServiceRepository.save(addService);
@@ -167,18 +176,27 @@ export class ClientService {
         })
         if (getClient) {
             getClient.service = body.service
+            getClient.client_nick_name = body.client_nick_name
             getClient.zipcode = body.zipcode
             getClient.dob = body.dob
             getClient.english_speaking_ability = body.english_speaking_ability
+            getClient.preferred_language = body.preferred_language || ""
             getClient.gender = body.gender
+            getClient.race = body.race
             getClient.citizenship_status = body.citizenship_status
             getClient.client_experienced = body.client_experienced
             getClient.pregnant = body.pregnant
-            getClient.pregnant_months = body.pregnant_months
-            getClient.birthdate_status = body.birthdate_status
+            getClient.pregnant_months = body.pregnant_months || null
+            getClient.birthdate_status = body.birthdate_status || null
             getClient.children_accompany = body.children_accompany
-            getClient.children_to_accompany = body.children_to_accompany || null
+            getClient.children_to_accompany = body.children_to_accompany
             getClient.criteria = body.criteria
+            getClient.criteria_add = body.criteria_add
+            getClient.medications = body.medications
+            getClient.mental_health_diagnoses = body.mental_health_diagnoses
+            getClient.physical_accommodation = body.physical_accommodation
+            getClient.specify_physical_accommodation = body.specify_physical_accommodation || ""
+            getClient.nicotine_products = body.nicotine_products
             return await this.clientServiceRepository.save(getClient);
         }
         return false

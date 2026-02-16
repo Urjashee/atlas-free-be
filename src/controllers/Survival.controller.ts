@@ -8,7 +8,7 @@ import {ClientService} from "../services/Client.service";
 import {authMiddleware} from "../middleware/Auth.middleware";
 import {Request, Response} from "express";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
-import {survivorSchema} from "../schema/Client.schema";
+import {clientSchema, survivorSchema} from "../schema/Client.schema";
 import {survivorMiddleware} from "../middleware/Survivor.middleware";
 import {getClientDetails, getServiceRequestsUser} from "../util/Advocate.util";
 import {Constants} from "../helper/Constants.helper";
@@ -48,7 +48,7 @@ export class AdvocateController {
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
-            const {error} = survivorSchema.validate(req.body);
+            const {error} = clientSchema.validate(req.body);
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
