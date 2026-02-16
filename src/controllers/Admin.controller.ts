@@ -172,7 +172,7 @@ export class AdminController {
         }
     }
 
-    @Post("/user-invitation")
+    @Post("/organization/user-invitation")
     @UseBefore(authMiddleware)
     @UseBefore(adminMiddleware)
     async sendInvitation(@Req() req: Request, @Res() res: Response) {
@@ -202,7 +202,7 @@ export class AdminController {
         }
     }
 
-    @Post("/user-invitation-resend")
+    @Post("/organization/user-invitation-resend")
     @UseBefore(authMiddleware)
     @UseBefore(adminMiddleware)
     async resendInvitation(@Req() req: Request, @Res() res: Response) {

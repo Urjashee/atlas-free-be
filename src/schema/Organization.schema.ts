@@ -8,6 +8,7 @@ export const reportSchema = Joi.object({
     client_service_id: Joi.number().optional().allow(""),
 })
 export const sendInvitationSchema = Joi.object({
+    organization_id: Joi.number().optional().allow(""),
     email: Joi.string().email().pattern(/^\S+$/).required(),
     role: Joi.number().required()
 })
