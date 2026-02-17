@@ -554,7 +554,8 @@ export class AdminController {
             const getEmailReminders = await this.organizationService.getEmailRemindersByServiceId(serviceId);
             const customResponse = {
                 service_id: getServiceSettings.id,
-                available_slots: getServiceSettings.slots_available,
+                total_available_slots: getServiceSettings.total_available_slots || "",
+                available_slots: getServiceSettings.slots_available || "",
                 service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager),
                 contact_email: getServiceSettings.contact_email,
                 contact_phone: getServiceSettings.contact_phone,
@@ -575,7 +576,7 @@ export class AdminController {
                     });
                 })
             }
-            return ResponseFormatter.successResponse(res, "Service settings", customResponse)
+            return ResponseFormatter.successResponse(res, "Service settings!", customResponse)
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
