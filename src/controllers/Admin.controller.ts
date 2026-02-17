@@ -454,7 +454,7 @@ export class AdminController {
 
     @Delete("/organization/service-delete/:organizationId/:serviceId")
     @UseBefore(authMiddleware)
-    @UseBefore(organizationMiddleware)
+    @UseBefore(adminMiddleware)
     async serviceDelete(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number, @Param("serviceId") serviceId: number) {
         try {
             const checkValidService = await this.organizationService.checkIfValidOrganization(serviceId, organizationId);
@@ -706,7 +706,7 @@ export class AdminController {
     //
     @Post("/organization/service-request/add")
     @UseBefore(authMiddleware)
-    @UseBefore(organizationMiddleware)
+    @UseBefore(adminMiddleware)
     async addClientService(@Req() req: Request, @Res() res: Response) {
         try {
             if (!req.body) {
