@@ -431,16 +431,18 @@ export class AdminController {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
 
+            const getOrganization = await this.organizationService.checkIfOrganization(req.user.organization_id)
+
             if (req.body.id) {
                 const checkIfValidOrganization = await this.organizationService.checkIfValidOrganization(req.body.id, req.body.organization_id);
                 if (!checkIfValidOrganization)
                     return ResponseFormatter.errorResponse(res, 'Invalid service');
-                const settings = await this.organizationService.editServiceDetails(req.body.id, req.body.organization_id, req.user.role, req.body)
+                const settings = await this.organizationService.editServiceDetails(req.body.id, req.body.organization_id, req.user.role, req.body, null, getOrganization)
                 if (!settings)
                     return ResponseFormatter.errorResponse(res, "Can't edit, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully updated service settings.");
             } else {
-                const settings = await this.organizationService.addServiceDetails(req.body.organization_id, req.user.role, req.body, req.user.id)
+                const settings = await this.organizationService.addServiceDetails(req.body.organization_id, req.user.role, req.body, req.user.id, getOrganization)
                 if (!settings)
                     return ResponseFormatter.errorResponse(res, "Can't add, try again later");
                 return ResponseFormatter.successResponse(res, "Successfully added service.");
