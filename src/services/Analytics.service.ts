@@ -33,6 +33,7 @@ export class AnalyticsService {
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
     private configService = new ConfigService();
 
+    // App engagement
     async getOrganizationCount(from_date?: string, to_date?: string) {
         const query = this.organizationRepository.createQueryBuilder("org");
 
@@ -107,6 +108,8 @@ export class AnalyticsService {
         return await query.getCount();
         // return count;
     }
+
+    // Survivor demographics
 
     async getServiceRequestDemo(from_date?: string, to_date?: string) {
         // Aggregate from DB
@@ -598,6 +601,8 @@ export class AnalyticsService {
 
         return returnFormat(dataArray, total, countMap);
     }
+
+    // Organization
 
     async getServicesByStatus(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
@@ -1626,6 +1631,7 @@ export class AnalyticsService {
     }
 
     async getServicesByFaithEngagement(from_date?: string, to_date?: string) {
+
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
             .select("sd.faith_engagement", "data")
@@ -1652,21 +1658,12 @@ export class AnalyticsService {
             .getRawMany();
 
 
-        const countMap: Record<number, number> = {};
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
-        raw.forEach((r) => {
-            const values = String(r.data)
-                .split(",")
-                .map(v => Number(v))
-                .filter(Boolean);
-
-            values.forEach((v) => {
-                countMap[v] = (countMap[v] || 0) + 1;
-            });
-        });
-
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
 
         const dataArray = [
             {
