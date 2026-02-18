@@ -1714,21 +1714,12 @@ export class AnalyticsService {
             .getRawMany();
 
 
-        const countMap: Record<number, number> = {};
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
-        raw.forEach((r) => {
-            const values = String(r.data)
-                .split(",")
-                .map(v => Number(v))
-                .filter(Boolean);
-
-            values.forEach((v) => {
-                countMap[v] = (countMap[v] || 0) + 1;
-            });
-        });
-
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
 
         const dataArray = [
             {
@@ -1775,21 +1766,12 @@ export class AnalyticsService {
             .getRawMany();
 
 
-        const countMap: Record<number, number> = {};
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
-        raw.forEach((r) => {
-            const values = String(r.data)
-                .split(",")
-                .map(v => Number(v))
-                .filter(Boolean);
-
-            values.forEach((v) => {
-                countMap[v] = (countMap[v] || 0) + 1;
-            });
-        });
-
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
 
         const dataArray = [
             {
@@ -1836,21 +1818,12 @@ export class AnalyticsService {
             .getRawMany();
 
 
-        const countMap: Record<number, number> = {};
+        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
-        raw.forEach((r) => {
-            const values = String(r.data)
-                .split(",")
-                .map(v => Number(v))
-                .filter(Boolean);
-
-            values.forEach((v) => {
-                countMap[v] = (countMap[v] || 0) + 1;
-            });
-        });
-
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        const countMap = raw.reduce<Record<number, number>>((acc, r) => {
+            acc[Number(r.data)] = Number(r.count);
+            return acc;
+        }, {});
 
         const dataArray = [
             {
