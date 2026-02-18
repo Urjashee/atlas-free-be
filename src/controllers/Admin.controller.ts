@@ -799,7 +799,7 @@ export class AdminController {
             const serviceRequestCitizenshipStatusDemo = await this.analyticService.getCitizenshipStatusDistribution(from_date, to_date);
             const serviceRequestClientExperienceDemo = await this.analyticService.getClientExperienceDistribution(from_date, to_date);
             const serviceRequestPregnantDemo = await this.analyticService.getPregnancyDistribution(from_date, to_date);
-            const serviceChildrenAccompanyDemo = "";
+            const serviceChildrenAccompanyDemo = await this.analyticService.getChildrenAccompanyDistribution(from_date, to_date);
             const serviceBirthdateDemo = await this.analyticService.getBirthdateDistribution(from_date, to_date);
             const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution(from_date, to_date);
             const organizationServiceStatus = await this.analyticService.getServicesByStatus(from_date, to_date);

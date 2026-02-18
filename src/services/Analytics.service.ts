@@ -29,15 +29,8 @@ import {ConfigService} from "./Config.service";
 export class AnalyticsService {
     private userRepository = AppDataSource.getRepository(Users);
     private organizationRepository = AppDataSource.getRepository(Organization);
-    private passwordResetRepository = AppDataSource.getRepository(PasswordReset);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
-    private emailReminderRepository = AppDataSource.getRepository(EmailReminder);
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
-    private reportUserRepository = AppDataSource.getRepository(ReportUser);
-    private reportServiceRepository = AppDataSource.getRepository(ReportService);
-    private clientServiceRepository = AppDataSource.getRepository(ClientService);
-    private affiliationRepository = AppDataSource.getRepository(Affiliations);
-    private mailerService = new EmailService();
     private configService = new ConfigService();
 
     async getOrganizationCount(from_date?: string, to_date?: string) {
@@ -504,39 +497,20 @@ export class AnalyticsService {
 
         const dataArray = [
             {
-                "id": 13,
-                "name": "Emancipated"
+                "id": 1,
+                "name": "Yes"
             },
             {
-                "id": 14,
-                "name": "Ward of the State"
+                "id": 2,
+                "name": "No"
             },
             {
-                "id": 15,
-                "name": "About to age-out"
-            },
-            {
-                "id": 16,
-                "name": "Parent or guardian consent"
-            },
-            {
-                "id": 17,
-                "name": "Determination in Process"
+                "id": 3,
+                "name": "Preferred"
             }
         ];
 
-        return dataArray.map((item) => {
-            const count = countMap[item.id] ?? 0;
-
-            return {
-                id: item.id,
-                name: item.name,
-                count,
-                percentage: total > 0
-                    ? Number(((count / total) * 100).toFixed(2))
-                    : 0,
-            };
-        });
+        return returnFormat(dataArray, total, countMap);
     }
 
     async getCriteriaDistribution(from_date?: string, to_date?: string) {
