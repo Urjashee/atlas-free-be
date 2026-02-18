@@ -816,7 +816,7 @@ export class AdminController {
             const organizationMentalHealth = await this.analyticService.getServicesByMentalHealth(from_date, to_date);
             const organizationPhysicalAccommodations = await this.analyticService.getServicesByPhysicalAccommodations(from_date, to_date);
             const organizationEntryRequirements = await this.analyticService.getServicesByEntryRequirements(from_date, to_date);
-            // const organizationFaithEngagement = await this.analyticService.getServicesByFaithEngagement(from_date, to_date);
+            const organizationFaithEngagement = await this.analyticService.getServicesByFaithEngagement(from_date, to_date);
             const organizationServiceStructure = await this.analyticService.getServicesByServiceStructure(from_date, to_date);
             const organizationSleepingArrangement = await this.analyticService.getServicesBySleepingArrangement(from_date, to_date);
             const organizationStaffingLevel = await this.analyticService.getServicesByStaffingLevel(from_date, to_date);
@@ -864,7 +864,7 @@ export class AdminController {
                     mental_health_diagnoses: organizationMentalHealth,
                     physical_accommodation: organizationPhysicalAccommodations,
                     entry_requirement: organizationEntryRequirements,
-                    // faith_engagement: organizationFaithEngagement,
+                    faith_engagement: organizationFaithEngagement,
                     service_structure: organizationServiceStructure,
                     sleeping_arrangement: organizationSleepingArrangement,
                     staffing_level: organizationStaffingLevel,

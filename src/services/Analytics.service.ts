@@ -1674,7 +1674,7 @@ export class AnalyticsService {
         }
 
         const raw = await qb
-            .groupBy("sd.entry_requirement")
+            .groupBy("sd.faith_engagement")
             .getRawMany();
 
 
