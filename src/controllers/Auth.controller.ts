@@ -78,7 +78,6 @@ const createPasswordSchema = Joi.object({
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
     password: Joi.string()
         .min(8) // At least 8 characters
-        .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{8,}$')) // At least one uppercase, one lowercase, one number
         .required()
         .messages({
             'string.min': 'Password must be at least 8 characters long.',
