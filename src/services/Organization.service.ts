@@ -565,6 +565,7 @@ export class OrganizationService {
 
         const [data, total] = await this.serviceDetailsRepository.findAndCount({
             where,
+            relations: ["organization", "state"],
             skip: (page_number - 1) * page_size,
             take: page_size,
         });
