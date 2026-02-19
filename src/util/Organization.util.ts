@@ -24,13 +24,13 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         //     ? `${service.address ?? ""} ${service.street ?? ""} ${service.city ?? ""} ${service.state?.name ?? ""} ${service.zipcode ?? ""}`.trim()
         //     : "",
 
-        address: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && service?.disclose_address) ? service.address : "-",
-        street: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && service?.disclose_address) ? service.street : "-",
-        city: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && service?.disclose_address) ? service.city : "-",
-        state_id: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && service?.disclose_address) ? service.state?.id : "-",
-        state: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && service?.disclose_address) ? service.state?.name : "-",
+        address: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.address : "-",
+        street: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.street : "-",
+        city: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.city : "-",
+        state_id: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.state?.id : "-",
+        state: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.state?.name : "-",
         zipcode: service.zipcode,
-        disclose_address: service?.disclose_address,
+        disclose_address: !service?.disclose_address,
         is_organization_address: service.is_organization_address,
 
         service_type_id: service?.service_type ?? null,
@@ -231,7 +231,7 @@ export async function getUserDetails(user: any) {
                     id: item.id,
                     name: item.name || "",
                     service_type: (await configService.getServiceOptionsById(item.service_type)).name,
-                    address: item.disclose_address == true ? `${item.address} ${item.street} ${item.city} ${item.state != null ? item.state.name : ""} ${item.zipcode}` : "",
+                    address: !item.disclose_address == true ? `${item.address} ${item.street} ${item.city} ${item.state != null ? item.state.name : ""} ${item.zipcode}` : "",
                 }))
             ),
             created_at: new Date(user.created_at).toISOString().split('T')[0],

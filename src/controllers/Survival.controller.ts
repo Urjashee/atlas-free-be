@@ -164,7 +164,7 @@ export class AdvocateController {
                     service: service.service.name,
                     service_type: serviceOption.name,
                     client_id: service.client_service.id,
-                    address: `${service.service.street || ""} ${service.service.address || ""} ${service.service.city || ""} ${service.service.state?.name || ""} ${service.service.zipcode || ""}`.trim(),
+                    address: `${service.service.street || ""} ${service.service.city || ""} ${service.service.state?.name || ""} ${service.service.zipcode || ""}`.trim(),
                     service_request: service.status
                 });
             }
