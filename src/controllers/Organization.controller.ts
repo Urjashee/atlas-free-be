@@ -117,7 +117,7 @@ export class AuthController {
             // if (!checkValidService)
             //     return ResponseFormatter.errorResponse(res, "Not a valid service")
             const getOrganizationServices = await this.organizationService.getOrganizationsServiceById(serviceId);
-            const customResponse = await getOrganizationsServiceDetails(getOrganizationServices)
+            const customResponse = await getOrganizationsServiceDetails(getOrganizationServices, Constants.ROLE_ORGANIZATION_ADMIN)
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

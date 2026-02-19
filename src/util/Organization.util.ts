@@ -16,6 +16,10 @@ const clientService = new ClientService();
 const advocateService = new AdvocateService();
 
 export async function getOrganizationsServiceDetails(service: any, roleId?: number) {
+    const isAdmin =
+        roleId === Constants.ROLE_ADMIN ||
+        roleId === Constants.ROLE_ORGANIZATION_ADMIN;
+        roleId === Constants.ROLE_SERVICE_MANAGER;
     return {
         id: service?.id ?? null,
         name: service?.name ?? "",
@@ -24,13 +28,13 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         //     ? `${service.address ?? ""} ${service.street ?? ""} ${service.city ?? ""} ${service.state?.name ?? ""} ${service.zipcode ?? ""}`.trim()
         //     : "",
 
-        address: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.address : "-",
-        street: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.street : "-",
-        city: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.city : "-",
-        state_id: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.state?.id : "-",
-        state: ((Constants.ROLE_ADMIN || Constants.ROLE_ORGANIZATION_ADMIN) && !service?.disclose_address) ? service.state?.name : "-",
+        address: isAdmin || !service?.disclose_address ? service.address : "-",
+        street: isAdmin || !service?.disclose_address ? service.street : "-",
+        city: isAdmin || !service?.disclose_address ? service.city : "-",
+        state_id: isAdmin || !service?.disclose_address ? service.state?.id : "-",
+        state: isAdmin || !service?.disclose_address ? service.state?.name : "-",
         zipcode: service.zipcode,
-        disclose_address: !service?.disclose_address,
+        disclose_address: service?.disclose_address,
         is_organization_address: service.is_organization_address,
 
         service_type_id: service?.service_type ?? null,

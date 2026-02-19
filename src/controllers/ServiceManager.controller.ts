@@ -80,7 +80,7 @@ export class ServiceManagerController {
             let customResponse = [];
             const getOrganizationServices = await this.serviceManagerService.getServiceManagerService(req.user.id);
             for (const service of getOrganizationServices) {
-                const data = await getOrganizationsServiceDetails(service)
+                const data = await getOrganizationsServiceDetails(service, Constants.ROLE_SERVICE_MANAGER)
                 customResponse.push(data)
             }
             return ResponseFormatter.successResponse(res, "Successful", customResponse);
