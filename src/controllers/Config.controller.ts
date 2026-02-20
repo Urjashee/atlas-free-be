@@ -424,7 +424,7 @@ export class ConfigController {
                         service_type: serviceType.name,
                         address: !service.disclose_address === false
                             ? "-"
-                            : `${service.street} ${service.city}, ${service?.state?.name || ""} ${service.zipcode}`,
+                            : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
                         availability_id: availability,
                         availability: ServiceStatus[availability],
                         waitlist: service.waitlist,
