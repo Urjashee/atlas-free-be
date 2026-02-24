@@ -472,95 +472,95 @@ export class OrganizationService {
         if (zipcode) {
             baseWhere.zipcode = zipcode;
         }
-        // // Availability
-        // if (availability === "true") {
-        //     baseWhere.waitlist = false;
-        // } else if (availability === "false") {
-        //     baseWhere.waitlist = true;
-        // }
-        // // Structure
-        // if (Array.isArray(structure) && structure.length > 0) {
-        //     const mappedStructures = structure.map((val) => structureMap[val]).filter(Boolean);
-        //     if (mappedStructures.length > 0) {
-        //         baseWhere.service_structure = In(mappedStructures);
-        //     }
-        // }
+        // Availability
+        if (availability === "true") {
+            baseWhere.waitlist = false;
+        } else if (availability === "false") {
+            baseWhere.waitlist = true;
+        }
+        // Structure
+        if (Array.isArray(structure) && structure.length > 0) {
+            const mappedStructures = structure.map((val) => structureMap[val]).filter(Boolean);
+            if (mappedStructures.length > 0) {
+                baseWhere.service_structure = In(mappedStructures);
+            }
+        }
+
+        if (!structure) {
+            baseWhere.service_structure = 111;
+        }
         //
-        // if (!structure) {
-        //     baseWhere.service_structure = 111;
-        // }
+        // Staffing
+        if (Array.isArray(staffing) && staffing.length > 0) {
+            baseWhere.staffing_level = In(staffing);
+        }
         //
-        // // Staffing
-        // if (Array.isArray(staffing) && staffing.length > 0) {
-        //     baseWhere.staffing_level = In(staffing);
-        // }
+        // Substance
+        if (substance == 1) {
+            where = [
+                {...baseWhere, entry_requirement: Like('%93%')},
+                {...baseWhere, entry_requirement: Like('%94%')}
+            ];
+        }
+        if (substance == 2) {
+            where = [
+                {...baseWhere, entry_requirement: Like('%95%')},
+            ];
+        }
         //
-        // // Substance
-        // if (substance == 1) {
-        //     where = [
-        //         {...baseWhere, entry_requirement: Like('%93%')},
-        //         {...baseWhere, entry_requirement: Like('%94%')}
-        //     ];
-        // }
-        // if (substance == 3) {
-        //     where = [
-        //         {...baseWhere, entry_requirement: Like('%95%')},
-        //     ];
-        // }
+        // Children
+        if (children === "true") {
+            where = [
+                {...baseWhere, served_to: Like('%17%')},
+                {...baseWhere, served_to: Like('%18%')}
+            ];
+        }
         //
-        // // Children
-        // if (children === "true") {
-        //     where = [
-        //         {...baseWhere, served_to: Like('%17%')},
-        //         {...baseWhere, served_to: Like('%18%')}
-        //     ];
-        // }
+        // Faith
+        if (faith == 1) {
+            where = [{
+                ...baseWhere,
+                faith_engagement: 110,
+                service_model: Like('%99%')
+            }];
+        }
+        if (faith == 2) {
+            where = [{
+                ...baseWhere,
+                faith_engagement: 109,
+                service_model: Like('%99%')
+            }];
+        }
+        if (faith == 3) {
+            baseWhere.service_model = Not(Like('%99%'));
+        }
         //
-        // // Faith
-        // if (faith == 1) {
-        //     where = [{
-        //         ...baseWhere,
-        //         faith_engagement: 110,
-        //         service_model: Like('%99%')
-        //     }];
-        // }
-        // if (faith == 2) {
-        //     where = [{
-        //         ...baseWhere,
-        //         faith_engagement: 109,
-        //         service_model: Like('%99%')
-        //     }];
-        // }
-        // if (faith == 3) {
-        //     baseWhere.service_model = Not(Like('%99%'));
-        // }
-        //
-        // // Living Arrangement
-        // if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
-        //     baseWhere.staffing_level = In(living_arrangement);
-        // }
-        // // Guidelines
-        // if (Array.isArray(guidelines) && guidelines.length > 0) {
-        //     const mappedGuidelines = guidelines.map((val) => guidelinesMap[val]).filter(Boolean);
-        //     if (mappedGuidelines.length > 0) {
-        //         const guidelineConditions = mappedGuidelines.map(id => ({
-        //             ...baseWhere,
-        //             service_guidelines: Like(`%${id}%`)
-        //         }));
-        //         where = guidelineConditions;
-        //     }
-        // }
-        // // Staff Diversity
-        // if (Array.isArray(staff_diversity) && staff_diversity.length > 0) {
-        //     const mappedStaffDiversity = staff_diversity.map((val) => staffDiversityMap[val]).filter(Boolean);
-        //     if (mappedStaffDiversity.length > 0) {
-        //         const staffDiversityConditions = mappedStaffDiversity.map(id => ({
-        //             ...baseWhere,
-        //             teams_diversity: Like(`%${id}%`)
-        //         }));
-        //         where = staffDiversityConditions;
-        //     }
-        // }
+        // Living Arrangement
+        if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
+            baseWhere.staffing_level = In(living_arrangement);
+        }
+        // Guidelines
+        if (Array.isArray(guidelines) && guidelines.length > 0) {
+            const mappedGuidelines = guidelines.map((val) => guidelinesMap[val]).filter(Boolean);
+            if (mappedGuidelines.length > 0) {
+                const guidelineConditions = mappedGuidelines.map(id => ({
+                    ...baseWhere,
+                    service_guidelines: Like(`%${id}%`)
+                }));
+                where = guidelineConditions;
+            }
+        }
+        // Staff Diversity
+        if (Array.isArray(staff_diversity) && staff_diversity.length > 0) {
+            const mappedStaffDiversity = staff_diversity.map((val) => staffDiversityMap[val]).filter(Boolean);
+            if (mappedStaffDiversity.length > 0) {
+                const staffDiversityConditions = mappedStaffDiversity.map(id => ({
+                    ...baseWhere,
+                    teams_diversity: Like(`%${id}%`)
+                }));
+                where = staffDiversityConditions;
+            }
+        }
 
 
         const [data, total] = await this.serviceDetailsRepository.findAndCount({

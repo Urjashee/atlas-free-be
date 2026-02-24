@@ -430,6 +430,10 @@ export class ConfigController {
                         waitlist: service.waitlist,
                         total_available_slots: service.total_available_slots,
                         slots_available: service.slots_available,
+                        // served_to: service.served_to,
+                        // service_structure: service.service_structure,
+                        // staffing_level: service.staffing_level,
+                        // entry_requirement: service.entry_requirement,
                     });
                 }
             }
