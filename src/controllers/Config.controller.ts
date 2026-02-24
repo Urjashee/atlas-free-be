@@ -423,7 +423,7 @@ export class ConfigController {
                         name: service.name,
                         service_type: serviceType.name,
                         address: !service.disclose_address === false
-                            ? "-"
+                            ? `${service.zipcode || ""}`
                             : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
                         availability_id: availability,
                         availability: ServiceStatus[availability],
