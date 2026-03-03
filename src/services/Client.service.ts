@@ -146,7 +146,7 @@ export class ClientService {
             dob: body.dob,
             english_speaking_ability: body.english_speaking_ability,
             preferred_language: body.preferred_language || "",
-            gender: body.gender,
+            gender: body.gender || null,
             race: body.race,
             citizenship_status: body.citizenship_status,
             client_experienced: body.client_experienced,
@@ -181,7 +181,7 @@ export class ClientService {
             getClient.dob = body.dob
             getClient.english_speaking_ability = body.english_speaking_ability
             getClient.preferred_language = body.preferred_language || ""
-            getClient.gender = body.gender
+            getClient.gender = body.gender || null
             getClient.race = body.race
             getClient.citizenship_status = body.citizenship_status
             getClient.client_experienced = body.client_experienced

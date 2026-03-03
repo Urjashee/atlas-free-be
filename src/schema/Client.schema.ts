@@ -9,7 +9,7 @@ export const clientSchema = Joi.object({
     dob: Joi.date(),
     english_speaking_ability: Joi.number(),
     preferred_language: Joi.string().optional().allow(""),
-    gender: Joi.string().optional().allow(""),
+    gender: Joi.array().items(Joi.number()).optional(),
     race: Joi.array().items(Joi.number()),
     citizenship_status: Joi.number(),
     client_experienced: Joi.array().items(Joi.number()).optional(),
