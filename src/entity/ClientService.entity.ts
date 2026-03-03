@@ -87,8 +87,14 @@ export class ClientService {
     @Column({ type: "simple-array", nullable: true })
     medications!: number[];
 
+    @Column({ nullable: true })
+    medications_other!: string;
+
     @Column({ type: "simple-array", nullable: true })
     mental_health_diagnoses!: number[];
+
+    @Column({ nullable: true })
+    mental_health_diagnoses_other!: string;
 
     @Column({ type: "simple-array", nullable: true })
     physical_accommodation!: number[];

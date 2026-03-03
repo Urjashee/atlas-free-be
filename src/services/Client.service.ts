@@ -158,7 +158,9 @@ export class ClientService {
             criteria: body.criteria,
             criteria_add: body.criteria_add,
             medications: body.medications,
+            medications_other: body.medications_other || "",
             mental_health_diagnoses: body.mental_health_diagnoses,
+            mental_health_diagnoses_other: body.mental_health_diagnoses_other || "",
             physical_accommodation: body.physical_accommodation,
             specify_physical_accommodation: body.specify_physical_accommodation || "",
             nicotine_products: body.nicotine_products,
@@ -193,7 +195,9 @@ export class ClientService {
             getClient.criteria = body.criteria
             getClient.criteria_add = body.criteria_add
             getClient.medications = body.medications
+            getClient.medications_other = body.medications_other || ""
             getClient.mental_health_diagnoses = body.mental_health_diagnoses
+            getClient.mental_health_diagnoses_other = body.mental_health_diagnoses_other || ""
             getClient.physical_accommodation = body.physical_accommodation
             getClient.specify_physical_accommodation = body.specify_physical_accommodation || ""
             getClient.nicotine_products = body.nicotine_products
