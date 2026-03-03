@@ -135,6 +135,12 @@ export class ConfigController {
                 name: item.name,
             }
         })
+        const legalArraySurvivor = legal.map((item) => {
+            return {
+                id: item.id,
+                name: (item.name).replace("them", "you"),
+            }
+        })
         const healthNeedsArray = healthNeeds.map((item) => {
             return {
                 id: item.id,
@@ -342,6 +348,7 @@ export class ConfigController {
             "language": languageArray,
             "traffic_status": traffickingStatusArray,
             "legal": legalArray,
+            "legal_survivor": legalArraySurvivor,
             "health_needs": healthNeedsArray,
             "medications": medicationsArray,
             "mental_health_diagnoses": mentalHealthDiagnosesArray,
