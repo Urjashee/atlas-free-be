@@ -136,9 +136,17 @@ export class ConfigController {
             }
         })
         const legalArraySurvivor = legal.map((item) => {
+            let updatedName = item.name;
+            if (item.id === 32) {
+                updatedName = "have an abuser actively looking for you";
+            }
+
+            if (item.id === 40) {
+                updatedName = "are registered as a sex offender";
+            }
             return {
                 id: item.id,
-                name: (item.name).replace("them", "you"),
+                name: updatedName,
             }
         })
         const healthNeedsArray = healthNeeds.map((item) => {

@@ -436,6 +436,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 167, name: 'Personal ID & Documentation Support', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 168, name: 'Substance Use Services (licensed)', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 169, name: 'Support Groups', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
+    {id: 170, name: 'None', type: 'legal', serviceHeading: heading_eligibility, icon: ""},
 ];
 
 const advocate_service: AdvocateService[] = [
