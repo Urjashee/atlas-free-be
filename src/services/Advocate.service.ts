@@ -40,6 +40,8 @@ export class AdvocateService {
             criteria: body.criteria,
             criteria_add: body.criteria_add,
             medications: body.medications,
+            medications_other: body.medications_other || "",
+            mental_health_diagnoses_other: body.mental_health_diagnoses_other || "",
             mental_health_diagnoses: body.mental_health_diagnoses,
             physical_accommodation: body.physical_accommodation,
             specify_physical_accommodation: body.specify_physical_accommodation || "",
@@ -76,6 +78,8 @@ export class AdvocateService {
             getClient.criteria = body.criteria
             getClient.criteria_add = body.criteria_add
             getClient.medications = body.medications
+            getClient.medications_other = body.medication_other || ""
+            getClient.mental_health_diagnoses_other = body.mental_health_diagnoses_other || ""
             getClient.mental_health_diagnoses = body.mental_health_diagnoses
             getClient.physical_accommodation = body.physical_accommodation
             getClient.specify_physical_accommodation = body.specify_physical_accommodation || ""

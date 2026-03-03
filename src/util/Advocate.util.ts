@@ -66,6 +66,8 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
+                    medications_other: clients.medications_other,
+                    mental_health_diagnoses_other: clients.mental_health_diagnoses_other,
                     mental_health_diagnoses: await Promise.all((clients.mental_health_diagnoses ?? []).map(async (item: number) => {
                         return {
                             id: item,
@@ -143,6 +145,8 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
+                    medications_other: clients.medications_other,
+                    mental_health_diagnoses_other: clients.mental_health_diagnoses_other,
                     mental_health_diagnoses: await Promise.all((clients.mental_health_diagnoses ?? []).map(async (item: number) => {
                         return {
                             id: item,
