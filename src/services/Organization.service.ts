@@ -38,18 +38,28 @@ export class OrganizationService {
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private mailerService = new EmailService();
 
-    async getOrganizations(filter: string) {
+    async getOrganizations(filter: string, search?: string) {
         if (filter === "active") {
-            return await this.userRepository
+            const query = this.userRepository
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
-                .andWhere('organization.under_review = :underReview', {underReview: false})
+                .andWhere('organization.under_review = :underReview', {underReview: false});
+
+            if (search && search.trim() !== "") {
+                query.andWhere(
+                    'LOWER(organization.name) LIKE LOWER(:search)',
+                    { search: `%${search}%` }
+                );
+            }
+
+            return await query
                 .orderBy('user.created_at', 'DESC')
                 .getMany();
+
         }
         if (filter === "inactive") {
             return await this.userRepository

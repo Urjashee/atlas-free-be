@@ -67,7 +67,8 @@ export class AdminController {
     @UseBefore(adminMiddleware)
     async getOrganizationList(@Req() req: Request, @Res() res: Response, @Param("filter") filter: string) {
         try {
-            const organizations = await this.organizationService.getOrganizations(filter)
+            const search = req.query.search as string
+            const organizations = await this.organizationService.getOrganizations(filter, search)
             const customResponse = await Promise.all(
                 organizations.map(async (organization: any) => {
                     return await getOrganizationsDetails(organization, filter, Constants.ROLE_ADMIN);
