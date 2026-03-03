@@ -376,7 +376,7 @@ export class ConfigController {
         try {
             const page_number = parseInt(req.query.page_number as string) || Constants.PAGE_NUMBER;
             const page_size = parseInt(req.query.page_size as string) || Constants.PAGE_SIZE;
-            const service_type = parseInt(req.query.service as string)
+            const service_type = req.query.service
             const state = parseInt(req.query.state as string);
             const city = req.query.city as string;
             const zipcode = req.query.zipcode as string
@@ -392,6 +392,7 @@ export class ConfigController {
 
             if (!service_type)
                 return ResponseFormatter.errorResponse(res, 'Service type is required');
+            // console.log("Service type", service_type);
             const { data, total } = await this.organizationService.getServices(page_number, page_size,
                 service_type, state, city, zipcode, availability, structure, staffing, substance, children,
                 faith, living_arrangement, guidelines, staff_diversity);

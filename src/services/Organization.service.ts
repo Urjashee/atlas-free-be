@@ -453,12 +453,21 @@ export class OrganizationService {
             5: 124,
         };
 
-        // Service type
         const baseWhere: any = {
-            service_type,
+            // service_type,
             is_submitted: true,
         };
         let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
+
+        // Multiple service types
+        if (Array.isArray(service_type) && service_type.length > 0) {
+            baseWhere.service_type = In(service_type.map(Number));
+        }
+
+        // Single service type
+        else if (service_type) {
+            baseWhere.service_type = Number(service_type);
+        }
 
         // City
         if (city) {
