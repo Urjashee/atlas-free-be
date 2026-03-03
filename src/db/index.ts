@@ -467,15 +467,16 @@ const advocate_service: AdvocateService[] = [
         name: 'White (Europe, the Middle East, or North Africa, German, Irish, English, Italian, Lebanese, Egyptian, Polish, French, Iranian, Slavic, Cajun, Chaldean, etc.)',
         type: 'race_ethnicity'
     },
-    {id: 9, name: 'prefer(s) not to say', type: 'race_ethnicity'},
-    {id: 10, name: 'US Citizen', type: 'citizenship_status'},
-    {id: 11, name: 'Documented foreign national', type: 'citizenship_status'},
-    {id: 12, name: 'Undocumented foreign national', type: 'citizenship_status'},
-    {id: 13, name: 'Emancipated', type: 'birthdate_status'},
-    {id: 14, name: 'Ward of the State', type: 'birthdate_status'},
-    {id: 15, name: 'About to age-out', type: 'birthdate_status'},
-    {id: 16, name: 'Parent or guardian consent', type: 'birthdate_status'},
-    {id: 17, name: 'Determination in Process', type: 'birthdate_status'},
+    {id: 9, name: 'Hispanic, Latino, or of Spanish origin', type: 'race_ethnicity'},
+    {id: 10, name: 'prefer(s) not to say', type: 'race_ethnicity'},
+    {id: 11, name: 'US Citizen', type: 'citizenship_status'},
+    {id: 12, name: 'Documented foreign national', type: 'citizenship_status'},
+    {id: 13, name: 'Undocumented foreign national', type: 'citizenship_status'},
+    {id: 14, name: 'Emancipated', type: 'birthdate_status'},
+    {id: 15, name: 'Ward of the State', type: 'birthdate_status'},
+    {id: 16, name: 'About to age-out', type: 'birthdate_status'},
+    {id: 17, name: 'Parent or guardian consent', type: 'birthdate_status'},
+    {id: 18, name: 'Determination in Process', type: 'birthdate_status'}
 ];
 
 const registration_option: RegistrationOption[] = [
@@ -849,7 +850,7 @@ connection.connect((err) => {
 
     seedState()
         .then(seedRoles)
-        .then(seedUsers)
+        // .then(seedUsers)
         .then(seedServiceTypes)
         .then(seedGeneralDetails)
         .then(seedAdvocateServices)
