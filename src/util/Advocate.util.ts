@@ -28,8 +28,12 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     english_speaking_ability_id: clients.english_speaking_ability,
                     english_speaking_ability: (await configService.getAdvocateServiceById(clients.english_speaking_ability)).name,
                     preferred_language: clients.preferred_language,
-                    gender: (await configService.getServiceOptionsById(clients.gender)).name,
-                    gender_id: clients.gender,
+                    gender: await Promise.all((clients.gender ?? []).map(async (item: number) => {
+                        return {
+                            id: item,
+                            name: (await configService.getServiceOptionsById(item)).name
+                        }
+                    })),
                     race: await Promise.all((clients.race ?? []).map(async (item: number) => {
                         return {
                             id: item,
@@ -107,8 +111,12 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     english_speaking_ability_id: clients.english_speaking_ability,
                     english_speaking_ability: (await configService.getAdvocateServiceById(clients.english_speaking_ability)).name,
                     preferred_language: clients.preferred_language,
-                    gender: (await configService.getServiceOptionsById(clients.gender)).name,
-                    gender_id: clients.gender,
+                    gender: await Promise.all((clients.gender ?? []).map(async (item: number) => {
+                        return {
+                            id: item,
+                            name: (await configService.getServiceOptionsById(item)).name
+                        }
+                    })),
                     race: await Promise.all((clients.race ?? []).map(async (item: number) => {
                         return {
                             id: item,
