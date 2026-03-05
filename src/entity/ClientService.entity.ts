@@ -51,8 +51,8 @@ export class ClientService {
     @Column({ nullable: true })
     preferred_language!: string;
 
-    @Column({ nullable: true, default: 10 })
-    gender!: number;
+    @Column({ type: "simple-array", nullable: true })
+    gender!: number[];
 
     @Column({ type: "simple-array", nullable: true })
     race!: number[];
