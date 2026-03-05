@@ -6,7 +6,7 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import {
     ActivateOrganization,
     CreatePassword,
-    PasswordResetEmail, ReportUserEmail,
+    PasswordResetEmail, RejectOrganization, ReportUserEmail,
     SendInvitationEmail,
     VerifyEmail
 } from "../helper/Emails.helper";
@@ -111,9 +111,18 @@ export class OrganizationService {
                 return organization.organization;
             }
             if (status_id == 2) {
+                const token = randomBytes(32).toString('hex');
                 organization.organization.is_active = false
                 organization.organization.under_review = false
                 await this.organizationRepository.save(organization.organization);
+                const emailContent = RejectOrganization(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
+                const mailOptions = {
+                    from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                    to: organization.email,
+                    subject: "New Organization Rejected!",
+                    html: emailContent
+                };
+                await this.mailerService.sendEmail(mailOptions);
                 return organization.organization;
             }
             if (status_id == 1) {
@@ -138,7 +147,7 @@ export class OrganizationService {
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                         to: organization.email,
-                        subject: "Email from Atlas free!",
+                        subject: "New Organization Approved!",
                         html: emailContent
                     };
                     await this.mailerService.sendEmail(mailOptions);
