@@ -257,14 +257,22 @@ export class ClientService {
 
     async updateServiceRequestStatus(id: number, status: ClientStatus) {
         const serviceRequest = await this.assignedServiceRepository.findOne({
-            where: { id }
+            where: { id },
+            relations: ["user", "client_service"]
         });
 
         if (!serviceRequest) {
             throw new Error("Service request not found");
         }
+        // console.log(serviceRequest)
+        // console.log("Status: ", status)
+        const name = serviceRequest.client_service.client_nick_name || `${serviceRequest.user.first_name} ${serviceRequest.user.last_name}`
+
+        let emailTemplate
 
         serviceRequest.status = status;
+        // Emails
+
         return await this.assignedServiceRepository.save(serviceRequest);
     }
 
