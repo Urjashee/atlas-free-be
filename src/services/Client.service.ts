@@ -10,7 +10,7 @@ import {Affiliations} from "../entity/Affiliations.entity";
 import {ClientService as ClientServiceEntity} from "../entity/ClientService.entity";
 import Joi from "joi";
 import {Constants} from "../helper/Constants.helper";
-import {ReportUserEmail} from "../helper/Emails.helper";
+import {PendingOrganization, ReportUserEmail, SendServiceRequest} from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
 
 export class ClientService {
@@ -258,7 +258,7 @@ export class ClientService {
     async updateServiceRequestStatus(id: number, status: ClientStatus) {
         const serviceRequest = await this.assignedServiceRepository.findOne({
             where: { id },
-            relations: ["user", "client_service"]
+            relations: ["user", "client_service", "organization", "service"]
         });
 
         if (!serviceRequest) {
@@ -267,11 +267,65 @@ export class ClientService {
         // console.log(serviceRequest)
         // console.log("Status: ", status)
         const name = serviceRequest.client_service.client_nick_name || `${serviceRequest.user.first_name} ${serviceRequest.user.last_name}`
+        const organization_name = serviceRequest.organization.name
+        const service_name = serviceRequest.service.name
+
+        let contact_email = serviceRequest.service?.contact_email
+        let contact_phone = serviceRequest.service?.contact_phone
+
+        // console.log("Contact email: ", contact_email)
+        // console.log("Contact phone: ", contact_phone)
 
         let emailTemplate
+        let subject = ""
+
+        if (status == Constants.PLACED) {
+            emailTemplate = `${organization_name} has placed your service request for ${service_name} 
+            and given you a spot in the service. 
+            Please use the information below establish contact with a service representative, 
+            they will share additional information on next steps:`
+            subject = `Service request placed`
+        }
+
+        if (status == Constants.UNABLE_TO_SERVE) {
+            emailTemplate = `${organization_name} is unable to place your service request for ${service_name}`
+            contact_email = ""
+            contact_phone = ""
+            subject = `Service request unable to place`
+        }
+
+        if (status == Constants.WAITLISTED) {
+            emailTemplate = `${organization_name} has waitlisted your service request for ${service_name}`
+            contact_email = ""
+            contact_phone = ""
+            subject = `Service request waitlisted`
+        }
+
+        if (status == Constants.CANCELLED) {
+            emailTemplate = `${organization_name} has cancelled your service request for ${service_name}`
+            contact_email = ""
+            contact_phone = ""
+            subject = `Service request cancelled`
+        }
+
+        if (status == Constants.ACCEPTED) {
+            emailTemplate = `${organization_name} has accepted your service request for ${service_name} 
+            and given you a spot in the service. 
+            Please use the information below establish contact with a service representative, 
+            they will share additional information on next steps:`
+            subject = `Service request accepted`
+        }
 
         serviceRequest.status = status;
         // Emails
+        const emailContent = SendServiceRequest(name, emailTemplate, contact_email, contact_phone);
+        const mailOptions = {
+            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            to: serviceRequest.user.email,
+            subject: subject,
+            html: emailContent
+        };
+        await this.mailerService.sendEmail(mailOptions);
 
         return await this.assignedServiceRepository.save(serviceRequest);
     }
