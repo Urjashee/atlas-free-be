@@ -510,9 +510,9 @@ export class OrganizationService {
             }
         }
 
-        if (!structure) {
-            baseWhere.service_structure = 111;
-        }
+        // if (!structure) {
+        //     baseWhere.service_structure = 111;
+        // }
         //
         // Staffing
         if (Array.isArray(staffing) && staffing.length > 0) {
