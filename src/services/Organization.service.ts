@@ -491,12 +491,17 @@ export class OrganizationService {
         if (zipcode) {
             baseWhere.zipcode = zipcode;
         }
+
+
         // Availability
         if (availability === "true") {
-            baseWhere.waitlist = false;
-        } else if (availability === "false") {
-            baseWhere.waitlist = true;
+            // console.log("Avail: ", availability);
+            baseWhere.slots_available = MoreThan(0);
         }
+        // else if (!availability) {
+        //     baseWhere.waitlist = true;
+        // }
+
         // Structure
         if (Array.isArray(structure) && structure.length > 0) {
             const mappedStructures = structure.map((val) => structureMap[val]).filter(Boolean);
