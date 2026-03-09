@@ -512,7 +512,7 @@ export class OrganizationService {
 
 
         // Availability
-        if (availability === "true") {
+        if (availability === "true" || availability === "1") {
             // console.log("Avail: ", availability);
             baseWhere.slots_available = MoreThan(0);
         }
@@ -551,7 +551,7 @@ export class OrganizationService {
         }
         //
         // Children
-        if (children === "true") {
+        if (children === "true" || children === "1") {
             where = [
                 {...baseWhere, served_to: Like('%17%')},
                 {...baseWhere, served_to: Like('%18%')}
