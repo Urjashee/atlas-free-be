@@ -41,6 +41,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                         }
                     })),
                     citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status)).name,
+                    citizenship_status_id: clients.citizenship_status,
                     client_experienced: await Promise.all((clients.client_experienced ?? []).map(async (item: number) => {
                         return {
                             id: item,
@@ -124,6 +125,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                         }
                     })),
                     citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status)).name,
+                    citizenship_status_id: clients.citizenship_status,
                     client_experienced: await Promise.all((clients.client_experienced ?? []).map(async (item: number) => {
                         return {
                             id: item,
