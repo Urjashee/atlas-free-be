@@ -203,8 +203,8 @@ export async function getUserDetails(user: any) {
         return {
             id: user.id,
             username: user.username,
-            first_name: user.first_name,
-            last_name: user.last_name,
+            first_name: user.first_name || "",
+            last_name: user.last_name || "",
             email: user.email,
             phone_no: user.mobile,
             country_code: user.country_code,
@@ -224,8 +224,8 @@ export async function getUserDetails(user: any) {
         return {
             id: user.id,
             username: user.username,
-            first_name: user.first_name,
-            last_name: user.last_name,
+            first_name: user.first_name || "",
+            last_name: user.last_name || "",
             email: user.email,
             phone_no: user.mobile,
             country_code: user.country_code,
@@ -244,8 +244,8 @@ export async function getUserDetails(user: any) {
     return {
         id: user.id,
         username: user.username,
-        first_name: user.first_name,
-        last_name: user.last_name,
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
         email: user.email,
         phone_no: user.mobile,
         country_code: user.country_code,
