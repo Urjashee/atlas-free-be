@@ -181,7 +181,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     , icon: ""},
     {
         id: 58,
-        name: 'Antipsychotic (Risperdal, Seroquel, Ziprasidone, etc)',
+        name: 'Anti-psychotic (Risperdal, Seroquel, Ziprasidone, etc)',
         type: 'medications',
         serviceHeading: heading_eligibility
     , icon: ""},
@@ -208,7 +208,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     , icon: ""},
     {
         id: 65,
-        name: 'Nerve Pain/Anticonvulsant (Gabapentin, Lyrica)',
+        name: 'Nerve Pain/Anti-convulsant (Gabapentin, Lyrica)',
         type: 'medications',
         serviceHeading: heading_eligibility
     , icon: ""},
@@ -240,7 +240,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     , icon: ""},
     {id: 77, name: 'Eating Disorder', type: 'mental_health_diagnoses', serviceHeading: heading_eligibility, icon: ""},
     {id: 78, name: 'None', type: 'mental_health_diagnoses', serviceHeading: heading_eligibility, icon: ""},
-    {id: 79, name: 'Other (fill in option)', type: 'mental_health_diagnoses', serviceHeading: heading_eligibility, icon: ""},
+    {id: 79, name: 'Other', type: 'mental_health_diagnoses', serviceHeading: heading_eligibility, icon: ""},
     {id: 80, name: 'Wheelchair accessibility', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
     {id: 81, name: 'Ramp access', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
     {
