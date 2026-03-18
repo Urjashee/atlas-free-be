@@ -43,13 +43,19 @@ export const CreatePassword = (name: string, email: string, token: string, type:
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
         </div>
         <div class="content">
-            <p>Dear ${name},</p>
+            <p>Dear ${email},</p>
             <p>Thank you for your patience</p>
-            <p>Please click the button below to create a password for your account to login</p>
+            <p>Please click the button below to create a password for your account to login. If the</p>
+            
             <button type="button" class="button">
             <a href='${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}' 
                     style="text-decoration:none;color: #2954FF;">
                 Create Password</a></button>
+                <br/><br/>
+                <p>If the above button does not work for you. Copy and paste the link to your browser address and try again.<br></p>
+            <a href='${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}' 
+                    style="text-decoration:none;color: #2954FF;">
+                ${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}</a>
         </div>
         <div class="footer">
             <p>Best Regards,</p>
