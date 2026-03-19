@@ -504,7 +504,7 @@ const registration_option: RegistrationOption[] = [
     {id: 21, name: 'Licensed to provide residential care to minors', type: 'affiliations_licenses'},
     {
         id: 22,
-        name: 'Other (should be able to add multiple others while we get more intel on possible affiliations)',
+        name: 'Other',
         type: 'affiliations_licenses'
     },
 ];
