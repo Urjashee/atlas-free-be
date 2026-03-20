@@ -79,6 +79,7 @@ export class JwtHelper {
                 isActive: user.is_active,
                 isStatus: user.is_status,
                 isProfile: user.is_profile,
+                isFirstLogin: user.is_first_login
             }, process.env.JWT_SECRET as string, {expiresIn: process.env.TOKEN_EXPIRY as any})
         }
     }

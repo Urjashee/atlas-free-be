@@ -1,4 +1,4 @@
-import {Delete, Get, JsonController, Param, Post, Put, Req, Res, UseBefore} from "routing-controllers";
+import {Delete, Get, JsonController, Param, Patch, Post, Put, Req, Res, UseBefore} from "routing-controllers";
 import {UserService} from "../services/User.service";
 import {OrganizationService} from "../services/Organization.service";
 import {ConfigService} from "../services/Config.service";
@@ -307,4 +307,24 @@ export class AdvocateController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
+
+
+    // @Patch("/first-login")
+    // @UseBefore(authMiddleware)
+    // @UseBefore(survivorMiddleware)
+    // async isFirstLogin(@Req() req: Request, @Res() res: Response) {
+    //     try {
+    //         const checkIfSurvivor = await this.clientService.checkIfSurvivor(req.user.id)
+    //         if (!checkIfSurvivor) {
+    //             return ResponseFormatter.errorResponse(res, 'You are not a survivor user');
+    //         }
+    //         const updateSurvivorFirstLogin = await this.clientService.updateLoginStatus(checkIfSurvivor);
+    //         if (!updateSurvivorFirstLogin)
+    //             return ResponseFormatter.errorResponse(res, 'Status not updated');
+    //         return ResponseFormatter.successResponse(res, "Profile updated successfully");
+    //     } catch (error: any) {
+    //         return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+    //     }
+    // }
 }

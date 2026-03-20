@@ -416,6 +416,12 @@ export class UserService {
             token: token,
             user: user.id,
         });
+        if (user.role.id == Constants.ROLE_SURVIVOR) {
+            if (user.is_first_login === false) {
+                user.is_first_login = true;
+                await this.userRepository.save(user);
+            }
+        }
         return await this.deviceTokenRepository.save(userToken);
     }
 
