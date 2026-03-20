@@ -417,8 +417,8 @@ export class UserService {
             user: user.id,
         });
         if (user.role.id == Constants.ROLE_SURVIVOR) {
-            if (user.is_first_login === false) {
-                user.is_first_login = true;
+            if (user.is_first_login === true) {
+                user.is_first_login = false;
                 await this.userRepository.save(user);
             }
         }

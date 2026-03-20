@@ -61,7 +61,7 @@ export class Users {
     @Column({ nullable: true, default: 'https://google.com' })
     safe_exit!: string;
 
-    @Column({ nullable: false, default: false })
+    @Column({ nullable: false, default: true })
     is_first_login!: boolean; //check if the user has done a first login
 
     @ManyToOne(() => UserRole, { eager: true })
