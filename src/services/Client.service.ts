@@ -12,6 +12,7 @@ import Joi from "joi";
 import {Constants} from "../helper/Constants.helper";
 import {PendingOrganization, ReportUserEmail, SendServiceRequest} from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
+import {In, Not} from "typeorm";
 
 export class ClientService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -25,6 +26,22 @@ export class ClientService {
 
     async findExistingServices(organization_id: number,) {
         const services = await this.assignedServiceRepository.find({})
+    }
+
+    async checkDuplicateServiceRequest(body: any, user_id: number) {
+        const status_checks = [Constants.UNABLE_TO_SERVE, Constants.PLACED, Constants.CANCELLED];
+        const existing = await this.assignedServiceRepository.find({
+            where: {
+                client_service: {id: body.client_service_id},
+                service: {id: body.service_id},
+                status: Not(In(status_checks))
+            },
+        });
+        console.log("Existing: ", existing);
+        if (existing.length > 0)
+            return true
+
+        return false
     }
 
     async addService(body: any, user_id: number) {

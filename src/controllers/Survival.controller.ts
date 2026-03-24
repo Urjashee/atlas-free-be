@@ -133,10 +133,13 @@ export class AdvocateController {
             const checkIfSlotAvailable = await this.organizationService.checkIfSlotAvailable(req.body.service_id, req.body.organization_id);
             if (!checkIfSlotAvailable)
                 return ResponseFormatter.errorResponse(res, 'No slot available for this service');
+            const checkIfDuplicate = await this.clientService.checkDuplicateServiceRequest(req.body, req.user.id)
+            if (checkIfDuplicate)
+                return ResponseFormatter.errorResponse(res, "Service request already sent")
             const addService = await this.clientService.addService(req.body, req.user.id);
             if (!addService)
                 return ResponseFormatter.errorResponse(res, "Request can't be sent");
-            return ResponseFormatter.successResponse(res, "Successful");
+            return ResponseFormatter.successResponse(res, "Service request sent successfully");
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }

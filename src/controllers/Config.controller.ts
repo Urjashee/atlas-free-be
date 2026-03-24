@@ -437,6 +437,7 @@ export class ConfigController {
                     customResponse.push({
                         id: service.id,
                         name: service.name,
+                        organization_id: service.organization.id,
                         service_type: serviceType.name,
                         address: !service.disclose_address === false
                             ? `${service.zipcode || ""}`
