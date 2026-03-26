@@ -108,6 +108,10 @@ export class AuthController {
             if (existingUser) {
                 return ResponseFormatter.errorResponse(res, 'Email already in use');
             }
+            const existingEin = await this.userService.findByEin(req.body.ein);
+            if (existingEin) {
+                return ResponseFormatter.errorResponse(res, 'EIN already exist');
+            }
             const roleId = Constants.ROLE_ORGANIZATION_ADMIN
             const user = await this.userService.createUser(req.body, roleId,);
             if (user)

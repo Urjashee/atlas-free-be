@@ -32,6 +32,14 @@ export class UserService {
         })
     }
 
+    async findByEin(ein: string): Promise<Organization> {
+        return await this.organizationRepository.findOne({
+            where: {
+                ein
+            }
+        })
+    }
+
     async findByEmailVerified(email: string): Promise<Users> {
         return await this.userRepository.findOne({
             where: {

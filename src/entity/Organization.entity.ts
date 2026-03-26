@@ -49,7 +49,7 @@ export class Organization {
     tax_exemption!: boolean;
 
     @Column({nullable: true})
-    ein!: number
+    ein!: string
 
     @Column({ type: "simple-array", nullable: true })
     primary_purpose!: number[]
