@@ -40,6 +40,15 @@ export class UserService {
         })
     }
 
+    async findByEinExceptOwn(ein: string, organization_id: number): Promise<Organization> {
+        return await this.organizationRepository.findOne({
+            where: {
+                ein,
+                id: Not(organization_id)
+            }
+        });
+    }
+
     async findByEmailVerified(email: string): Promise<Users> {
         return await this.userRepository.findOne({
             where: {

@@ -249,6 +249,10 @@ export class AuthController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            const existingEin = await this.userService.findByEinExceptOwn(req.body.ein, req.user.organization_id);
+            if (existingEin) {
+                return ResponseFormatter.errorResponse(res, 'EIN already exist');
+            }
             const user = await this.userService.updateUser(req.user.organization_id, req.body, req.user.role);
             if (!user)
                 return ResponseFormatter.successResponse(res, 'User not updated')
