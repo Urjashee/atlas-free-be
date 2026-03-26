@@ -12,7 +12,7 @@ const AppDataSource = new DataSource({
     synchronize: false,
     logging: false,
     entities: process.env.NODE_ENV === 'development' ? [__dirname + "/src/entity/*.ts"] : [__dirname + "/src/entity/*.js"],
-    migrations: process.env.NODE_ENV === 'development' ? [__dirname + "/src/migration/*.ts"] : [__dirname + "/src/migration/*.js"],
+    migrations: process.env.NODE_ENV === 'development' ? [__dirname + "/src/migrations/*.ts"] : [__dirname + "/src/migrations/*.js"],
     // entities: [
     //     process.env.NODE_ENV === "development"
     //         ? __dirname + "/entity/*.ts"
@@ -21,8 +21,8 @@ const AppDataSource = new DataSource({
     //
     // migrations: [
     //     process.env.NODE_ENV === "development"
-    //         ? __dirname + "/migration/*.ts"
-    //         : __dirname + "/migration/*.js",
+    //         ? __dirname + "/migrations/*.ts"
+    //         : __dirname + "/migrations/*.js",
     // ],
     subscribers: ["src/subscriber/**/*.ts"],
 });
