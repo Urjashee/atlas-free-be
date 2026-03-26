@@ -8,6 +8,7 @@
     "dev": "tsc-watch --onSuccess \"node ./dist/src/app.js\"",
     "seed": "ts-node-dev src/db/index.ts",
     "migrate": "npx typeorm-ts-node-commonjs migration:run -d ormconfig.ts",
+    "migrate:ubuntu": "npx typeorm-ts-node-commonjs migration:run -d dist/ormconfig.js",
     "build": "tsc",
     "build:windows": "tsc",
     "build:ubuntu": "tsc && mkdir -p dist/src/assets && cp -r src/assets/* dist/src/assets"
