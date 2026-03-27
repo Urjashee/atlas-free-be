@@ -805,6 +805,7 @@ export class AdminController {
             const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution(from_date, to_date);
             const organizationServiceStatus = await this.analyticService.getServicesByStatus(from_date, to_date);
             const organizationServiceModel = await this.analyticService.getServicesByServiceModel(from_date, to_date);
+            const organizationServiceType = await this.analyticService.getServicesByServiceType(from_date, to_date);
             const organizationSlotsBeds = await this.analyticService.getServicesBySlotsBeds(from_date, to_date);
             const organizationGendersServed = await this.analyticService.getServicesByGenderServed(from_date, to_date);
             const organizationServedTo = await this.analyticService.getServicesByServedTo(from_date, to_date);
@@ -852,7 +853,7 @@ export class AdminController {
                 },
                 organization: {
                     service_status: organizationServiceStatus,
-                    service_type: organizationServiceModel,
+                    service_type: organizationServiceType,
                     slots_beds: organizationSlotsBeds,
                     genders_served: organizationGendersServed,
                     served_to: organizationServedTo,

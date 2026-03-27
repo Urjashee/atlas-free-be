@@ -607,9 +607,71 @@ export class AnalyticsService {
     async getServicesByStatus(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
-            .select("sd.waitlist", "data")
+            .select("sd.waitlist", "waitlist")
+            .addSelect("sd.id", "id")
+            .addSelect("sd.total_available_slots", "total_available_slots")
+            // .where("sd.total_available_slots IS NOT NULL");
+
+        // Proper date filtering
+        if (from_date && to_date) {
+            qb.andWhere(
+                "sd.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        } else if (from_date) {
+            qb.andWhere("sd.created_at >= :from_date", { from_date });
+        } else if (to_date) {
+            qb.andWhere("sd.created_at <= :to_date", { to_date });
+        }
+
+        const raw = await qb.getRawMany();
+
+        // Status logic (FIXED based on your rules)
+        const getStatus = (service: any): number => {
+            // const waitlist = service.waitlist === true || service.waitlist === '1';
+            const slots = Number(service.total_available_slots);
+
+            if (service.waitlist == 1) {
+                if (slots > 0) return 1;  // Open
+                if (slots <= 0) return 2; // Waitlist
+            } else {
+                if (slots <= 0) return 3; // Full
+                if (slots > 0) return 1;  // Open
+            }
+
+            return 1;
+        };
+
+        // Initialize counts
+        const countMap: Record<number, number> = {
+            1: 0, // Open
+            2: 0, // Waitlist
+            3: 0, // Full
+        };
+
+        // Aggregate
+        raw.forEach((r) => {
+            const status = getStatus(r);
+            countMap[status]++;
+        });
+
+        // Static labels
+        const dataArray = [
+            { id: 1, name: "Open" },
+            { id: 2, name: "Waitlist" },
+            { id: 3, name: "Full" }
+        ];
+        const total = raw.length;
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getServicesByServiceType(from_date?: string, to_date?: string) {
+
+        const qb = this.serviceDetailsRepository
+            .createQueryBuilder("sd")
+            .select("sd.service_type", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.waitlist IS NOT NULL");
+            .where("sd.service_type IS NOT NULL");
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -627,7 +689,7 @@ export class AnalyticsService {
         }
 
         const raw = await qb
-            .groupBy("sd.waitlist")
+            .groupBy("sd.service_type")
             .getRawMany();
 
 
@@ -638,15 +700,41 @@ export class AnalyticsService {
             return acc;
         }, {});
 
-
         const dataArray = [
             {
-                "id": 0,
-                "name": "Open"
+                "id": 1,
+                "name": "Advocacy/Case Management",
+                
             },
             {
-                "id": 1,
-                "name": "Waitlist"
+                "id": 2,
+                "name": "Educational/Vocational Service",
+                
+            },
+            {
+                "id": 3,
+                "name": "Housing, Long-Term (3+ months)",
+                
+            },
+            {
+                "id": 4,
+                "name": "Housing, Short-Term (24 hours up to 3 months)",
+                
+            },
+            {
+                "id": 5,
+                "name": "Legal Advocacy",
+                
+            },
+            {
+                "id": 6,
+                "name": "Mental Health Service",
+                
+            },
+            {
+                "id": 7,
+                "name": "Substance-Use Disorder Service",
+                
             }
         ];
 
