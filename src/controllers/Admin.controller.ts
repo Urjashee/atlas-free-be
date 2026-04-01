@@ -803,6 +803,10 @@ export class AdminController {
             const serviceChildrenAccompanyDemo = await this.analyticService.getChildrenAccompanyDistribution(from_date, to_date);
             const serviceBirthdateDemo = await this.analyticService.getBirthdateDistribution(from_date, to_date);
             const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution(from_date, to_date);
+            const serviceRaceDemo = await this.analyticService.getRaceDistribution(from_date, to_date);
+            const serviceMedicationDemo = await this.analyticService.getMedicationDistribution(from_date, to_date);
+            const serviceMentalHealthDemo = await this.analyticService.getMentalHealthDistribution(from_date, to_date);
+            const serviceNicotineProductsDemo = await this.analyticService.getNicotineProductsDistribution(from_date, to_date);
             const organizationServiceStatus = await this.analyticService.getServicesByStatus(from_date, to_date);
             const organizationServiceModel = await this.analyticService.getServicesByServiceModel(from_date, to_date);
             const organizationServiceType = await this.analyticService.getServicesByServiceType(from_date, to_date);
@@ -844,12 +848,16 @@ export class AdminController {
                     service_requests_demographics: serviceRequestDemo,
                     speaking_ability_demographics: serviceRequestSpeakingAbilityDemo,
                     gender_demographics: serviceRequestGenderDemo,
+                    client_race_demographics: serviceRaceDemo,
                     citizenship_status_demographics: serviceRequestCitizenshipStatusDemo,
                     client_experience_demographics: serviceRequestClientExperienceDemo,
                     pregnancy_demographics: serviceRequestPregnantDemo,
                     children_accompany: serviceChildrenAccompanyDemo,
                     birthdate_status_demographics: serviceBirthdateDemo,
                     client_criteria_demographics: serviceCriteriaDemo,
+                    client_medication_demographics: serviceMedicationDemo,
+                    client_mental_health_demographics: serviceMentalHealthDemo,
+                    client_nicotine_products_demographics: serviceNicotineProductsDemo,
                 },
                 organization: {
                     service_status: organizationServiceStatus,

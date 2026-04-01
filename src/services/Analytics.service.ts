@@ -602,6 +602,350 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
+    async getRaceDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.race", "data")
+            .where("cs.race IS NOT NULL")
+
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            {
+                "id": 4,
+                "name": "Asian (Far East, Southeast Asia, or the Indian subcontinent. India, China, the Philippine Islands, Japan, Korea, or Vietnam, Asian Indian, Chinese, Filipino, Korean, Japanese, Vietnamese, Other Asian, Pakistani, Cambodian, Hmong, Thai, Bengali, Mien, etc.)"
+            },
+            {
+                "id": 5,
+                "name": "Native Hawaiian and Other Pacific Islander (Hawaii, Guam, Samoa, Pacific Islands, Native Hawaiian, Chamorro, Samoan, Other Pacific Islander, Pacific Islander, Palauan, Tahitian, Chuukese, Pohnpeian, Saipanese, Yapese, etc.)"
+            },
+            {
+                "id": 6,
+                "name": "American Indian and Alaska Native (North and South America, race as \"American Indian or Alaska Native\", Navajo Nation, Blackfeet Tribe, Mayan, Aztec, Native Village of Barrow Inupiat, or Nome Eskimo Community.)"
+            },
+            {
+                "id": 7,
+                "name": "Black or African American (Black racial groups of Africa. Such as African American, Jamaican, Haitian, Nigerian, Ethiopian, or Somali, Ghanaian, South African, Barbadian, Kenyan, Liberian, Bahamian, etc.)"
+            },
+            {
+                "id": 8,
+                "name": "White (Europe, the Middle East, or North Africa, German, Irish, English, Italian, Lebanese, Egyptian, Polish, French, Iranian, Slavic, Cajun, Chaldean, etc.)"
+            },
+            {
+                "id": 9,
+                "name": "Hispanic, Latino, or of Spanish origin"
+            },
+            {
+                "id": 10,
+                "name": "prefer(s) not to say"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getMedicationDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.medications", "data")
+            .where("cs.medications IS NOT NULL")
+
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            {
+                "id": 55,
+                "name": "Not taking any medications"
+            },
+            {
+                "id": 56,
+                "name": "Stimulants (Adderall, Ritalin, Vyvanse, etc)"
+            },
+            {
+                "id": 57,
+                "name": "Mood Stabilizers (Lithium, Abilify, Saphris, Vraylar, etc)"
+            },
+            {
+                "id": 58,
+                "name": "Anti-psychotic (Risperdal, Seroquel, Ziprasidone, etc)"
+            },
+            {
+                "id": 59,
+                "name": "Injectables (insulin, etc)"
+            },
+            {
+                "id": 60,
+                "name": "Anti-Anxiety (Xanax, Klonopin, Valium, Ativan, etc)"
+            },
+            {
+                "id": 61,
+                "name": "Anti-Depressants/SSRI’s (Prozac, Seroxat, Lustral, Cipramil, etc)"
+            },
+            {
+                "id": 62,
+                "name": "Methadone"
+            },
+            {
+                "id": 63,
+                "name": "Suboxone"
+            },
+            {
+                "id": 64,
+                "name": "Narcotics (Vicodin, OxyContin, Percocet)"
+            },
+            {
+                "id": 65,
+                "name": "Nerve Pain/Anti-convulsant (Gabapentin, Lyrica)"
+            },
+            {
+                "id": 66,
+                "name": "Medical Marijuana"
+            },
+            {
+                "id": 67,
+                "name": "Other"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getMentalHealthDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.mental_health_diagnoses", "data")
+            .where("cs.mental_health_diagnoses IS NOT NULL")
+
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            {
+                "id": 68,
+                "name": "Anxiety"
+            },
+            {
+                "id": 69,
+                "name": "Bipolar"
+            },
+            {
+                "id": 70,
+                "name": "Borderline Personality Disorder"
+            },
+            {
+                "id": 71,
+                "name": "PTSD"
+            },
+            {
+                "id": 72,
+                "name": "Depression"
+            },
+            {
+                "id": 73,
+                "name": "Dissociative Identity Disorder"
+            },
+            {
+                "id": 74,
+                "name": "Schizophrenia"
+            },
+            {
+                "id": 75,
+                "name": "Self-injuring"
+            },
+            {
+                "id": 76,
+                "name": "Suicide ideation/Suicide Risk"
+            },
+            {
+                "id": 77,
+                "name": "Eating Disorder"
+            },
+            {
+                "id": 78,
+                "name": "None"
+            },
+            {
+                "id": 79,
+                "name": "Other"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
+    async getNicotineProductsDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.nicotine_products", "data")
+            .where("cs.nicotine_products IS NOT NULL")
+
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            {
+                "id": 88,
+                "name": "Cigarettes"
+            },
+            {
+                "id": 89,
+                "name": "Recreational Marijuana"
+            },
+            {
+                "id": 90,
+                "name": "Vapes"
+            },
+            {
+                "id": 91,
+                "name": "None"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
     // Organization
 
     async getServicesByStatus(from_date?: string, to_date?: string) {
