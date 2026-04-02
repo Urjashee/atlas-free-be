@@ -466,8 +466,8 @@ export class OrganizationService {
                       guidelines: any, staff_diversity: any) {
 
         const structureMap = {
-            1: 113,
-            2: 112
+            1: [113],
+            2: [112, 111]
         };
         const guidelinesMap = {
             1: 126,
@@ -522,7 +522,9 @@ export class OrganizationService {
 
         // Structure
         if (Array.isArray(structure) && structure.length > 0) {
-            const mappedStructures = structure.map((val) => structureMap[val]).filter(Boolean);
+            const mappedStructures = structure
+                .flatMap((val) => structureMap[val] || [])
+                .filter(Boolean);
             if (mappedStructures.length > 0) {
                 baseWhere.service_structure = In(mappedStructures);
             }
