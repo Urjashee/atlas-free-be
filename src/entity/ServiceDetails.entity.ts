@@ -166,6 +166,9 @@ export class ServiceDetails {
     @Column({ type: "simple-array", nullable: true })
     physical_accommodations!: number[];
 
+    @Column({nullable: true})
+    physical_accommodation_others!: string
+
     @Column({ type: "simple-array", nullable: true })
     smoking_allowed!: number[];
 
