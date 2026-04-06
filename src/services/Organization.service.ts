@@ -244,7 +244,6 @@ export class OrganizationService {
             medications: body.medications || null,
             mental_health_diagnoses: body.mental_health_diagnoses || null,
             physical_accommodations: body.physical_accommodations || null,
-            physical_accommodation_others: body.physical_accommodation_others || null,
             smoking_allowed: body.smoking_allowed || null,
             entry_requirement: body.entry_requirement || null,
             days_sober: body.days_sober,
@@ -316,7 +315,6 @@ export class OrganizationService {
             getService.medications = body.medications || null
             getService.mental_health_diagnoses = body.mental_health_diagnoses || null
             getService.physical_accommodations = body.physical_accommodations || null
-            getService.physical_accommodation_others = body.physical_accommodation_others || null
             getService.smoking_allowed = body.smoking_allowed || null
             getService.entry_requirement = body.entry_requirement || null
             getService.days_sober = body.days_sober
