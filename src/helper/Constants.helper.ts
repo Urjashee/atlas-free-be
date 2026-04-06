@@ -17,11 +17,11 @@ export class Constants {
     static PAGE_SIZE = 20
 
     static PENDING = 1
-    static PLACED = 2
-    static UNABLE_TO_SERVE = 3
-    static WAITLISTED = 4
+    static PLACED = 4
+    static UNABLE_TO_SERVE = 6
+    static WAITLISTED = 2
     static CANCELLED = 5
-    static ACCEPTED = 6
+    static ACCEPTED = 3
 
     static MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
 
@@ -36,11 +36,17 @@ export const roleMap: { [key: string]: number } = {
 };
 export const statusMap: Record<number, string> = {
     1: "PENDING",
-    2: "PLACED",
-    3: "UNABLE_TO_SERVE",
-    4: "WAITLISTED",
+    // 2: "PLACED",
+    // 3: "UNABLE_TO_SERVE",
+    // 4: "WAITLISTED",
+    // 5: "CANCELLED",
+    // 6: "ACCEPTED",
+
+    2: "WAITLISTED",
+    3: "ACCEPTED",
+    4: "PLACED",
     5: "CANCELLED",
-    6: "ACCEPTED",
+    6: "UNABLE_TO_SERVE",
 };
 export const roleTypeMap = {
     [Constants.ROLE_ORGANIZATION_ADMIN]: "organization_admin",
