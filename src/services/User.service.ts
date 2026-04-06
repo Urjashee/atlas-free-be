@@ -243,7 +243,7 @@ export class UserService {
         const mailOptions = {
             from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
             to: body.email,
-            subject: "Email from Atlas free!",
+            subject: "Verification for Wayplace",
             html: emailContent
         };
         await this.mailerService.sendEmail(mailOptions);
@@ -263,7 +263,7 @@ export class UserService {
         const mailOptions = {
             from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
             to: email,
-            subject: "Email from Atlas free!",
+            subject: "Verification for Wayplace",
             html: emailContent
         };
         return await this.mailerService.sendEmail(mailOptions);

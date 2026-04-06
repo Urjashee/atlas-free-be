@@ -219,7 +219,7 @@ export class AuthController {
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                         to: email,
-                        subject: "Email from Atlas free!",
+                        subject: "Reset your password in Wayplace",
                         html: emailContent
                     };
                     await this.mailerService.sendEmail(mailOptions);

@@ -1,6 +1,6 @@
 import AppDataSource from "../../ormconfig";
 import {Users} from "../entity/Users.entity";
-import {Constants} from "../helper/Constants.helper";
+import {Constants, roleTypeMap} from "../helper/Constants.helper";
 import {randomBytes} from "crypto";
 import {PasswordReset} from "../entity/PasswordReset.entity";
 import {
@@ -109,11 +109,11 @@ export class OrganizationService {
                 organization.organization.is_active = true
                 organization.organization.under_review = true
                 await this.organizationRepository.save(organization.organization);
-                const emailContent = PendingOrganization(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
+                const emailContent = PendingOrganization(organization.user_name, organization.organization.name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
                 const mailOptions = {
                     from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                     to: organization.email,
-                    subject: "New Organization Rejected!",
+                    subject: `Unable to accept ${organization.organization.name}'s profile changes`,
                     html: emailContent
                 };
                 await this.mailerService.sendEmail(mailOptions);
@@ -124,11 +124,11 @@ export class OrganizationService {
                 organization.organization.is_active = false
                 organization.organization.under_review = false
                 await this.organizationRepository.save(organization.organization);
-                const emailContent = RejectOrganization(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
+                const emailContent = RejectOrganization(organization.user_name, organization.organization.name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
                 const mailOptions = {
                     from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                     to: organization.email,
-                    subject: "New Organization Rejected!",
+                    subject: `${organization.organization.name} could not be verified in Wayplace`,
                     html: emailContent
                 };
                 await this.mailerService.sendEmail(mailOptions);
@@ -156,7 +156,7 @@ export class OrganizationService {
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                         to: organization.email,
-                        subject: "New Organization Approved!",
+                        subject: `${organization.organization.name} has been verified in Wayplace`,
                         html: emailContent
                     };
                     await this.mailerService.sendEmail(mailOptions);
@@ -403,11 +403,11 @@ export class OrganizationService {
         })
         await this.passwordResetRepository.save(password_reset_request)
         if (invitation) {
-            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name);
+            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name, roleTypeMap[role]);
             const mailOptions = {
                 from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                 to: email,
-                subject: "Email from Atlas free!",
+                subject: "You are invited to join Wayplace",
                 html: emailContent
             };
             await this.mailerService.sendEmail(mailOptions);
@@ -425,11 +425,11 @@ export class OrganizationService {
         })
         const password_resets = await this.passwordResetRepository.save(password_reset_request)
         if (password_resets) {
-            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name);
+            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name, roleTypeMap[role].replace("_", " "));
             const mailOptions = {
                 from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                 to: email,
-                subject: "Email from Atlas free!",
+                subject: "You are invited to join Wayplace",
                 html: emailContent
             };
             await this.mailerService.sendEmail(mailOptions);
