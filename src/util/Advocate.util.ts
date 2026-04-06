@@ -5,6 +5,7 @@ import {TimePeriod} from "../entity/ServiceDetails.entity";
 import {ChildrenToAccompany} from "../entity/ClientService.entity";
 import {Constants} from "../helper/Constants.helper";
 import {ClientStatus} from "../entity/AssignedServices.entity";
+import {safeOptionsArray} from "./Organization.util";
 
 const userService = new UserService();
 const organizationService = new OrganizationService();
@@ -59,12 +60,13 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                             name: (await configService.getServiceOptionsById(item)).name
                         }
                     })),
-                    criteria_add: await Promise.all((clients.criteria_add ?? []).map(async (item: number) => {
-                        return {
-                            id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
-                        }
-                    })),
+                    criteria_add: await safeOptionsArray(clients.criteria_add),
+                    // criteria_add: await Promise.all((clients.criteria_add ?? []).map(async (item: number) => {
+                    //     return {
+                    //         id: item,
+                    //         name: (await configService.getServiceOptionsById(item)).name
+                    //     }
+                    // })),
                     medications: await Promise.all((clients.medications ?? []).map(async (item: number) => {
                         return {
                             id: item,
