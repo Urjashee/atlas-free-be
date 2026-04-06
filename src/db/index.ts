@@ -147,7 +147,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 43, name: 'experience episodes of psychosis', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     {id: 44, name: 'have a certified service animal', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     {id: 45, name: 'have an emotional support animal', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
-    // {id: 46, name: 'have immediate health concerns', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
+    {id: 46, name: 'have immediate health concerns', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     // {id: 47, name: 'have physical disabilities', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     // {id: 48, name: 'have reported self-injuring', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     // {id: 49, name: 'have reported suicide ideation', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
