@@ -9,7 +9,7 @@ const AppDataSource = new DataSource({
     username: process.env.DB_USERNAME || "root",   // Default to 'root' if not provided
     password: process.env.DB_PASSWORD,       // Default to empty string if not provided
     database: process.env.DB_DATABASE,
-    synchronize: true,
+    synchronize: false,
     logging: false,
     entities: process.env.NODE_ENV === 'development' ? [__dirname + "/src/entity/*.ts"] : [__dirname + "/src/entity/*.js"],
     migrations: process.env.NODE_ENV === 'development' ? [__dirname + "/src/migrations/*.ts"] : [__dirname + "/src/migrations/*.js"],
