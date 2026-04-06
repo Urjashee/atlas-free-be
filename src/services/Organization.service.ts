@@ -1224,6 +1224,7 @@ export class OrganizationService {
         return await this.serviceDetailsRepository.count({
             where: {
                 organization: {id: organization_id},
+                is_submitted: true
             }
         })
     }

@@ -147,7 +147,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 43, name: 'experience episodes of psychosis', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     {id: 44, name: 'have a certified service animal', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     {id: 45, name: 'have an emotional support animal', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
-    {id: 46, name: 'have immediate health concerns', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
+    // {id: 46, name: 'have immediate health concerns', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     // {id: 47, name: 'have physical disabilities', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     // {id: 48, name: 'have reported self-injuring', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     // {id: 49, name: 'have reported suicide ideation', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
@@ -181,7 +181,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     , icon: ""},
     {
         id: 58,
-        name: 'Anti-psychotic (Risperdal, Seroquel, Ziprasidone, etc)',
+        name: 'Anti-Psychotic (Risperdal, Seroquel, Ziprasidone, etc)',
         type: 'medications',
         serviceHeading: heading_eligibility
     , icon: ""},
@@ -208,7 +208,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     , icon: ""},
     {
         id: 65,
-        name: 'Nerve Pain/Anti-convulsant (Gabapentin, Lyrica)',
+        name: 'Nerve Pain/Anti-Convulsant (Gabapentin, Lyrica)',
         type: 'medications',
         serviceHeading: heading_eligibility
     , icon: ""},
@@ -231,10 +231,10 @@ const service_details_options: ServiceDetailsOptions[] = [
         serviceHeading: heading_eligibility
     , icon: ""},
     {id: 74, name: 'Schizophrenia', type: 'mental_health_diagnoses', serviceHeading: heading_eligibility, icon: ""},
-    {id: 75, name: 'Self-injuring', type: 'mental_health_diagnoses', serviceHeading: heading_eligibility, icon: ""},
+    {id: 75, name: 'Self-Injuring', type: 'mental_health_diagnoses', serviceHeading: heading_eligibility, icon: ""},
     {
         id: 76,
-        name: 'Suicide ideation/Suicide Risk',
+        name: 'Suicide Ideation/Suicide Risk',
         type: 'mental_health_diagnoses',
         serviceHeading: heading_eligibility
     , icon: ""},
@@ -380,7 +380,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     , icon: ""},
     {
         id: 127,
-        name: 'Initial blackout period (no phone, no Internet, etc)',
+        name: 'Initial blackout period (no phone, no internet, etc)',
         type: 'service_guidelines',
         serviceHeading: heading_service_model
     , icon: ""},
@@ -394,17 +394,17 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 135, name: 'Financial Assistance', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 136, name: 'Food/Groceries', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 137, name: 'Goal-planning', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
-    {id: 138, name: 'Housing advocacy/navigation', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
+    {id: 138, name: 'Housing Advocacy/Navigation', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 139, name: 'Hygiene Supplies', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 140, name: 'Immigration Support', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
-    {id: 141, name: 'Information and Referral', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
+    // {id: 141, name: 'Information and Referral', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 142, name: 'Life Coaching', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 143, name: 'Life Skills', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 144, name: 'Medical Consultation', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {id: 145, name: 'Medical Service', type: 'support_provided', serviceHeading: heading_offerings, icon: ""},
     {
         id: 146,
-        name: 'Mental Health Counseling/Trauma therapy (licensed)',
+        name: 'Mental Health Counseling/Trauma Therapy (Licensed)',
         type: 'support_provided',
         serviceHeading: heading_offerings
     , icon: ""},
@@ -420,7 +420,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 156, name: 'Equine/Animal Therapy', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 157, name: 'Financial Assistance', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 158, name: 'Food/Groceries', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
-    {id: 159, name: 'Housing advocacy/navigation', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
+    {id: 159, name: 'Housing Advocacy/Navigation', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 160, name: 'Immigration Support', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 161, name: 'Life Coaching', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 162, name: 'Life Skills', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
@@ -428,7 +428,7 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 164, name: 'Medical Service', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {
         id: 165,
-        name: 'Mental Health Counseling/Trauma therapy (licensed)',
+        name: 'Mental Health Counseling/Trauma Therapy (Licensed)',
         type: 'support_offered',
         serviceHeading: heading_offerings
     , icon: ""},
