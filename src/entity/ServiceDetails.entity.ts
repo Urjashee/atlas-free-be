@@ -160,8 +160,14 @@ export class ServiceDetails {
     @Column({ type: "simple-array", nullable: true })
     medications!: number[];
 
+    @Column({nullable: true})
+    medication_others!: string
+
     @Column({ type: "simple-array", nullable: true })
     mental_health_diagnoses!: number[];
+
+    @Column({nullable: true})
+    mental_health_diagnoses_others!: string
 
     @Column({ type: "simple-array", nullable: true })
     physical_accommodations!: number[];

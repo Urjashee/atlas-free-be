@@ -89,6 +89,11 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         medications: await safeOptionsArray(service?.medications),
         mental_health_diagnoses: await safeOptionsArray(service?.mental_health_diagnoses),
         physical_accommodations: await safeOptionsArray(service?.physical_accommodations),
+
+        medication_others: service?.medication_others ?? null,
+        mental_health_diagnoses_others: service?.mental_health_diagnoses_others ?? null,
+        physical_accommodations_others: service?.physical_accommodations_others ?? null,
+
         smoking_allowed: await safeOptionsArray(service?.smoking_allowed),
         entry_requirement: await safeOptionsArray(service?.entry_requirement),
 

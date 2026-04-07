@@ -52,6 +52,9 @@ export const servicesSchema = Joi.object({
     medications: Joi.array().items().optional(),
     mental_health_diagnoses: Joi.array().items().optional(),
     physical_accommodations: Joi.array().items().optional(),
+    medication_others: Joi.string().optional().allow(""),
+    mental_health_diagnoses_others: Joi.string().optional().allow(""),
+    physical_accommodation_others: Joi.string().optional().allow(""),
     smoking_allowed: Joi.array().items().optional(),
     entry_requirement: Joi.array().items().optional(),
 

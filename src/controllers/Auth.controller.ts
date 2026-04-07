@@ -39,7 +39,7 @@ const registrationSurvivor = Joi.object({
     password: Joi.string().required(),
 });
 const loginSchema = Joi.object({
-    email: Joi.string().pattern(/^\S+$/).required(),
+    email: Joi.string().email().required(),
     password: Joi.string().required(),
     device_token: Joi.string().allow(null, ""),
     device_type: Joi.string().valid("web").required(),
