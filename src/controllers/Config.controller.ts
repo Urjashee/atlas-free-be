@@ -439,7 +439,7 @@ export class ConfigController {
                         name: service.name,
                         organization_id: service.organization.id,
                         service_type: serviceType.name,
-                        service_icon: serviceType.icon,
+                        service_type_icon: serviceType.icon,
                         address: !service.disclose_address === false
                             ? `${service.zipcode || ""}`
                             : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
