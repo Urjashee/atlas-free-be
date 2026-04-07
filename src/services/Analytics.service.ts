@@ -782,6 +782,88 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
+    async getPhysicalAccommodationDistribution(from_date?: string, to_date?: string) {
+        const qb = this.assignedServiceRepository
+            .createQueryBuilder("as")
+            .leftJoin("as.client_service", "cs")
+            .select("cs.physical_accommodation", "data")
+            .where("cs.physical_accommodation IS NOT NULL")
+
+
+        if (from_date) {
+            qb.andWhere("as.created_at >= :from_date", { from_date });
+        }
+
+        if (to_date) {
+            qb.andWhere("as.created_at <= :to_date", { to_date });
+        }
+
+        if (from_date && to_date) {
+            qb.andWhere(
+                "as.created_at BETWEEN :from_date AND :to_date",
+                { from_date, to_date }
+            );
+        }
+
+        const raw = await qb
+            .getRawMany();
+
+
+        const countMap: Record<number, number> = {};
+
+        raw.forEach((r) => {
+            const values = String(r.data)
+                .split(",")
+                .map(v => Number(v))
+                .filter(Boolean);
+
+            values.forEach((v) => {
+                countMap[v] = (countMap[v] || 0) + 1;
+            });
+        });
+
+        const total = Object.values(countMap)
+            .reduce((sum, c) => sum + c, 0);
+
+
+        const dataArray = [
+            {
+                "id": 80,
+                "name": "Wheelchair accessibility"
+            },
+            {
+                "id": 81,
+                "name": "Ramp access"
+            },
+            {
+                "id": 82,
+                "name": "Assistance with mobility (e.g., walking, getting to/from locations)"
+            },
+            {
+                "id": 83,
+                "name": "Visual assistance (e.g., large print, screen reader support)"
+            },
+            {
+                "id": 84,
+                "name": "Hearing assistance (e.g., sign language interpreter, hearing loop)"
+            },
+            {
+                "id": 85,
+                "name": "Seating with support (e.g., back support, specific seating arrangement)"
+            },
+            {
+                "id": 86,
+                "name": "Specialized equipment (e.g., adjustable tables, assistive technology)"
+            },
+            {
+                "id": 87,
+                "name": "Other"
+            }
+        ];
+
+        return returnFormat(dataArray, total, countMap);
+    }
+
     async getMentalHealthDistribution(from_date?: string, to_date?: string) {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")

@@ -805,6 +805,7 @@ export class AdminController {
             const serviceCriteriaDemo = await this.analyticService.getCriteriaDistribution(from_date, to_date);
             const serviceRaceDemo = await this.analyticService.getRaceDistribution(from_date, to_date);
             const serviceMedicationDemo = await this.analyticService.getMedicationDistribution(from_date, to_date);
+            const servicePhysicalAccommodationDemo = await this.analyticService.getPhysicalAccommodationDistribution(from_date, to_date);
             const serviceMentalHealthDemo = await this.analyticService.getMentalHealthDistribution(from_date, to_date);
             const serviceNicotineProductsDemo = await this.analyticService.getNicotineProductsDistribution(from_date, to_date);
             const organizationServiceStatus = await this.analyticService.getServicesByStatus(from_date, to_date);
@@ -856,6 +857,7 @@ export class AdminController {
                     birthdate_status_demographics: serviceBirthdateDemo,
                     client_criteria_demographics: serviceCriteriaDemo,
                     client_medication_demographics: serviceMedicationDemo,
+                    client_physical_accommodation_demographics: servicePhysicalAccommodationDemo,
                     client_mental_health_demographics: serviceMentalHealthDemo,
                     client_nicotine_products_demographics: serviceNicotineProductsDemo,
                 },
