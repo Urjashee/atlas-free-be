@@ -52,6 +52,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     pregnant: clients.pregnant == true ? "Yes" : "No",
                     pregnant_months: clients.pregnant == true ? `${clients.pregnant_months} months` : "",
                     birthdate_status: clients.birthdate_status == null ? null : (await configService.getAdvocateServiceById(clients.birthdate_status)).name,
+                    birthdate_status_id: clients.birthdate_status || null,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_to_accompany: clients.children_to_accompany,
                     criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
@@ -137,6 +138,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     pregnant: clients.pregnant == true ? "Yes" : "No",
                     pregnant_months: clients.pregnant == true ? `${clients.pregnant_months} months` : "",
                     birthdate_status: clients.birthdate_status == null ? null : (await configService.getAdvocateServiceById(clients.birthdate_status)).name,
+                    birthdate_status_id: clients.birthdate_status || null,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_to_accompany: clients.children_to_accompany,
                     criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
