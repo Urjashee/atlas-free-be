@@ -15,7 +15,7 @@ import {PasswordResetEmail} from "../helper/Emails.helper";
 dotenv.config();
 const registrationOrganizationSchema = Joi.object({
     name: Joi.string().min(3).max(150).required(),
-    email: Joi.string().email().pattern(/^\S+$/).required(),
+    email: Joi.string().email().required(),
     country_code: Joi.string().min(2).max(5).required(),
     phone_no: Joi.string().pattern(/^\d+$/).min(6).max(16).required(),
     street: Joi.string().min(3).max(1600).required(),
@@ -35,7 +35,7 @@ const registrationOrganizationSchema = Joi.object({
 });
 const registrationSurvivor = Joi.object({
     username: Joi.string().required(),
-    email: Joi.string().pattern(/^\S+$/).required(),
+    email: Joi.string().email().required(),
     password: Joi.string().required(),
 });
 const loginSchema = Joi.object({
