@@ -438,6 +438,7 @@ export class ConfigController {
                         id: service.id,
                         name: service.name,
                         organization_id: service.organization.id,
+                        organization_name: service.organization.name,
                         service_type: serviceType.name,
                         service_type_icon: serviceType.icon,
                         address: !service.disclose_address === false
