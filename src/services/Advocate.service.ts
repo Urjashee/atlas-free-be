@@ -37,6 +37,7 @@ export class AdvocateService {
             birthdate_status: body.birthdate_status || null,
             children_accompany: body.children_accompany || null,
             children_to_accompany: body.children_to_accompany || null,
+            ages_of_children: body.ages_of_children || null,
             criteria: body.criteria,
             criteria_add: body.criteria_add,
             medications: body.medications,
@@ -75,6 +76,7 @@ export class AdvocateService {
             getClient.birthdate_status = body.birthdate_status || null
             getClient.children_accompany = body.children_accompany
             getClient.children_to_accompany = body.children_to_accompany
+            getClient.ages_of_children = body.ages_of_children || null
             getClient.criteria = body.criteria
             getClient.criteria_add = body.criteria_add
             getClient.medications = body.medications
