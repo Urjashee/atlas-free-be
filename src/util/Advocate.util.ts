@@ -55,6 +55,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     birthdate_status_id: clients.birthdate_status || null,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_to_accompany: clients.children_to_accompany,
+                    ages_of_children: clients.ages_of_children || "",
                     criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
                         return {
                             id: item,
@@ -141,6 +142,7 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     birthdate_status_id: clients.birthdate_status || null,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_to_accompany: clients.children_to_accompany,
+                    ages_of_children: clients.ages_of_children || "",
                     criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
                         return {
                             id: item,

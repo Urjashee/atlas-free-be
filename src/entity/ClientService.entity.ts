@@ -78,6 +78,9 @@ export class ClientService {
     @Column({ nullable: true })
     children_to_accompany!: number;
 
+    @Column({ nullable: true })
+    ages_of_children!: string;
+
     @Column({ type: "simple-array", nullable: true })
     criteria!: number[];
 

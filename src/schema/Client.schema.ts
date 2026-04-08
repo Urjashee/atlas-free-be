@@ -23,6 +23,7 @@ export const clientSchema = Joi.object({
     birthdate_status: Joi.number().allow(null).empty("").optional(),
     children_accompany: Joi.number().optional(),
     children_to_accompany: Joi.number().optional().empty(""),
+    ages_of_children: Joi.string().optional().empty(""),
     criteria: Joi.array().items(Joi.number()).optional(),
     criteria_add: Joi.array().items(Joi.number()).optional(),
     medications: Joi.array().items(Joi.number()),
