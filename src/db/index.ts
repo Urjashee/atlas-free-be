@@ -382,8 +382,8 @@ const service_details_options: ServiceDetailsOptions[] = [
         serviceHeading: heading_eligibility
         , icon: ""
     },
-    {id: 170, name: 'None', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
-    {id: 87, name: 'Other', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
+    {id: 87, name: 'None', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
+    {id: 171, name: 'Other', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
     {id: 88, name: 'Cigarettes', type: 'smoking_allowed', serviceHeading: heading_eligibility, icon: ""},
     {id: 89, name: 'Recreational Marijuana', type: 'smoking_allowed', serviceHeading: heading_eligibility, icon: ""},
     {id: 90, name: 'Vapes', type: 'smoking_allowed', serviceHeading: heading_eligibility, icon: ""},
@@ -640,7 +640,7 @@ const service_details_options: ServiceDetailsOptions[] = [
         icon: ""
     },
     {id: 169, name: 'Support Groups', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
-    {id: 171, name: 'None', type: 'legal', serviceHeading: heading_eligibility, icon: ""},
+    {id: 170, name: 'None', type: 'legal', serviceHeading: heading_eligibility, icon: ""},
 ];
 
 const advocate_service: AdvocateService[] = [
