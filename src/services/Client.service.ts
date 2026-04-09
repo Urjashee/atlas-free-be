@@ -10,7 +10,7 @@ import {Affiliations} from "../entity/Affiliations.entity";
 import {ClientService as ClientServiceEntity} from "../entity/ClientService.entity";
 import Joi from "joi";
 import {Constants} from "../helper/Constants.helper";
-import {PendingOrganization, ReportUserEmail, SendServiceRequest} from "../helper/Emails.helper";
+import {PendingOrganization, ReportUserEmail, SendServiceRequest, SurvivorReportReceipt} from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
 import {In, Not} from "typeorm";
 
@@ -118,7 +118,8 @@ export class ClientService {
         });
     }
 
-    async reportService(id: number, reason: string, body: any) {
+    async reportService(id: number, reason: string, body: any, user_email?: string) {
+        console.log("user_email: ", user_email);
         const createReport = await this.reportServiceRepository.create({
             reason: reason,
             organization: {id: body.organization.id},
@@ -137,6 +138,22 @@ export class ClientService {
             html: emailContent
         };
         await this.mailerService.sendEmail(mailOptions)
+        const user = await this.userRepository.findOne({
+            where: {
+                email: user_email
+            }
+        })
+        console.log("User: ", user)
+        if (user) {
+            const emailReportContent = SurvivorReportReceipt(user.user_name != null ? user.user_name : user.email)
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: user.email,
+                subject: "Email from Atlas free!",
+                html: emailReportContent
+            };
+            await this.mailerService.sendEmail(mailOptions)
+        }
         return await this.reportServiceRepository.save(createReport);
     }
 

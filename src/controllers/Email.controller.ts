@@ -8,11 +8,12 @@ import {authMiddleware} from "../middleware/Auth.middleware";
 import {adminMiddleware} from "../middleware/Admin.middleware";
 import {Request, Response} from "express";
 import {UserService} from "../services/User.service";
-import {OrganizationService} from "../services/Organization.service";
+import {formatRoleName, OrganizationService} from "../services/Organization.service";
 import AppDataSource from "../../ormconfig";
 import {Users} from "../entity/Users.entity";
 import {randomBytes} from "crypto";
 import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
+
 
 @JsonController("/api/email")
 
@@ -63,7 +64,7 @@ export class EmailController {
                 },
                 relations: ['organization']
             })
-            const emailContent = SendInvitationEmail("urja@simpalm.com", token, Constants.SEND_INVITATION, 3, organization.organization.name, roleTypeMap[3]);
+            const emailContent = SendInvitationEmail("urja@simpalm.com", token, Constants.SEND_INVITATION, 2, organization.organization.name, formatRoleName(roleTypeMap[2]));
             const mailOptions = {
                 from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                 to: "urja@simpalm.com",

@@ -6,8 +6,8 @@ import {PasswordReset} from "../entity/PasswordReset.entity";
 import {
     ActivateOrganization,
     CreatePassword,
-    PasswordResetEmail, PendingOrganization, RejectOrganization, ReportUserEmail,
-    SendInvitationEmail,
+    PasswordResetEmail, PendingOrganization, RejectOrganization, ReportedUser, ReportUserEmail,
+    SendInvitationEmail, SurvivorReportReceipt,
     VerifyEmail
 } from "../helper/Emails.helper";
 import {type} from "node:os";
@@ -52,7 +52,7 @@ export class OrganizationService {
             if (search && search.trim() !== "") {
                 query.andWhere(
                     'LOWER(organization.name) LIKE LOWER(:search)',
-                    { search: `%${search}%` }
+                    {search: `%${search}%`}
                 );
             }
 
@@ -204,7 +204,7 @@ export class OrganizationService {
         }
     }
 
-    async addServiceDetails(organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization? : Organization) {
+    async addServiceDetails(organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization?: Organization) {
         const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
@@ -272,7 +272,7 @@ export class OrganizationService {
         return await this.serviceDetailsRepository.save(addService)
     }
 
-    async editServiceDetails(id: number, organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization? : any) {
+    async editServiceDetails(id: number, organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization?: any) {
         const getService = await this.serviceDetailsRepository.findOne({
             where: {
                 id: id,
@@ -319,9 +319,9 @@ export class OrganizationService {
             getService.mental_health_diagnoses = body.mental_health_diagnoses || null
             getService.physical_accommodations = body.physical_accommodations || null
             getService.medication_others = body.medication_others || null,
-            getService.mental_health_diagnoses_others = body.mental_health_diagnoses_others || null,
-            getService.mental_health_diagnoses_others = body.mental_health_diagnoses_others || null,
-            getService.smoking_allowed = body.smoking_allowed || null
+                getService.mental_health_diagnoses_others = body.mental_health_diagnoses_others || null,
+                getService.mental_health_diagnoses_others = body.mental_health_diagnoses_others || null,
+                getService.smoking_allowed = body.smoking_allowed || null
             getService.entry_requirement = body.entry_requirement || null
             getService.days_sober = body.days_sober
 
@@ -379,8 +379,8 @@ export class OrganizationService {
             .leftJoinAndSelect('organization.state', 'state') // ✅ include state relation
             .leftJoinAndSelect('organization.affiliations', 'affiliations')
             .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
-            .andWhere('user.role_id = :roleId', { roleId: Constants.ROLE_ORGANIZATION_ADMIN })
-            .andWhere('organization.id = :orgId', { orgId: id })
+            .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
+            .andWhere('organization.id = :orgId', {orgId: id})
             .getOne();
     }
 
@@ -409,7 +409,8 @@ export class OrganizationService {
         })
         await this.passwordResetRepository.save(password_reset_request)
         if (invitation) {
-            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name, roleTypeMap[role]);
+            const formattedRole = formatRoleName(roleTypeMap[role])
+            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name, formattedRole);
             const mailOptions = {
                 from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                 to: email,
@@ -785,30 +786,62 @@ export class OrganizationService {
             html: emailContent
         };
         await this.mailerService.sendEmail(mailOptions)
+        const user = await this.userRepository.findOne({
+            where: {
+                id: user_id
+            }
+        })
+        // console.log("User advocate: ", user)
+        if (user) {
+            const emailReportContent = ReportedUser()
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: user.email,
+                subject: "You have reported a user in Wayplace",
+                html: emailReportContent
+            };
+            await this.mailerService.sendEmail(mailOptions)
+        }
         return await this.reportUserRepository.save(report);
     }
 
     async reportUser(type: any, reason: string, user_id: number, organization_id?: number, client_service_id?: number) {
-            const report = await this.reportUserRepository.create({
-                reported_client: {id: client_service_id},
-                reason: reason,
-                reported_by: {id: user_id},
-                organization: {id: organization_id},
-                type
-            });
-            const reportedUser = await this.clientServiceRepository.findOne({
-                where: {id: client_service_id},
-            });
+        const report = await this.reportUserRepository.create({
+            reported_client: {id: client_service_id},
+            reason: reason,
+            reported_by: {id: user_id},
+            organization: {id: organization_id},
+            type
+        });
+        const reportedUser = await this.clientServiceRepository.findOne({
+            where: {id: client_service_id},
+        });
 
-            const emailContent = ReportUserEmail(reportedUser.client_nick_name, reason, "user");
+        const emailContent = ReportUserEmail(reportedUser.client_nick_name, reason, "user");
+        const mailOptions = {
+            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            to: process.env.SUPER_ADMIN_MAIN,
+            subject: "Email from Atlas free!",
+            html: emailContent
+        };
+        await this.mailerService.sendEmail(mailOptions)
+        const user = await this.userRepository.findOne({
+            where: {
+                id: user_id
+            }
+        })
+        // console.log("User user: ", user)
+        if (user) {
+            const emailReportContent = ReportedUser()
             const mailOptions = {
                 from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
-                to: process.env.SUPER_ADMIN_MAIN,
-                subject: "Email from Atlas free!",
-                html: emailContent
+                to: user.email,
+                subject: "You have reported a user in Wayplace",
+                html: emailReportContent
             };
             await this.mailerService.sendEmail(mailOptions)
-            return await this.reportUserRepository.save(report);
+        }
+        return await this.reportUserRepository.save(report);
     }
 
     async getServiceRequestsById(client_id: number) {
@@ -1001,11 +1034,11 @@ export class OrganizationService {
             }
         })
         if (checkIfWaitlist.waitlist == true) {
-                if (checkIfWaitlist.slots_available <= 0) {
-                    return false;
-                } else {
-                    return true;
-                }
+            if (checkIfWaitlist.slots_available <= 0) {
+                return false;
+            } else {
+                return true;
+            }
         }
         return true
     }
@@ -1265,5 +1298,12 @@ export class OrganizationService {
         return await this.serviceDetailsRepository.save(service);
     }
 
+}
+
+export function formatRoleName(role: string): string {
+    return role
+        .replace(/_/g, ' ')           // service_manager → service manager
+        .toLowerCase()               // normalize casing
+        .replace(/^\w/, c => c.toUpperCase()); // capitalize first letter
 }
 

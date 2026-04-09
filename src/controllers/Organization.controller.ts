@@ -587,7 +587,7 @@ export class AuthController {
             const checkIfService = await this.organizationService.checkIfServiceExists(getServiceRequests.service.id);
             if (!checkIfService)
                 return ResponseFormatter.errorResponse(res, 'Invalid service');
-            const reportService = await this.clientService.reportService(serviceRequestsId, reason, getServiceRequests);
+            const reportService = await this.clientService.reportService(serviceRequestsId, reason, getServiceRequests, req.user.email);
             if (!reportService)
                 return ResponseFormatter.errorResponse(res, "Can't report, try again later");
 
