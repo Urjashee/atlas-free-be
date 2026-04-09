@@ -50,6 +50,7 @@ export const statusMap: Record<number, string> = {
 };
 export const roleTypeMap = {
     [Constants.ROLE_ORGANIZATION_ADMIN]: "organization_admin",
+    [Constants.ROLE_SERVICE_MANAGER]: "service_manager",
     [Constants.ROLE_ADVOCATE]: "advocate",
     [Constants.ROLE_SURVIVOR]: "survivor",
 };

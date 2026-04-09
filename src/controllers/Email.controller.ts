@@ -1,5 +1,5 @@
-import {CreatePassword, RejectOrganization} from "../helper/Emails.helper";
-import {Constants} from "../helper/Constants.helper";
+import {CreatePassword, RejectOrganization, SendInvitationEmail} from "../helper/Emails.helper";
+import {Constants, roleTypeMap} from "../helper/Constants.helper";
 
 
 import {Get, JsonController, Param, Req, Res, UseBefore} from "routing-controllers";
@@ -48,5 +48,33 @@ export class EmailController {
        catch (error: any) {
            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
        }
+    }
+
+    @Get("/organization-invitation")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async getOrganizationInvitation(@Req() req: Request, @Res() res: Response) {
+        try {
+            const token = randomBytes(32).toString('hex');
+            const organization = await this.userRepository.findOne({
+                where: {
+                    organization: {id: 5},
+                    role: {id: Constants.ROLE_ORGANIZATION_ADMIN}
+                },
+                relations: ['organization']
+            })
+            const emailContent = SendInvitationEmail("urja@simpalm.com", token, Constants.SEND_INVITATION, 3, organization.organization.name, roleTypeMap[3]);
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: "urja@simpalm.com",
+                subject: "You are invited to join Wayplace",
+                html: emailContent
+            };
+            await this.mailerService.sendEmail(mailOptions);
+            return ResponseFormatter.successResponse(res, "Email sent successfully.");
+        }
+        catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
     }
 }

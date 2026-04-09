@@ -1,3 +1,5 @@
+import {Constants} from "./Constants.helper";
+
 export const CreatePassword = (name: string, email: string, token: string, type: number, role?: number) => `
 <!DOCTYPE html>
 <html>
@@ -25,7 +27,7 @@ export const CreatePassword = (name: string, email: string, token: string, type:
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -40,7 +42,7 @@ export const CreatePassword = (name: string, email: string, token: string, type:
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>Dear ${email},</p>
@@ -58,8 +60,9 @@ export const CreatePassword = (name: string, email: string, token: string, type:
                 ${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}</a>
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -93,7 +96,7 @@ export const RejectOrganization = (name: string, organization_name: string, emai
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -108,7 +111,7 @@ export const RejectOrganization = (name: string, organization_name: string, emai
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>Thank you for your patience as we verify your organization in Wayplace. 
@@ -118,8 +121,9 @@ export const RejectOrganization = (name: string, organization_name: string, emai
             
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -153,7 +157,7 @@ export const PendingOrganization = (name: string, organization_name: string, ema
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -168,7 +172,7 @@ export const PendingOrganization = (name: string, organization_name: string, ema
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
            
@@ -177,8 +181,9 @@ export const PendingOrganization = (name: string, organization_name: string, ema
             
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -212,7 +217,7 @@ export const SendServiceRequest = (name: string, template: string, contact_email
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -227,7 +232,7 @@ export const SendServiceRequest = (name: string, template: string, contact_email
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>Hi ${name},</p>
@@ -237,8 +242,9 @@ export const SendServiceRequest = (name: string, template: string, contact_email
             <p>${contact_phone}</p>
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -272,7 +278,7 @@ export const PasswordResetEmail = (email: string, token: string, type: number, r
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -287,7 +293,7 @@ export const PasswordResetEmail = (email: string, token: string, type: number, r
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>We received a request to reset the password for your account.</p>
@@ -300,8 +306,9 @@ export const PasswordResetEmail = (email: string, token: string, type: number, r
                 Reset Password</a></button>
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -335,7 +342,7 @@ export const ActivateOrganization = (name: string, email: string, token: string,
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -350,7 +357,7 @@ export const ActivateOrganization = (name: string, email: string, token: string,
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>Dear ${name},</p>
@@ -359,8 +366,9 @@ export const ActivateOrganization = (name: string, email: string, token: string,
            
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -394,7 +402,7 @@ export const SendInvitationEmail = (email: string, token: string, type: number, 
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -409,12 +417,17 @@ export const SendInvitationEmail = (email: string, token: string, type: number, 
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>Hi ${email},</p>
-            <p>You are invited to join Wayplace as a ${role_name} for ${organization_name}. 
-            To confirm your email address and set up your account, click the button below.</p>
+            <p>
+                    ${ role === Constants.ROLE_ORGANIZATION_ADMIN
+                ? `You are invited to join Wayplace as a ${role_name} for ${organization_name}.`
+                : `You are invited by ${organization_name} to join Wayplace as a ${role_name}.`
+                }
+                    To confirm your email address and set up your account, click the button below.
+            </p>
             
             <button type="button" class="button">
             <a href='${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}' 
@@ -422,8 +435,9 @@ export const SendInvitationEmail = (email: string, token: string, type: number, 
                 Set Up User Account</a></button>
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -457,7 +471,7 @@ export const VerifyEmail = (username: string, user_id: number, token: string, ty
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -472,7 +486,7 @@ export const VerifyEmail = (username: string, user_id: number, token: string, ty
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>Welcome to Wayplace! </p>
@@ -483,8 +497,9 @@ export const VerifyEmail = (username: string, user_id: number, token: string, ty
                 Click here to verify your email address</a></button>
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
@@ -518,7 +533,7 @@ export const ReportUserEmail = (username: string, reason: string, type: string) 
             font-family: "Google Sans", sans-serif;
         }
         .footer {
-            margin-top: 30px;
+            margin-top: 90px;
             text-align: center;
             color: grey;
             font-family: "Google Sans", sans-serif;
@@ -533,7 +548,7 @@ export const ReportUserEmail = (username: string, reason: string, type: string) 
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="100" height="100">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
         </div>
         <div class="content">
             <p>Dear Admin,</p>
@@ -543,8 +558,9 @@ export const ReportUserEmail = (username: string, reason: string, type: string) 
             
         </div>
         <div class="footer">
-            <p>Best Regards,</p>
-            <p>Wayplace Team</p>
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
         </div>
     </div>
 </body>
