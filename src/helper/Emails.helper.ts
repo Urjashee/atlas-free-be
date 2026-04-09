@@ -190,7 +190,7 @@ export const PendingOrganization = (name: string, organization_name: string, ema
 </html>
 `;
 
-export const SendServiceRequest = (name: string, template: string, contact_email: string, contact_phone: string) => `
+export const SendServiceRequest = (name: string, line_1: string, line_2: string, line_3: string, contact_email: string, contact_phone: string) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -236,10 +236,72 @@ export const SendServiceRequest = (name: string, template: string, contact_email
         </div>
         <div class="content">
             <p>Hi ${name},</p>
-            <p>${template}</p>
-            <br/><br/>
-            <p>${contact_email}</p>
-            <p>${contact_phone}</p>
+            <p>${line_1}</p>
+            <p>${contact_email} ${contact_phone}</p>
+            <p>${line_2}</p>
+            <p>${line_3}</p>
+            <p>Wayplace</p>
+        </div>
+        <div class="footer">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+export const SendServiceRequestClient = (name: string, line_1: string, line_2: string, line_3: string, contact_email: string, contact_phone: string) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: "Google Sans", sans-serif;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #f7f7f7;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .content {
+            margin-top: 20px;
+            font-family: "Google Sans", sans-serif;
+        }
+        .footer {
+            margin-top: 90px;
+            text-align: center;
+            color: grey;
+            font-family: "Google Sans", sans-serif;
+        }
+        .button {
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
+        </div>
+        <div class="content">
+            <p>Hi ${name},</p>
+            <p>${line_1}</p>
+            <p>${line_2}</p>
+            <p>${contact_email} ${contact_phone}</p>
+            <p>Wayplace</p>
         </div>
         <div class="footer">
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">

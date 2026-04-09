@@ -10,7 +10,13 @@ import {Affiliations} from "../entity/Affiliations.entity";
 import {ClientService as ClientServiceEntity} from "../entity/ClientService.entity";
 import Joi from "joi";
 import {Constants} from "../helper/Constants.helper";
-import {PendingOrganization, ReportUserEmail, SendServiceRequest, SurvivorReportReceipt} from "../helper/Emails.helper";
+import {
+    PendingOrganization,
+    ReportUserEmail,
+    SendServiceRequest,
+    SendServiceRequestClient,
+    SurvivorReportReceipt
+} from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
 import {In, Not} from "typeorm";
 
@@ -294,74 +300,169 @@ export class ClientService {
     async updateServiceRequestStatus(id: number, status: ClientStatus) {
         const serviceRequest = await this.assignedServiceRepository.findOne({
             where: { id },
-            relations: ["user", "client_service", "organization", "service"]
+            relations: ["user", "client_service", "organization", "service", "client_service.client"]
         });
 
         if (!serviceRequest) {
             throw new Error("Service request not found");
         }
-        // console.log(serviceRequest)
-        // console.log("Status: ", status)
-        const name = serviceRequest.client_service.client_nick_name || `${serviceRequest.user.first_name} ${serviceRequest.user.last_name}`
-        const organization_name = serviceRequest.organization.name
-        const service_name = serviceRequest.service.name
 
-        let contact_email = serviceRequest.service?.contact_email
-        let contact_phone = serviceRequest.service?.contact_phone
+        if (serviceRequest.user.role.id == Constants.ROLE_ORGANIZATION_ADMIN || serviceRequest.user.role.id == Constants.ROLE_ADVOCATE ) {
 
-        // console.log("Contact email: ", contact_email)
-        // console.log("Contact phone: ", contact_phone)
+            const name = serviceRequest.user.email || `${serviceRequest.user.first_name} ${serviceRequest.user.last_name}`
+            const organization_name = serviceRequest.organization.name
+            const service_name = serviceRequest.service.name
 
-        let emailTemplate
-        let subject = ""
+            let contact_email = serviceRequest.service?.contact_email
+            let contact_phone = serviceRequest.service?.contact_phone
 
-        if (status == Constants.PLACED) {
-            emailTemplate = `${organization_name} has placed your service request for ${service_name} 
-            and given you a spot in the service. 
-            Please use the information below establish contact with a service representative, 
-            they will share additional information on next steps:`
-            subject = `Service request placed`
+
+            let emailTemplate_line1: string
+            let emailTemplate_line2: string
+            let emailTemplate_line3: string
+            let emailTemplate_line4: string
+            let subject = ""
+
+            if (status == Constants.PLACED) {
+                emailTemplate_line1 = `Success! `
+                emailTemplate_line2 = `A service request for ${service_name} was just <b>placed</b> in Wayplace. 
+            This means you have completed your screening and have begun serving this individual.`
+                emailTemplate_line3 = `If this is incorrect, please reach out to wayplace@atlasfree.org`
+                subject = `An individual has been placed for ${service_name} in Wayplace`
+                contact_email = ""
+                contact_phone = ""
+            }
+
+            if (status == Constants.UNABLE_TO_SERVE) {
+                emailTemplate_line1 = `A service request for ${service_name} was just <b>unable to serve</b> in Wayplace. 
+            This means you have reviewed the individual’s details and decided you were not in a position to serve the individual at this time. 
+            The individual has been notified and encouraged to consider sending their service request to another service.`
+                subject = `An individual has been changed to ‘Unable to Serve’ for ${service_name} in Wayplace`
+                contact_email = ""
+                contact_phone = ""
+            }
+
+            if (status == Constants.WAITLISTED) {
+                emailTemplate_line1 = `A service request for ${service_name} was just <b>waitlisted</b> in Wayplace. 
+            The individual has been sent the following information, in order to reach out to your organization.`
+                emailTemplate_line2 = `Wayplace does not replace your organization’s processes. 
+                When the individual reaches out, you are welcome to go through your organization’s typical screening and waitlist process.`
+                emailTemplate_line3 = `If the contact information above needs to be updated, 
+            please edit that in the service settings for ${service_name} in Wayplace.`
+                subject = `An individual has been waitlisted for ${service_name} in Wayplace`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+            }
+
+            if (status == Constants.CANCELLED) {
+                emailTemplate_line1 = `A service request for ${service_name} was just <b>canceled</b> in Wayplace. 
+            This means you have reviewed the individual’s details and decided you were not in a position to serve the individual at this time. 
+            The individual has been notified and encouraged to consider sending their service request to another service.`
+                subject = `An individual has been changed to ‘Canceled’ for ${service_name} in Wayplace`
+                contact_email = ""
+                contact_phone = ""
+            }
+
+            if (status == Constants.ACCEPTED) {
+                emailTemplate_line1 = `A service request for ${service_name} was just <b>matched</b> in Wayplace. 
+            The individual has been sent the following information, in order to reach out to your organization.`
+                emailTemplate_line2 = `Wayplace does not replace your intake process. When the individual reaches out, 
+            you are welcome to go through your organization’s typical screening and onboarding steps.`
+                emailTemplate_line3 = `If the contact information above needs to be updated, 
+            please edit that in the service settings for ${service_name} in Wayplace.`
+                subject = `An individual has been matched for ${service_name} in Wayplace`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+            }
+
+            // Emails
+            const emailContent = SendServiceRequest(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: serviceRequest.user.email,
+                subject: subject,
+                html: emailContent
+            };
+            await this.mailerService.sendEmail(mailOptions);
         }
+        console.log("Client: ", serviceRequest.client_service.client.email)
+        if (serviceRequest.client_service.client != null) {
+            const name = serviceRequest.client_service.client.user_name
+            const organization_name = serviceRequest.organization.name
+            const service_name = serviceRequest.service.name
 
-        if (status == Constants.UNABLE_TO_SERVE) {
-            emailTemplate = `${organization_name} is unable to place your service request for ${service_name}`
-            contact_email = ""
-            contact_phone = ""
-            subject = `Service request unable to place`
-        }
+            let contact_email = serviceRequest.service?.contact_email
+            let contact_phone = serviceRequest.service?.contact_phone
 
-        if (status == Constants.WAITLISTED) {
-            emailTemplate = `${organization_name} has waitlisted your service request for ${service_name}`
-            contact_email = ""
-            contact_phone = ""
-            subject = `Service request waitlisted`
-        }
 
-        if (status == Constants.CANCELLED) {
-            emailTemplate = `${organization_name} has cancelled your service request for ${service_name}`
-            contact_email = ""
-            contact_phone = ""
-            subject = `Service request cancelled`
-        }
+            let emailTemplate_line1: string
+            let emailTemplate_line2: string
+            let emailTemplate_line3: string
+            let emailTemplate_line4: string
+            let subject = ""
 
-        if (status == Constants.ACCEPTED) {
-            emailTemplate = `${organization_name} has accepted your service request for ${service_name} 
-            and given you a spot in the service. 
-            Please use the information below establish contact with a service representative, 
-            they will share additional information on next steps:`
-            subject = `Service request accepted`
+            if (status == Constants.PLACED) {
+                emailTemplate_line1 = `Congratulations on starting your healing journey! `
+                emailTemplate_line2 = `Your service request for ${service_name} was just switched to <b>matched</b> in Wayplace. This means that you have begun receiving services. 
+                If you have not started to receive services, please reach out to: wayplace@atlasfree.org.`
+                emailTemplate_line3 = `Please know if you ever need more support, we are here to help. `
+                subject = `Update on your service request`
+                contact_email = ""
+                contact_phone = ""
+            }
+
+            if (status == Constants.UNABLE_TO_SERVE) {
+                emailTemplate_line1 = `We would like to acknowledge your strength and persistence in reaching out for help. 
+                It takes courage to seek assistance in regards to the events you’ve experienced.`
+                emailTemplate_line2 = `Your service request for ${service_name} was switched to unable to serve in Wayplace. 
+                This means that they do not feel they could provide you with the support you deserve. 
+                We recommend reviewing your filters and consider sending your service request to other services.`
+                subject = `Update on your service request`
+                contact_email = ""
+                contact_phone = ""
+            }
+
+            if (status == Constants.WAITLISTED) {
+                emailTemplate_line1 = `We admire your strength in finding programs that can support you. `
+                emailTemplate_line2 = `Your service request for ${service_name} was just matched in Wayplace. 
+                Below is the information for the service. Please reach out to discuss potential placement.`
+                subject = `Update on your service request`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+            }
+
+            if (status == Constants.CANCELLED) {
+                emailTemplate_line1 = `We would like to acknowledge your strength and persistence in reaching out for help. 
+                It takes courage to seek assistance in regards to the events you’ve experienced.`
+                emailTemplate_line2 = `Your service request for ${service_name} was switched to canceled in Wayplace. 
+                This means that they do not feel they could provide you with the support you deserve. 
+                We recommend reviewing your filters and consider sending your service request to other services.`
+                subject = `Update on your service request`
+                contact_email = ""
+                contact_phone = ""
+            }
+
+            if (status == Constants.ACCEPTED) {
+                emailTemplate_line1 = `We admire your strength in finding programs that can support you. `
+                emailTemplate_line2 = `Your service request for ${service_name} was just matched in Wayplace. 
+                Below is the information for the service. Please reach out to discuss potential placement.`
+                subject = `Update on your service request`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+            }
+
+            // Emails
+            const emailContent = SendServiceRequestClient(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);
+            const mailOptions = {
+                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                to: serviceRequest.client_service.client.email,
+                subject: subject,
+                html: emailContent
+            };
+            await this.mailerService.sendEmail(mailOptions);
         }
 
         serviceRequest.status = status;
-        // Emails
-        const emailContent = SendServiceRequest(name, emailTemplate, contact_email, contact_phone);
-        const mailOptions = {
-            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
-            to: serviceRequest.user.email,
-            subject: subject,
-            html: emailContent
-        };
-        await this.mailerService.sendEmail(mailOptions);
 
         return await this.assignedServiceRepository.save(serviceRequest);
     }
