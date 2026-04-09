@@ -55,6 +55,8 @@ export const CreatePassword = (name: string, email: string, token: string, type:
                 Create Password</a></button>
                 <br/><br/>
                 <p>If the above button does not work for you. Copy and paste the link to your browser address and try again.<br></p>
+            <br><br>
+            <p>Wayplace</p>
             <a href='${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}' 
                     style="text-decoration:none;color: #2954FF;">
                 ${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}</a>
@@ -753,3 +755,73 @@ export const ReportedUser = () => `
 </body>
 </html>
 `;
+
+export const ServiceSettingReminder = (email: string, service_name: string) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: "Google Sans", sans-serif;
+            line-height: 1.6;
+            color: #333333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            background-color: #f7f7f7;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .content {
+            margin-top: 20px;
+            font-family: "Google Sans", sans-serif;
+        }
+        .footer {
+            margin-top: 90px;
+            text-align: center;
+            color: grey;
+            font-family: "Google Sans", sans-serif;
+        }
+        .button {
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/wayplace_logo_gray.png" alt="logo" width="110" height="100">
+        </div>
+        <div class="content">
+            <p>Hi ${email},</p>
+            <p>It’s time to review and update ${service_name}’s availability in Wayplace. 
+            Log in <a href=${process.env.SITE_NAME}>here</a> and go to the Service Settings page for ${service_name}.</p>
+            <p>Ensuring your availability information is accurate and current is critical so survivors can see, in real time, what services are truly accessible. 
+            This will impact how your service shows up in search results, whether that be ‘Full,’ ‘Waitlist Only,’ or ‘Open.’</p>
+            <p>If you need assistance, please contact us at wayplace@atlasfree.org</p>
+       
+            <p>Wayplace</p>
+            
+            <a href='${process.env.SITE_NAME}' 
+                    style="text-decoration:none;color: #2954FF;">
+                ${process.env.SITE_NAME}</a>
+            
+        </div>
+        <div class="footer">
+            <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
+            <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
+            <p style="margin: 0">PO Box 77, Kirkland, WA 98083</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+

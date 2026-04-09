@@ -1,4 +1,4 @@
-import {Get, JsonController, Req, Res, UseBefore} from "routing-controllers";
+import {Get, JsonController, Post, Req, Res, UseBefore} from "routing-controllers";
 import { Request, Response } from "express";
 import { ConfigService } from "../services/Config.service";
 import { ResponseFormatter } from "@inquitickets/response";
@@ -464,6 +464,34 @@ export class ConfigController {
                 total_pages: Math.ceil(total / page_size),
                 data: customResponse
             });
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/service-setting-email")
+    async service_setting_email(@Req() req: Request, @Res() res: Response) {
+        try {
+            const services = await this.configService.getAllActiveServices();
+
+            if (!services || services.length === 0) {
+                return ResponseFormatter.errorResponse(res, 'No services found');
+            }
+
+            const results = await Promise.allSettled(
+                services.map(service =>
+                    this.configService.sendSettingEmail(
+                        service.contact_email,
+                        service.name
+                    )
+                )
+            )
+            const formattedResults = results.map((result, index) => ({
+                email: services[index].contact_email,
+                status: result.status,
+                error: result.status === 'rejected' ? result.reason?.message : null
+            }));
+            return ResponseFormatter.successResponse(res, "Successful", formattedResults)
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
