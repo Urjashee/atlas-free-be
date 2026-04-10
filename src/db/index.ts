@@ -383,7 +383,6 @@ const service_details_options: ServiceDetailsOptions[] = [
         , icon: ""
     },
     {id: 87, name: 'None', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
-    {id: 171, name: 'Other', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
     {id: 88, name: 'Cigarettes', type: 'smoking_allowed', serviceHeading: heading_eligibility, icon: ""},
     {id: 89, name: 'Recreational Marijuana', type: 'smoking_allowed', serviceHeading: heading_eligibility, icon: ""},
     {id: 90, name: 'Vapes', type: 'smoking_allowed', serviceHeading: heading_eligibility, icon: ""},
@@ -420,14 +419,14 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 97, name: 'Survivor-Informed', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
     {
         id: 98,
-        name: 'Program-Centered/curriculum-based',
+        name: 'Program-Centered/Curriculum-Based',
         type: 'service_model',
         serviceHeading: heading_service_model,
         icon: ""
     },
-    {id: 99, name: 'Faith-based', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
+    {id: 99, name: 'Faith-Based', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
     {id: 100, name: 'Trauma-Informed', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
-    {id: 101, name: 'Clean and sober', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
+    {id: 101, name: 'Clean and Sober', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
     {id: 102, name: 'Evidence-Based', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
     {id: 103, name: 'Harm Reduction', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
     {id: 104, name: 'Strengths-Based', type: 'service_model', serviceHeading: heading_service_model, icon: ""},
@@ -641,6 +640,9 @@ const service_details_options: ServiceDetailsOptions[] = [
     },
     {id: 169, name: 'Support Groups', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 170, name: 'None', type: 'legal', serviceHeading: heading_eligibility, icon: ""},
+    {id: 171, name: 'Other', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
+    {id: 172, name: 'None', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
+    {id: 173, name: 'None', type: 'service_model', serviceHeading: heading_eligibility, icon: ""},
 ];
 
 const advocate_service: AdvocateService[] = [
