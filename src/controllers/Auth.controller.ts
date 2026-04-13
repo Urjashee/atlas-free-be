@@ -195,6 +195,7 @@ export class AuthController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
     @Post("/forgot-password")
     async forgotPassword(@Req() req: Request, @Res() res: Response, @Body() body: { email: string }) {
         try {

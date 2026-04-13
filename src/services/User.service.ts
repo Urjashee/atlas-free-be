@@ -6,7 +6,7 @@ import {Constants} from "../helper/Constants.helper";
 import {Affiliations} from "../entity/Affiliations.entity";
 import s3UploadService from "../helper/S3UploadService.helper";
 import {PasswordReset} from "../entity/PasswordReset.entity";
-import {In, IsNull, MoreThan, Not} from "typeorm";
+import {ILike, In, IsNull, MoreThan, Not} from "typeorm";
 import {Organization} from "../entity/Organization.entity";
 import {randomBytes} from "crypto";
 import {VerifyEmail} from "../helper/Emails.helper";
@@ -390,14 +390,14 @@ export class UserService {
     async checkIfEmail(email: string) {
         return await this.userRepository.findOne({
             where: {
-                email
+                email: ILike(email)
             },
             relations: ["organization"]
         });
     }
 
     async checkIfVerified(email: string) {
-        const user = await this.userRepository.findOneBy({email});
+        const user = await this.userRepository.findOneBy({email: ILike(email)});
         if (user.emailVerifiedAt == null) {
             return false
         } else {
@@ -406,7 +406,7 @@ export class UserService {
     }
 
     async checkIfActive(email: string) {
-        const user = await this.userRepository.findOneBy({email});
+        const user = await this.userRepository.findOneBy({email: ILike(email)});
         if (user.is_active != true) {
             return false
         } else {
@@ -417,7 +417,7 @@ export class UserService {
     async findUserByCredentials(email: string, password: string) {
         const user = await this.userRepository.findOne({
             where: {
-                email,
+                email: ILike(email),
             }, relations: ["organization"]
         });
         if (user && await bcrypt.compare(password, user.password)) {
