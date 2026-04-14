@@ -205,14 +205,15 @@ export class OrganizationService {
     }
 
     async addServiceDetails(organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization?: Organization) {
+        const isOrgAddress = body.is_organization_address === true || body.is_organization_address === 'true';
         const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
-            street: body.is_organization_address ? checkIfValidOrganization.street : body.street,
-            address: body.is_organization_address ? checkIfValidOrganization.address : body.address,
-            state: body.is_organization_address ? checkIfValidOrganization.state : body.state,
-            city: body.is_organization_address ? checkIfValidOrganization.city : body.city,
-            zipcode: body.is_organization_address ? checkIfValidOrganization.zipcode : body.zipcode,
+            street: isOrgAddress ? checkIfValidOrganization.street : body.street,
+            address: isOrgAddress ? checkIfValidOrganization.address : body.address,
+            state: isOrgAddress ? checkIfValidOrganization.state : body.state,
+            city: isOrgAddress ? checkIfValidOrganization.city : body.city,
+            zipcode: isOrgAddress ? checkIfValidOrganization.zipcode : body.zipcode,
             disclose_address: body.disclose_address === true || body.disclose_address === 'true',
             is_organization_address: body.is_organization_address === true || body.is_organization_address === 'true',
             service_type: body.service_type || null,
@@ -279,15 +280,35 @@ export class OrganizationService {
                 organization: {id: organization_id},
             }
         })
-        console.log("org", organization_id)
-        console.log("getService 1:", getService)
+
+        // console.log("org address check:", body.is_organization_address)
+        // console.log("org address:", checkIfValidOrganization?.street)
         if (getService) {
+            const isOrgAddress = body.is_organization_address === true || body.is_organization_address === 'true';
+            if (!isOrgAddress) {
+                if (body.state == 0 || body.state == null)
+                    throw new Error("Please enter your service state")
+            }
             getService.name = body.name
-            getService.street = body.is_organization_address == true ? checkIfValidOrganization?.organization.street : body.street
-            getService.address = body.is_organization_address == true ? checkIfValidOrganization?.organization.address : body.address
-            getService.state = body.is_organization_address == true ? checkIfValidOrganization?.organization.state : body.state
-            getService.city = body.is_organization_address == true ? checkIfValidOrganization?.organization.city : body.city
-            getService.zipcode = body.is_organization_address == true ? checkIfValidOrganization?.organization.zipcode : body.zipcode
+            getService.street = isOrgAddress
+                ? checkIfValidOrganization?.street
+                : body.street;
+
+            getService.address = isOrgAddress
+                ? checkIfValidOrganization?.address
+                : body.address;
+
+            getService.city = isOrgAddress
+                ? checkIfValidOrganization?.city
+                : body.city;
+
+            getService.state = isOrgAddress
+                ? checkIfValidOrganization?.state
+                : body.state;
+
+            getService.zipcode = isOrgAddress
+                ? checkIfValidOrganization?.zipcode
+                : body.zipcode;
             getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
             getService.is_organization_address = body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type || null

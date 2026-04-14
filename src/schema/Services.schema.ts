@@ -15,6 +15,13 @@ export const servicesSchema = Joi.object({
 
     disclose_address: Joi.boolean().default(true),
     is_organization_address: Joi.boolean().default(false),
+    // state: Joi.when('is_organization_address', {
+    //     is: false || "false",
+    //     then: Joi.number().required().messages({
+    //         'any.required': 'State is required when not using organization address',
+    //     }),
+    //     otherwise: Joi.number().allow(null).empty("").optional()
+    // }),
 
     service_type: Joi.number().allow(null).empty("").optional(),
     total_available_slots: Joi.number().allow(null).empty("").optional(),
