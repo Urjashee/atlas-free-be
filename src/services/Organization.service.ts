@@ -206,6 +206,10 @@ export class OrganizationService {
 
     async addServiceDetails(organization_id: number, role: number, body: any, user_id?: number, checkIfValidOrganization?: Organization) {
         const isOrgAddress = body.is_organization_address === true || body.is_organization_address === 'true';
+        if (!isOrgAddress) {
+            if (body.state == 0 || body.state == null)
+                throw new Error("Please enter your service state")
+        }
         const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
