@@ -26,12 +26,12 @@ export async function clients(body: any, user_id: number, organization_id: numbe
         const editClientDetails = await advocateService.editClient(body.id, user_id, organization_id, body)
         if (!editClientDetails)
             throw new Error("Can\'t edit, try again later");
-        return "Successfully updated clients."
+        return "Successfully updated service request form"
     } else {
         const addClientDetails = await advocateService.addClient(user_id, organization_id, body)
         if (!addClientDetails)
             throw new Error("Can't add, try again later");
-        return "Successfully added clients."
+        return "Successfully added service request form"
     }
 }
 export async function getClientsById(client_id: number, user_id: number, organization_id?: number) {
