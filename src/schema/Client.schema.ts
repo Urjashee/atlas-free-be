@@ -22,8 +22,21 @@ export const clientSchema = Joi.object({
         }).allow(null).empty(""),
     birthdate_status: Joi.number().allow(null).empty(""),
     children_accompany: Joi.number().required(),
-    children_to_accompany: Joi.number().optional().empty(""),
-    ages_of_children: Joi.string().optional().empty(""),
+    children_to_accompany: Joi.number()
+        .optional()
+        .empty("")
+        .when("children_accompany", {
+            is: Joi.valid(1, 3), // Yes or Preferred
+            then: Joi.required(),
+        }),
+
+    ages_of_children: Joi.string()
+        .optional()
+        .empty("")
+        .when("children_accompany", {
+            is: Joi.valid(1, 3), // Yes or Preferred
+            then: Joi.required(),
+        }),
     criteria: Joi.array().items(Joi.number()).min(1).required(),
     criteria_add: Joi.array().items(Joi.number()).optional(),
     medications: Joi.array().items(Joi.number()).min(1).required(),
