@@ -54,7 +54,7 @@ pipelines:
                 - eval $(ssh-agent -s)
                 - ssh-add keys/atlas-production.pem
                 # SSH into the server and deploy the application
-                - ssh -i keys/atlas-production.pem $PROD_REMOTE_USER@$REMOTE_HOST "
+                - ssh -i keys/atlas-production.pem $REMOTE_USER@$PROD_REMOTE_HOST "
                   cd /var/www/atlas-free-be && git stash && git pull https://$BITBUCKET_USERNAME:$BITBUCKET_APP_PASSWORD@bitbucket.org/Simpalm/atlas-free-be.git production && yarn install && yarn build:ubuntu && pm2 reload atlas-free-be "
                 # Clean up the key after usage
                 - rm -f keys/atlas-production.pem
