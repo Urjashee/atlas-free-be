@@ -434,6 +434,7 @@ export class ConfigController {
                         }
                     }
 
+
                     customResponse.push({
                         id: service.id,
                         name: service.name,
@@ -441,7 +442,7 @@ export class ConfigController {
                         organization_name: service.organization.name,
                         service_type: serviceType.name,
                         service_type_icon: serviceType.icon,
-                        address: !service.disclose_address === false
+                        address: (!service.disclose_address === false || !service.organization.disclose_address === false)
                             ? `${service.zipcode || ""}`
                             : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
                         availability_id: availability,
@@ -472,6 +473,11 @@ export class ConfigController {
     @Post("/service-setting-email")
     async service_setting_email(@Req() req: Request, @Res() res: Response) {
         try {
+            const apiKey = req.headers["x-api-key"];
+            if (apiKey !== process.env.INTERNAL_API_KEY) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+
             const services = await this.configService.getAllActiveServices();
 
             if (!services || services.length === 0) {
