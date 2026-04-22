@@ -473,6 +473,11 @@ export class ConfigController {
     @Post("/service-setting-email")
     async service_setting_email(@Req() req: Request, @Res() res: Response) {
         try {
+            const apiKey = req.headers["x-api-key"];
+            if (apiKey !== process.env.INTERNAL_API_KEY) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+
             const services = await this.configService.getAllActiveServices();
 
             if (!services || services.length === 0) {
