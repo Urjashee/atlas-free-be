@@ -434,6 +434,7 @@ export class ConfigController {
                         }
                     }
 
+
                     customResponse.push({
                         id: service.id,
                         name: service.name,
@@ -441,7 +442,7 @@ export class ConfigController {
                         organization_name: service.organization.name,
                         service_type: serviceType.name,
                         service_type_icon: serviceType.icon,
-                        address: !service.disclose_address === false
+                        address: (!service.disclose_address || !service.organization.disclose_address) === false
                             ? `${service.zipcode || ""}`
                             : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
                         availability_id: availability,
