@@ -35,6 +35,7 @@ import {clients, getClientsById} from "../util/ServiceRequest.util";
 import {AdvocateService} from "../services/Advocate.service";
 import {addClientService} from "../util/Common.util"
 import {AnalyticsService} from "../services/Analytics.service";
+import {DeleteOrganizationService} from "../services/DeleteOrganization.service";
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -61,6 +62,7 @@ export class AdminController {
     private userService = new UserService();
     private clientService = new ClientService();
     private analyticService = new AnalyticsService();
+    private deleteOrganizationService = new DeleteOrganizationService();
 
     @Get("/organization/list/:filter")
     @UseBefore(authMiddleware)
@@ -475,6 +477,22 @@ export class AdminController {
                 return ResponseFormatter.errorResponse(res, "Can't remove service, try again later");
 
             return ResponseFormatter.successResponse(res, "Successful");
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Delete("/organization/:organizationId")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async deleteOrganization(@Req() req: Request, @Res() res: Response, @Param("organizationId") organizationId: number) {
+        try {
+            const exists = await this.deleteOrganizationService.organizationExists(organizationId);
+            if (!exists) {
+                return ResponseFormatter.errorResponse(res, 'Organization not found');
+            }
+            await this.deleteOrganizationService.deleteOrganization(organizationId);
+            return ResponseFormatter.successResponse(res, 'Organization deleted successfully');
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
