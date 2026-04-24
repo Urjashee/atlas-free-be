@@ -77,3 +77,6 @@ Key `.env` variables: `PORT` (default 3003), `DB_HOST/DB_USER/DB_PASSWORD/DB_NAM
 ## Deployment
 
 Deployed via Bitbucket Pipelines on the `staging` branch. Build step runs `yarn build:ubuntu`; deploy step SSH-pulls to remote server and reloads with PM2.
+
+## Repository
+- Push to both origins
