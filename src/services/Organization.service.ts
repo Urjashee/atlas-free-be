@@ -56,13 +56,19 @@ export class OrganizationService {
                 );
             }
 
-            return await query
+            const users = await query
                 .orderBy('user.created_at', 'DESC')
                 .getMany();
+            const seen = new Set<number>();
+            return users.filter(user => {
+                if (!user.organization || seen.has(user.organization.id)) return false;
+                seen.add(user.organization.id);
+                return true;
+            });
 
         }
         if (filter === "inactive") {
-            return await this.userRepository
+            const users = await this.userRepository
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
@@ -73,9 +79,15 @@ export class OrganizationService {
                 .orderBy('user.created_at', 'DESC')
                 // .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
+            const seen = new Set<number>();
+            return users.filter(user => {
+                if (!user.organization || seen.has(user.organization.id)) return false;
+                seen.add(user.organization.id);
+                return true;
+            });
         }
         if (filter === "pending") {
-            return await this.userRepository
+            const users = await this.userRepository
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
@@ -86,6 +98,12 @@ export class OrganizationService {
                 .orderBy('user.created_at', 'DESC')
                 // .andWhere('user.is_active = :userActive', {userActive: true})
                 .getMany();
+            const seen = new Set<number>();
+            return users.filter(user => {
+                if (!user.organization || seen.has(user.organization.id)) return false;
+                seen.add(user.organization.id);
+                return true;
+            });
         }
     }
 
