@@ -24,8 +24,8 @@ export const servicesSchema = Joi.object({
     // }),
 
     service_type: Joi.number().allow(null).empty("").optional(),
-    total_available_slots: Joi.number().allow(null).empty("").required(),
-    slots_beds: Joi.number().allow(null).empty("").required(),
+    total_available_slots: Joi.number().required(),
+    slots_beds: Joi.number().required(),
 
     start_day_of_service: Joi.date().allow(null).optional(),
 
