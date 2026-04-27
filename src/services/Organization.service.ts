@@ -236,7 +236,9 @@ export class OrganizationService {
             state: isOrgAddress ? checkIfValidOrganization.state : body.state,
             city: isOrgAddress ? checkIfValidOrganization.city : body.city,
             zipcode: isOrgAddress ? checkIfValidOrganization.zipcode : body.zipcode,
-            disclose_address: body.disclose_address === true || body.disclose_address === 'true',
+            disclose_address: isOrgAddress
+                ? false
+                : (body.disclose_address === true || body.disclose_address === 'true'),
             is_organization_address: body.is_organization_address === true || body.is_organization_address === 'true',
             service_type: body.service_type || null,
             total_available_slots: body.total_available_slots || null,
@@ -311,6 +313,7 @@ export class OrganizationService {
                 if (body.state == 0 || body.state == null)
                     throw new Error("Please enter your service state")
             }
+            console.log("isOrgAddress: ", isOrgAddress)
             getService.name = body.name
             getService.street = isOrgAddress
                 ? checkIfValidOrganization?.street
@@ -331,7 +334,11 @@ export class OrganizationService {
             getService.zipcode = isOrgAddress
                 ? checkIfValidOrganization?.zipcode
                 : body.zipcode;
-            getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
+            if (isOrgAddress) {
+                getService.disclose_address = false;
+            } else {
+                getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
+            }
             getService.is_organization_address = body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type || null
             getService.total_available_slots = body.total_available_slots || null
