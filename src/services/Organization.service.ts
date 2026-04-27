@@ -332,7 +332,7 @@ export class OrganizationService {
                 ? checkIfValidOrganization?.zipcode
                 : body.zipcode;
             getService.disclose_address = body.disclose_address === true || body.disclose_address === 'true';
-            getService.is_organization_address = isOrgAddress ? false : body.is_organization_address === true || body.is_organization_address === 'true';
+            getService.is_organization_address = !isOrgAddress ? false : body.is_organization_address === true || body.is_organization_address === 'true';
             getService.service_type = body.service_type || null
             getService.total_available_slots = body.total_available_slots || null
             getService.slots_beds = body.slots_beds || null
