@@ -237,7 +237,7 @@ export class OrganizationService {
             city: isOrgAddress ? checkIfValidOrganization.city : body.city,
             zipcode: isOrgAddress ? checkIfValidOrganization.zipcode : body.zipcode,
             disclose_address: body.disclose_address === true || body.disclose_address === 'true',
-            is_organization_address: body.is_organization_address === true || body.is_organization_address === 'true',
+            is_organization_address: isOrgAddress ? false : body.is_organization_address === true || body.is_organization_address === 'true',
             service_type: body.service_type || null,
             total_available_slots: body.total_available_slots || null,
             slots_available: body.slots_available || body.total_available_slots,
