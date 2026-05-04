@@ -55,7 +55,7 @@ export const CreatePassword = (name: string, email: string, token: string, type:
                 ${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}</a></p>
             For any questions about your account or how to use Wayplace, please reach out to us at <br/>
             wayplace@atlasfree.org.<br/>
-            <p>Wayplace</p>
+            <p>Wayplace Team</p>
             
         </div>
         <div class="footer">
