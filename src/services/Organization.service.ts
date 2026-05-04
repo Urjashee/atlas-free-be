@@ -170,7 +170,7 @@ export class OrganizationService {
                         user: {id: organization.id}
                     })
                     await this.passwordResetRepository.save(password_reset_request);
-                    const emailContent = CreatePassword(organization.user_name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
+                    const emailContent = CreatePassword(organization.organization.name, organization.email, token, Constants.CREATE_PASSWORD, organization.role.id);
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                         to: organization.email,

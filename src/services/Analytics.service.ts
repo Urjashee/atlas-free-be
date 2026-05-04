@@ -35,7 +35,10 @@ export class AnalyticsService {
 
     // App engagement
     async getOrganizationCount(from_date?: string, to_date?: string) {
-        const query = this.organizationRepository.createQueryBuilder("org");
+        const query = this.organizationRepository
+            .createQueryBuilder("org")
+            .where('org.is_active = :orgActive', {orgActive: true})
+        ;
 
         if (from_date && to_date) {
             query.andWhere(
@@ -52,7 +55,10 @@ export class AnalyticsService {
     }
 
     async getServiceCount(from_date?: string, to_date?: string) {
-        const query = this.serviceDetailsRepository.createQueryBuilder("service");
+        const query = this.serviceDetailsRepository
+            .createQueryBuilder("service")
+            .innerJoin("service.organization", "org")
+            .where("org.is_active = :active", { active: true });
 
         if (from_date && to_date) {
             query.andWhere(
@@ -71,7 +77,9 @@ export class AnalyticsService {
     async getUserCount(type: number, from_date?: string, to_date?: string) {
         const query = this.userRepository
             .createQueryBuilder("user")
-            .where("user.role = :type", {type});
+            .innerJoin("user.organization", "org")
+            .where("user.role = :type", {type})
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date && to_date) {
             query.andWhere(
@@ -89,7 +97,9 @@ export class AnalyticsService {
 
     async getServiceRequestCount(status?: number, from_date?: string, to_date?: string) {
         const query = this.assignedServiceRepository
-            .createQueryBuilder("service_request");
+            .createQueryBuilder("service_request")
+            .innerJoin("service_request.organization", "org")
+            .where("org.is_active = :active", { active: true });
 
         if (status) {
             query.andWhere("service_request.status = :status", {status});
@@ -116,8 +126,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .innerJoin("as.service", "service")
+            .innerJoin("as.organization", "org")
             .select("service.service_type", "data")
-            .addSelect("COUNT(as.id)", "count");
+            .addSelect("COUNT(as.id)", "count")
+            .where("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -163,9 +175,11 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.english_speaking_ability", "data")
             .addSelect("COUNT(as.id)", "count")
             .where("cs.english_speaking_ability IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -210,9 +224,11 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.gender", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.gender IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -255,9 +271,11 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.citizenship_status", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.citizenship_status IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -307,8 +325,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.client_experienced", "data")
             .where("cs.client_experienced IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -360,9 +380,11 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.pregnant", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.pregnant IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -408,9 +430,11 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.birthdate_status", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.birthdate_status IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -468,9 +492,11 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.children_accompany", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.children_accompany IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
         if (from_date) {
             qb.andWhere("as.created_at >= :from_date", { from_date });
@@ -520,8 +546,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.criteria", "data")
             .where("cs.criteria IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
 
         if (from_date) {
@@ -606,8 +634,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.race", "data")
             .where("cs.race IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
 
         if (from_date) {
@@ -684,8 +714,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.medications", "data")
             .where("cs.medications IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
 
         if (from_date) {
@@ -786,8 +818,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.physical_accommodation", "data")
             .where("cs.physical_accommodation IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
 
         if (from_date) {
@@ -868,8 +902,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.mental_health_diagnoses", "data")
             .where("cs.mental_health_diagnoses IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
 
         if (from_date) {
@@ -966,8 +1002,10 @@ export class AnalyticsService {
         const qb = this.assignedServiceRepository
             .createQueryBuilder("as")
             .leftJoin("as.client_service", "cs")
+            .innerJoin("as.organization", "org")
             .select("cs.nicotine_products", "data")
             .where("cs.nicotine_products IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
 
 
         if (from_date) {
@@ -1033,10 +1071,11 @@ export class AnalyticsService {
     async getServicesByStatus(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.waitlist", "waitlist")
             .addSelect("sd.id", "id")
             .addSelect("sd.total_available_slots", "total_available_slots")
-            // .where("sd.total_available_slots IS NOT NULL");
+            .where("org.is_active = :active", { active: true });
 
         // Proper date filtering
         if (from_date && to_date) {
@@ -1095,9 +1134,11 @@ export class AnalyticsService {
 
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.service_type", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.service_type IS NOT NULL");
+            .where("sd.service_type IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1170,9 +1211,11 @@ export class AnalyticsService {
     async getServicesByServiceModel(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.service_model", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.service_model IS NOT NULL");
+            .where("sd.service_model IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
 
         if (from_date) {
@@ -1265,11 +1308,13 @@ export class AnalyticsService {
     async getServicesBySlotsBeds(from_date?: string, to_date?: string) {
         const rows = await this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.slots_beds", "slots_beds")
             .addSelect("SUM(sd.slots_available)", "total")
             .addSelect("AVG(sd.slots_available)", "average")
             .addSelect("COUNT(*)", "count")
             .where("sd.slots_beds IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true })
             .groupBy("sd.slots_beds")
             .getRawMany();
 
@@ -1279,9 +1324,11 @@ export class AnalyticsService {
     async getServicesByGenderServed(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.genders_served", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.genders_served IS NOT NULL");
+            .where("sd.genders_served IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
 
         if (from_date) {
@@ -1353,9 +1400,11 @@ export class AnalyticsService {
     async getServicesByServedTo(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.served_to", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.served_to IS NOT NULL");
+            .where("sd.served_to IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1422,9 +1471,11 @@ export class AnalyticsService {
     async getServicesByCitizenshipRequirements(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.citizenship_requirement", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.citizenship_requirement IS NOT NULL");
+            .where("sd.citizenship_requirement IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1483,9 +1534,11 @@ export class AnalyticsService {
     async getServicesByLanguageRequirements(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.language_requirement", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.language_requirement IS NOT NULL");
+            .where("sd.language_requirement IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1544,9 +1597,11 @@ export class AnalyticsService {
     async getServicesByTraffickingStatus(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.trafficking_status", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.trafficking_status IS NOT NULL");
+            .where("sd.trafficking_status IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1613,9 +1668,11 @@ export class AnalyticsService {
     async getServicesByLegal(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.legal", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.legal IS NOT NULL");
+            .where("sd.legal IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1698,9 +1755,11 @@ export class AnalyticsService {
     async getServicesByHealthNeeds(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.health_needs", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.health_needs IS NOT NULL");
+            .where("sd.health_needs IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1803,9 +1862,11 @@ export class AnalyticsService {
     async getServicesByMedications(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.medications", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.medications IS NOT NULL");
+            .where("sd.medications IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -1904,9 +1965,11 @@ export class AnalyticsService {
     async getServicesByMentalHealth(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.mental_health_diagnoses", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.mental_health_diagnoses IS NOT NULL");
+            .where("sd.mental_health_diagnoses IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2001,9 +2064,11 @@ export class AnalyticsService {
     async getServicesByPhysicalAccommodations(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.physical_accommodations", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.physical_accommodations IS NOT NULL");
+            .where("sd.physical_accommodations IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2082,9 +2147,11 @@ export class AnalyticsService {
     async getServicesByEntryRequirements(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.entry_requirement", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.entry_requirement IS NOT NULL");
+            .where("sd.entry_requirement IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2148,9 +2215,11 @@ export class AnalyticsService {
 
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.faith_engagement", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.faith_engagement IS NOT NULL");
+            .where("sd.faith_engagement IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2204,9 +2273,11 @@ export class AnalyticsService {
     async getServicesByServiceStructure(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.service_structure", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.service_structure IS NOT NULL");
+            .where("sd.service_structure IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2256,9 +2327,11 @@ export class AnalyticsService {
     async getServicesBySleepingArrangement(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.sleeping_arrangement", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.sleeping_arrangement IS NOT NULL");
+            .where("sd.sleeping_arrangement IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2308,9 +2381,11 @@ export class AnalyticsService {
     async getServicesByStaffingLevel(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.staffing_level", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.staffing_level IS NOT NULL");
+            .where("sd.staffing_level IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2360,9 +2435,11 @@ export class AnalyticsService {
     async getServicesByTeamDiversity(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.teams_diversity", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.teams_diversity IS NOT NULL");
+            .where("sd.teams_diversity IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
@@ -2433,9 +2510,11 @@ export class AnalyticsService {
     async getServicesByServiceGuidelines(from_date?: string, to_date?: string) {
         const qb = this.serviceDetailsRepository
             .createQueryBuilder("sd")
+            .innerJoin("sd.organization", "org")
             .select("sd.service_guidelines", "data")
             .addSelect("COUNT(*)", "count")
-            .where("sd.service_guidelines IS NOT NULL");
+            .where("sd.service_guidelines IS NOT NULL")
+            .andWhere("org.is_active = :active", { active: true });
 
         if (from_date) {
             qb.andWhere("sd.created_at >= :from_date", { from_date });
