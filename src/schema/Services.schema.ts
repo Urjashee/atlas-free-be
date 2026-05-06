@@ -24,10 +24,17 @@ export const servicesSchema = Joi.object({
     // }),
 
     service_type: Joi.number().allow(null).empty("").optional(),
-    total_available_slots: Joi.number().allow(null).empty("").optional(),
-    slots_beds: Joi.number().allow(null).empty("").optional(),
+    total_available_slots: Joi.number()
+        .greater(0)
+        .required()
+        .messages({
+            'number.base': 'Total available slots must be a number',
+            'number.greater': 'Total available slots must be greater than 0',
+            'any.required': 'Total available slots is required',
+        }),
+    slots_beds: Joi.number().required(),
 
-    start_day_of_service: Joi.date().allow(null).optional(),
+    start_day_of_service: Joi.date().required(),
 
     service_limited: Joi.boolean().default(false),
     enrollment_type: Joi.number().allow(null).empty("").optional(),
@@ -36,7 +43,7 @@ export const servicesSchema = Joi.object({
     extension: Joi.boolean().default(false),
     waitlist: Joi.boolean().default(false),
 
-    service_description: Joi.string().allow("").optional(),
+    service_description: Joi.string().required(),
 
     minimum_age: Joi.number().allow(null).empty("").optional(),
     maximum_age: Joi.number().allow(null).empty("").optional(),

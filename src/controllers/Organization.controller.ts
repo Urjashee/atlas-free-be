@@ -196,7 +196,7 @@ export class AuthController {
             const customResponse = {
                 service_id: getServiceSettings.id,
                 total_available_slots: checkIfValidService.total_available_slots || "",
-                available_slots: getServiceSettings.slots_available || "",
+                available_slots: getServiceSettings.slots_available || 0,
                 service_manager: await this.organizationService.getServiceManager(getServiceSettings.service_manager) || [],
                 contact_email: getServiceSettings.contact_email,
                 contact_phone: getServiceSettings.contact_phone,
