@@ -541,6 +541,10 @@ export class OrganizationService {
         const baseWhere: any = {
             // service_type,
             is_submitted: true,
+            organization: {
+                is_active: true,
+                under_review: false,
+            },
         };
         let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
 
