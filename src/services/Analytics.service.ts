@@ -2641,7 +2641,7 @@ const formatSlotsBeds = (rows: any[]) => {
         },
         {
             id: 2,
-            name: "Beds",
+            name: "Beds Total",
             count: result.beds.total,
             average: result.beds.count
                 ? Number((result.beds.total / result.beds.count).toFixed(2))
@@ -2657,7 +2657,7 @@ const formatSlotsBeds = (rows: any[]) => {
         },
         {
             id: 4,
-            name: "Slots",
+            name: "Slots Total",
             count: result.slots.total,
             average: result.slots.count
                 ? Number((result.slots.total / result.slots.count).toFixed(2))
