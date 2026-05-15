@@ -132,6 +132,7 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         reason_for_removal: service?.reason_for_removal ?? "",
 
         is_submitted: service?.is_submitted ?? false,
+        organization: service?.organization ?? null,
     };
 }
 
