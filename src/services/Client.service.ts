@@ -50,6 +50,21 @@ export class ClientService {
         return false
     }
 
+    async checkIfBelongsToOrganization(organization_id: number, service_id: number) {
+        const service =await this.serviceDetailsRepository.findOne({
+            where: {
+                id: service_id,
+                organization: {
+                    id: organization_id,
+                }
+            }
+        })
+        if (service)
+            return true
+
+        return false
+    }
+
     async addService(body: any, user_id: number) {
         let case_no: string;
 

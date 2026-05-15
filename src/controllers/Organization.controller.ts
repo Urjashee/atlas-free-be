@@ -469,9 +469,14 @@ export class AuthController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            const checkIfServiceOrganization = await this.clientService.checkIfBelongsToOrganization(req.body.organization_id, req.body.service_id);
+            if (!checkIfServiceOrganization)
+                return ResponseFormatter.errorResponse(res, "Service is not a part of the organization");
+
             const checkIfDuplicate = await this.clientService.checkDuplicateServiceRequest(req.body, req.user.id)
             if (checkIfDuplicate)
                 return ResponseFormatter.errorResponse(res, "Service request already sent")
+
             await addClientService(req.body, req.user.role.id)
             return ResponseFormatter.successResponse(res, "Successful");
         } catch (error: any) {
