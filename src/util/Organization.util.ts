@@ -132,6 +132,24 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
         reason_for_removal: service?.reason_for_removal ?? "",
 
         is_submitted: service?.is_submitted ?? false,
+        // data: service?.organization ?? null,
+        organization: {
+            "id": service?.organization?.id ?? "",
+            "name": service?.organization?.name ?? "",
+            "street": service?.organization?.street ?? "",
+            "address": service?.organization?.address ?? "",
+            "city": service?.organization?.address ?? "",
+            "zipcode": service?.organization?.zipcode ?? "",
+            "disclose_address": service?.organization?.disclose_address ?? "",
+            "year": service?.organization?.year ?? "",
+            "website": service?.organization?.website ?? "",
+
+            "email": service?.organization?.users[0]?.email ?? "",
+            "country_code": service?.organization?.users[0]?.country_code ?? "",
+            "phone_no": service?.organization?.users[0]?.mobile ?? "",
+            "first_name": service?.organization?.users[0]?.first_name ?? "",
+            "last_name": service?.organization?.users[0]?.last_name ?? "",
+        },
     };
 }
 

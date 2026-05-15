@@ -50,6 +50,21 @@ export class ClientService {
         return false
     }
 
+    async checkIfBelongsToOrganization(organization_id: number, service_id: number) {
+        const service =await this.serviceDetailsRepository.findOne({
+            where: {
+                id: service_id,
+                organization: {
+                    id: organization_id,
+                }
+            }
+        })
+        if (service)
+            return true
+
+        return false
+    }
+
     async addService(body: any, user_id: number) {
         let case_no: string;
 
@@ -302,12 +317,16 @@ export class ClientService {
             where: { id },
             relations: ["user", "client_service", "organization", "service", "client_service.client"]
         });
-
+        console.log("serviceRequest:", serviceRequest)
         if (!serviceRequest) {
             throw new Error("Service request not found");
         }
 
-        if (serviceRequest.user.role.id == Constants.ROLE_ORGANIZATION_ADMIN || serviceRequest.user.role.id == Constants.ROLE_ADVOCATE ) {
+        serviceRequest.status = status;
+        const saved = await this.assignedServiceRepository.save(serviceRequest);
+
+        try {
+        if (serviceRequest.user?.role?.id == Constants.ROLE_ORGANIZATION_ADMIN || serviceRequest.user?.role?.id == Constants.ROLE_ADVOCATE ) {
 
             const name = serviceRequest.user.email || `${serviceRequest.user.first_name} ${serviceRequest.user.last_name}`
             const organization_name = serviceRequest.organization.name
@@ -385,8 +404,7 @@ export class ClientService {
             };
             await this.mailerService.sendEmail(mailOptions);
         }
-        console.log("Client: ", serviceRequest.client_service.client.email)
-        if (serviceRequest.client_service.client != null) {
+        if (serviceRequest.client_service && serviceRequest.client_service.client && serviceRequest.client_service.client.email) {
             const name = serviceRequest.client_service.client.user_name
             const organization_name = serviceRequest.organization.name
             const service_name = serviceRequest.service.name
@@ -461,10 +479,11 @@ export class ClientService {
             };
             await this.mailerService.sendEmail(mailOptions);
         }
+        } catch (err) {
+            console.error("updateServiceRequestStatus notification failed:", err);
+        }
 
-        serviceRequest.status = status;
-
-        return await this.assignedServiceRepository.save(serviceRequest);
+        return saved;
     }
 
 

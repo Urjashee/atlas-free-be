@@ -414,12 +414,18 @@ export class OrganizationService {
     }
 
     async getOrganizationsServiceById(id: number) {
-        return await this.serviceDetailsRepository.findOne({
-            where: {
-                id: id
-            },
-            relations: ['organization', 'state']
-        })
+        return await this.serviceDetailsRepository
+            .createQueryBuilder('service')
+            .leftJoinAndSelect('service.organization', 'organization')
+            .leftJoinAndSelect('service.state', 'state')
+            .leftJoinAndSelect(
+                'organization.users',
+                'orgAdmin',
+                'orgAdmin.role_id = :roleId',
+                {roleId: Constants.ROLE_ORGANIZATION_ADMIN}
+            )
+            .where('service.id = :id', {id})
+            .getOne();
     }
 
     async getOrganizationsById(id: number) {
@@ -541,6 +547,10 @@ export class OrganizationService {
         const baseWhere: any = {
             // service_type,
             is_submitted: true,
+            organization: {
+                is_active: true,
+                under_review: false,
+            },
         };
         let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
 

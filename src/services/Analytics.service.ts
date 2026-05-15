@@ -1310,8 +1310,10 @@ export class AnalyticsService {
             .createQueryBuilder("sd")
             .innerJoin("sd.organization", "org")
             .select("sd.slots_beds", "slots_beds")
-            .addSelect("SUM(sd.slots_available)", "total")
-            .addSelect("AVG(sd.slots_available)", "average")
+            .addSelect("SUM(sd.total_available_slots)", "total")
+            .addSelect("AVG(sd.total_available_slots)", "average")
+            .addSelect("SUM(sd.slots_available)", "slots_total")
+            .addSelect("AVG(sd.slots_available)", "slots_average")
             .addSelect("COUNT(*)", "count")
             .where("sd.slots_beds IS NOT NULL")
             .andWhere("org.is_active = :active", { active: true })
@@ -2597,15 +2599,19 @@ const returnFormat = (data: any, total: number, countMap: Record<string, number>
 }
 
 const formatSlotsBeds = (rows: any[]) => {
+    console.log("Rows: ", rows);
     const result = {
         beds: { count: 0, total: 0 },
         slots: { count: 0, total: 0 },
+        beds_available: { count: 0, total: 0 },
+        slots_available: { count: 0, total: 0 },
     };
 
     for (const row of rows) {
         const slotsBeds = Number(row.slots_beds);
         const count = Number(row.count);
         const total = Number(row.total);
+        const slotsTotal = Number(row.slots_total);
 
         // ignore 0 if needed
         if (slotsBeds === 0) continue;
@@ -2614,30 +2620,91 @@ const formatSlotsBeds = (rows: any[]) => {
         if (slotsBeds >= 9) {
             result.beds.count += count;
             result.beds.total += total;
+            result.beds_available.count += count;
+            result.beds_available.total += slotsTotal;
         } else {
             result.slots.count += count;
             result.slots.total += total;
+            result.slots_available.count += count;
+            result.slots_available.total += slotsTotal;
         }
     }
+    const total =
+        result.beds.total +
+        result.slots.total;
 
-    return [
-        {
-            id: 1,
-            name: "Beds",
-            count: result.beds.total,
-            average: result.beds.count
-                ? Number((result.beds.total / result.beds.count).toFixed(2))
-                : 0,
-        },
-        {
-            id: 2,
-            name: "Slots",
-            count: result.slots.total,
-            average: result.slots.count
-                ? Number((result.slots.total / result.slots.count).toFixed(2))
-                : 0,
-        },
-    ];
+    return {
+        total,
+        data: [
+            {
+                id: 1,
+                name: "Beds available",
+                count: result.beds_available.total,
+                percentage: total
+                    ? Number(((result.beds_available.total / total) * 100).toFixed(2))
+                    : 0,
+            },
+            {
+                id: 2,
+                name: "Beds Total",
+                count: result.beds.total,
+                percentage: total
+                    ? Number(((result.beds.total / total) * 100).toFixed(2))
+                    : 0,
+            },
+            {
+                id: 3,
+                name: "Slots available",
+                count: result.slots_available.total,
+                percentage: total
+                    ? Number(((result.slots_available.total / total) * 100).toFixed(2))
+                    : 0,
+            },
+            {
+                id: 4,
+                name: "Slots Total",
+                count: result.slots.total,
+                percentage: total
+                    ? Number(((result.slots.total / total) * 100).toFixed(2))
+                    : 0,
+            },
+        ],
+    };
+
+    // return [
+    //     {
+    //         id: 1,
+    //         name: "Beds available",
+    //         count: result.beds_available.total,
+    //         average: result.beds_available.count
+    //             ? Number((result.beds_available.total / result.beds_available.count).toFixed(2))
+    //             : 0,
+    //     },
+    //     {
+    //         id: 2,
+    //         name: "Beds Total",
+    //         count: result.beds.total,
+    //         average: result.beds.count
+    //             ? Number((result.beds.total / result.beds.count).toFixed(2))
+    //             : 0,
+    //     },
+    //     {
+    //         id: 3,
+    //         name: "Slots available",
+    //         count: result.slots_available.total,
+    //         average: result.slots_available.count
+    //             ? Number((result.slots_available.total / result.slots_available.count).toFixed(2))
+    //             : 0,
+    //     },
+    //     {
+    //         id: 4,
+    //         name: "Slots Total",
+    //         count: result.slots.total,
+    //         average: result.slots.count
+    //             ? Number((result.slots.total / result.slots.count).toFixed(2))
+    //             : 0,
+    //     },
+    // ];
 }
 
 

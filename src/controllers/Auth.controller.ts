@@ -11,6 +11,7 @@ import { JwtHelper } from "../helper/Jwt.helper";
 import {randomBytes} from "crypto";
 import {EmailService} from "../services/Email.service";
 import {PasswordResetEmail} from "../helper/Emails.helper";
+import {OrganizationService} from "../services/Organization.service";
 
 dotenv.config();
 const registrationOrganizationSchema = Joi.object({
@@ -89,6 +90,7 @@ const createPasswordSchema = Joi.object({
 @JsonController("/api/auth")
 export class AuthController {
     private userService = new UserService();
+    private organizationService = new OrganizationService();
     private s3UploadService = new S3UploadService();
     private jwtHelper = new JwtHelper();
     private mailerService = new EmailService();
@@ -168,17 +170,19 @@ export class AuthController {
         // if (!checkIfAdmin)
         //     return ResponseFormatter.errorResponse(res, `Not an ${user_type} user`);
         try {
+
             const checkIsEmail = await this.userService.checkIfEmail(req.body.email)
             if (!checkIsEmail)
                 return ResponseFormatter.errorResponse(res, 'Not a valid email!');
             const checkIsEmailVerified = await this.userService.checkIfVerified(req.body.email)
             if (!checkIsEmailVerified)
                 return ResponseFormatter.errorResponse(res, 'User email is not verified');
-            // if (checkIsEmail.role.id != Constants.ROLE_ADMIN && checkIsEmail.role.id != Constants.ROLE_SURVIVOR) {
-            //     if (!checkIsEmail.organization.is_active) {
-            //         return ResponseFormatter.errorResponse(res, 'User organization is not active');
-            //     }
-            // }
+
+            if (checkIsEmail.role.id != Constants.ROLE_ADMIN && checkIsEmail.role.id != Constants.ROLE_SURVIVOR) {
+                if (!checkIsEmail.organization.is_active) {
+                    return ResponseFormatter.errorResponse(res, 'User organization is not active');
+                }
+            }
             const checkIsActive = await this.userService.checkIfActive(req.body.email)
             if (!checkIsActive)
                 return ResponseFormatter.errorResponse(res, 'User is not active');

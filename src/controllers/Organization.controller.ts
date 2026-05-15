@@ -399,6 +399,7 @@ export class AuthController {
             if (!getServiceRequest) {
                 return ResponseFormatter.errorResponse(res, "Service request not found");
             }
+            console.log("getServiceRequest", getServiceRequest);
             const updatedAssignedServiceStatus = await this.clientService.updateServiceRequestStatus(serviceRequestsId, status);
             if (!updatedAssignedServiceStatus)
                 return ResponseFormatter.errorResponse(res, "Failed to update service request status");
@@ -469,9 +470,14 @@ export class AuthController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            const checkIfServiceOrganization = await this.clientService.checkIfBelongsToOrganization(req.body.organization_id, req.body.service_id);
+            if (!checkIfServiceOrganization)
+                return ResponseFormatter.errorResponse(res, "Service is not a part of the organization");
+
             const checkIfDuplicate = await this.clientService.checkDuplicateServiceRequest(req.body, req.user.id)
             if (checkIfDuplicate)
                 return ResponseFormatter.errorResponse(res, "Service request already sent")
+
             await addClientService(req.body, req.user.role.id)
             return ResponseFormatter.successResponse(res, "Successful");
         } catch (error: any) {
