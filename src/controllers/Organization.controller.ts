@@ -399,6 +399,7 @@ export class AuthController {
             if (!getServiceRequest) {
                 return ResponseFormatter.errorResponse(res, "Service request not found");
             }
+            console.log("getServiceRequest", getServiceRequest);
             const updatedAssignedServiceStatus = await this.clientService.updateServiceRequestStatus(serviceRequestsId, status);
             if (!updatedAssignedServiceStatus)
                 return ResponseFormatter.errorResponse(res, "Failed to update service request status");
