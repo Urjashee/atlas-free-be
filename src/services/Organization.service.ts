@@ -405,12 +405,18 @@ export class OrganizationService {
     }
 
     async getOrganizationsService(organization: number) {
-        return await this.serviceDetailsRepository.find({
-            where: {
-                organization: {id: organization}
-            },
-            relations: ['organization', 'state'],
-        })
+        return await this.serviceDetailsRepository
+            .createQueryBuilder('service')
+            .leftJoinAndSelect('service.organization', 'organization')
+            .leftJoinAndSelect('service.state', 'state')
+            .leftJoinAndSelect(
+                'organization.users',
+                'orgAdmin',
+                'orgAdmin.role_id = :roleId',
+                {roleId: Constants.ROLE_ORGANIZATION_ADMIN}
+            )
+            .where('service.organization_id = :organization', {organization})
+            .getMany();
     }
 
     async getOrganizationsServiceById(id: number) {
@@ -648,7 +654,7 @@ export class OrganizationService {
         //
         // Living Arrangement
         if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
-            baseWhere.staffing_level = In(living_arrangement);
+            baseWhere.sleeping_arrangement = In(living_arrangement);
         }
         // Guidelines
         if (Array.isArray(guidelines) && guidelines.length > 0) {
