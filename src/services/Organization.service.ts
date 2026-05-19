@@ -405,12 +405,18 @@ export class OrganizationService {
     }
 
     async getOrganizationsService(organization: number) {
-        return await this.serviceDetailsRepository.find({
-            where: {
-                organization: {id: organization}
-            },
-            relations: ['organization', 'state'],
-        })
+        return await this.serviceDetailsRepository
+            .createQueryBuilder('service')
+            .leftJoinAndSelect('service.organization', 'organization')
+            .leftJoinAndSelect('service.state', 'state')
+            .leftJoinAndSelect(
+                'organization.users',
+                'orgAdmin',
+                'orgAdmin.role_id = :roleId',
+                {roleId: Constants.ROLE_ORGANIZATION_ADMIN}
+            )
+            .where('service.organization_id = :organization', {organization})
+            .getMany();
     }
 
     async getOrganizationsServiceById(id: number) {

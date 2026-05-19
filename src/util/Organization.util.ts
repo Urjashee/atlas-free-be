@@ -144,11 +144,11 @@ export async function getOrganizationsServiceDetails(service: any, roleId?: numb
             "year": service?.organization?.year ?? "",
             "website": service?.organization?.website ?? "",
 
-            "email": service?.organization?.users[0]?.email ?? "",
-            "country_code": service?.organization?.users[0]?.country_code ?? "",
-            "phone_no": service?.organization?.users[0]?.mobile ?? "",
-            "first_name": service?.organization?.users[0]?.first_name ?? "",
-            "last_name": service?.organization?.users[0]?.last_name ?? "",
+            "email": service?.organization?.users?.[0]?.email ?? "",
+            "country_code": service?.organization?.users?.[0]?.country_code ?? "",
+            "phone_no": service?.organization?.users?.[0]?.mobile ?? "",
+            "first_name": service?.organization?.users?.[0]?.first_name ?? "",
+            "last_name": service?.organization?.users?.[0]?.last_name ?? "",
         },
     };
 }
