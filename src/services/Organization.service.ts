@@ -648,7 +648,7 @@ export class OrganizationService {
         //
         // Living Arrangement
         if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
-            baseWhere.staffing_level = In(living_arrangement);
+            baseWhere.sleeping_arrangement = In(living_arrangement);
         }
         // Guidelines
         if (Array.isArray(guidelines) && guidelines.length > 0) {
