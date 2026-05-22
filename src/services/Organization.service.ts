@@ -576,7 +576,7 @@ export class OrganizationService {
         }
         // State
         if (state) {
-            baseWhere.state = state;
+            baseWhere.state = {id: state};
         }
         // Zipcode
         if (zipcode) {
