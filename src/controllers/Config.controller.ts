@@ -450,10 +450,14 @@ export class ConfigController {
                         waitlist: service.waitlist,
                         total_available_slots: service.total_available_slots,
                         slots_available: service.slots_available,
+                        state_id: service.state.id || "",
+                        service_staffing: service.staffing_level || "",
                         // served_to: service.served_to,
-                        // service_structure: service.service_structure,
-                        // staffing_level: service.staffing_level,
-                        // entry_requirement: service.entry_requirement,
+                        service_structure: service.service_structure || "",
+                        staffing_level: service.staffing_level || "",
+                        entry_requirement: service.entry_requirement || "",
+                        staff_diversity: service.teams_diversity || "",
+                        living_arrangement: service.sleeping_arrangement || "",
                     });
                 }
             }
