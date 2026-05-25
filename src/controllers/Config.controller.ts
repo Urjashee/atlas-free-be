@@ -458,6 +458,8 @@ export class ConfigController {
                         entry_requirement: service.entry_requirement || "",
                         staff_diversity: service.teams_diversity || "",
                         living_arrangement: service.sleeping_arrangement || "",
+                        faith: service.faith_engagement || "",
+                        staffing_guideline: service.service_guidelines || ""
                     });
                 }
             }
