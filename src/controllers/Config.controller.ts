@@ -450,7 +450,7 @@ export class ConfigController {
                         waitlist: service.waitlist,
                         total_available_slots: service.total_available_slots,
                         slots_available: service.slots_available,
-                        state_id: service.state.id || "",
+                        state_id: service?.state?.id || "",
                         service_staffing: service.staffing_level || "",
                         // served_to: service.served_to,
                         service_structure: service.service_structure || "",
