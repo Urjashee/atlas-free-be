@@ -445,14 +445,18 @@ export class ConfigController {
                         service_type: serviceType.name,
                         service_type_icon: serviceType.icon,
                         address: (!service.disclose_address === false || (!service.is_organization_address === false && !service.organization.disclose_address === false))
-                            ? `${service.zipcode || ""}`
-                            : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
+                            ? `${service.is_organization_address ? (service.organization.zipcode || "") : (service.zipcode || "")}`
+                            : service.is_organization_address
+                                ? `${service.organization.street || ""} ${service.organization.city || ""}, ${service.organization.state?.name || ""} ${service.organization.zipcode || ""}`
+                                : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
                         availability_id: availability,
                         availability: ServiceStatus[availability],
                         waitlist: service.waitlist,
                         total_available_slots: service.total_available_slots,
                         slots_available: service.slots_available,
-                        state_id: service?.state?.id || "",
+                        state_id: service.is_organization_address
+                            ? (service.organization.state?.id || "")
+                            : (service?.state?.id || ""),
                         service_staffing: service.staffing_level || "",
                         // served_to: service.served_to,
                         service_structure: service.service_structure || "",
