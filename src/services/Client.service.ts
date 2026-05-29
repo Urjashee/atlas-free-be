@@ -409,14 +409,14 @@ export class ClientService {
             const organization_name = serviceRequest.organization.name
             const service_name = serviceRequest.service.name
 
-            let contact_email = serviceRequest.service?.contact_email
-            let contact_phone = serviceRequest.service?.contact_phone
+            let contact_email = serviceRequest.service?.contact_email || ""
+            let contact_phone = serviceRequest.service?.contact_phone || ""
 
 
-            let emailTemplate_line1: string
-            let emailTemplate_line2: string
-            let emailTemplate_line3: string
-            let emailTemplate_line4: string
+            let emailTemplate_line1: string = ""
+            let emailTemplate_line2: string = ""
+            let emailTemplate_line3: string = ""
+            let emailTemplate_line4: string = ""
             let subject = ""
 
             if (status == Constants.PLACED) {
