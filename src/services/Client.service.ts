@@ -332,14 +332,14 @@ export class ClientService {
             const organization_name = serviceRequest.organization.name
             const service_name = serviceRequest.service.name
 
-            let contact_email = serviceRequest.service?.contact_email
-            let contact_phone = serviceRequest.service?.contact_phone
+            let contact_email = serviceRequest.service?.contact_email || ""
+            let contact_phone = serviceRequest.service?.contact_phone || ""
 
 
-            let emailTemplate_line1: string
-            let emailTemplate_line2: string
-            let emailTemplate_line3: string
-            let emailTemplate_line4: string
+            let emailTemplate_line1: string = ""
+            let emailTemplate_line2: string = ""
+            let emailTemplate_line3: string = ""
+            let emailTemplate_line4: string = ""
             let subject = ""
 
             if (status == Constants.PLACED) {
@@ -374,10 +374,10 @@ export class ClientService {
             }
 
             if (status == Constants.CANCELLED) {
-                emailTemplate_line1 = `A service request for ${service_name} was just <b>canceled</b> in Wayplace. 
-            This means you have reviewed the individual’s details and decided you were not in a position to serve the individual at this time. 
-            The individual has been notified and encouraged to consider sending their service request to another service.`
-                subject = `An individual has been changed to ‘Canceled’ for ${service_name} in Wayplace`
+                emailTemplate_line1 = `A service request for ${service_name} was just changed to <b>canceled</b> in Wayplace. 
+            This means the individual decided not to move forward with services at this time. 
+            If the individual changes their mind, they will have the ability to resend this service request.`
+                subject = `An individual has ‘Canceled’ for ${service_name} in Wayplace`
                 contact_email = ""
                 contact_phone = ""
             }
@@ -452,10 +452,10 @@ export class ClientService {
             if (status == Constants.CANCELLED) {
                 emailTemplate_line1 = `We would like to acknowledge your strength and persistence in reaching out for help. 
                 It takes courage to seek assistance in regards to the events you’ve experienced.`
-                emailTemplate_line2 = `Your service request for ${service_name} was switched to canceled in Wayplace. 
-                This means that they do not feel they could provide you with the support you deserve. 
-                We recommend reviewing your filters and consider sending your service request to other services.`
-                subject = `Update on your service request`
+                emailTemplate_line2 = `According to our system, you canceled your service request for ${service_name} Wayplace. 
+                This means that the organization cannot respond to your request. 
+                If you change your mind, you may resubmit a new service request for this service. `
+                subject = `Update on your canceled service request`
                 contact_email = ""
                 contact_phone = ""
             }
