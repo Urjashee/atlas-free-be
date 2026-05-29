@@ -12,7 +12,7 @@ import {
 } from "../helper/Emails.helper";
 import {type} from "node:os";
 import {EmailService} from "./Email.service";
-import {Equal, FindOptionsWhere, In, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, Raw} from "typeorm";
+import {Brackets, Equal, FindOptionsWhere, In, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, Raw} from "typeorm";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
@@ -550,48 +550,52 @@ export class OrganizationService {
             5: 124,
         };
 
-        const baseWhere: any = {
-            // service_type,
-            is_submitted: true,
-            organization: {
-                is_active: true,
-                under_review: false,
-            },
-        };
-        let where: FindOptionsWhere<any>[] | FindOptionsWhere<any> = baseWhere;
+        const qb = this.serviceDetailsRepository
+            .createQueryBuilder('svc')
+            .leftJoinAndSelect('svc.organization', 'org')
+            .leftJoinAndSelect('svc.state', 'svcState')
+            .leftJoinAndSelect('org.state', 'orgState');
 
-        // Multiple service types
+        // Baseline filters
+        qb.andWhere('svc.is_submitted = :submitted', { submitted: true })
+          .andWhere('org.is_active = :isActive', { isActive: true })
+          .andWhere('org.under_review = :underReview', { underReview: false });
+
+        // Service type
         if (Array.isArray(service_type) && service_type.length > 0) {
-            baseWhere.service_type = In(service_type.map(Number));
+            qb.andWhere('svc.service_type IN (:...serviceTypes)', { serviceTypes: service_type.map(Number) });
+        } else if (service_type) {
+            qb.andWhere('svc.service_type = :serviceType', { serviceType: Number(service_type) });
         }
 
-        // Single service type
-        else if (service_type) {
-            baseWhere.service_type = Number(service_type);
-        }
-
-        // City
-        if (city) {
-            baseWhere.city = city;
-        }
-        // State
+        // State — use org state when is_organization_address = true
         if (state) {
-            baseWhere.state = {id: state};
-        }
-        // Zipcode
-        if (zipcode) {
-            baseWhere.zipcode = zipcode;
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('(svc.is_organization_address = false AND svcState.id = :stateId)', { stateId: state })
+                   .orWhere('(svc.is_organization_address = true AND orgState.id = :stateId)', { stateId: state });
+            }));
         }
 
+        // City — use org city when is_organization_address = true
+        if (city) {
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('(svc.is_organization_address = false AND svc.city = :city)', { city })
+                   .orWhere('(svc.is_organization_address = true AND org.city = :city)', { city });
+            }));
+        }
+
+        // Zipcode — use org zipcode when is_organization_address = true
+        if (zipcode) {
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('(svc.is_organization_address = false AND svc.zipcode = :zipcode)', { zipcode })
+                   .orWhere('(svc.is_organization_address = true AND org.zipcode = :zipcode)', { zipcode });
+            }));
+        }
 
         // Availability
         if (availability === "true" || availability === "1") {
-            // console.log("Avail: ", availability);
-            baseWhere.slots_available = MoreThan(0);
+            qb.andWhere('svc.slots_available > :minSlots', { minSlots: 0 });
         }
-        // else if (!availability) {
-        //     baseWhere.waitlist = true;
-        // }
 
         // Structure
         if (Array.isArray(structure) && structure.length > 0) {
@@ -599,95 +603,85 @@ export class OrganizationService {
                 .flatMap((val) => structureMap[val] || [])
                 .filter(Boolean);
             if (mappedStructures.length > 0) {
-                baseWhere.service_structure = In(mappedStructures);
+                qb.andWhere('svc.service_structure IN (:...structures)', { structures: mappedStructures });
             }
         }
 
-        // if (!structure) {
-        //     baseWhere.service_structure = 111;
-        // }
-        //
         // Staffing
         if (Array.isArray(staffing) && staffing.length > 0) {
-            baseWhere.staffing_level = In(staffing);
+            qb.andWhere('svc.staffing_level IN (:...staffingLevels)', { staffingLevels: staffing });
         }
-        //
+
         // Substance
         if (substance == 1) {
-            where = [
-                {...baseWhere, entry_requirement: Like('%93%')},
-                {...baseWhere, entry_requirement: Like('%94%')}
-            ];
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('svc.entry_requirement LIKE :s1a', { s1a: '%93%' })
+                   .orWhere('svc.entry_requirement LIKE :s1b', { s1b: '%94%' });
+            }));
+        } else if (substance == 2) {
+            qb.andWhere('svc.entry_requirement LIKE :s2', { s2: '%95%' });
         }
-        if (substance == 2) {
-            where = [
-                {...baseWhere, entry_requirement: Like('%95%')},
-            ];
-        }
-        //
+
         // Children
         if (children === "true" || children === "1") {
-            where = [
-                {...baseWhere, served_to: Like('%17%')},
-                {...baseWhere, served_to: Like('%18%')}
-            ];
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('svc.served_to LIKE :ch1', { ch1: '%17%' })
+                   .orWhere('svc.served_to LIKE :ch2', { ch2: '%18%' });
+            }));
         }
-        //
+
         // Faith
         if (faith == 1) {
-            where = [{
-                ...baseWhere,
-                faith_engagement: 110,
-                service_model: Like('%99%')
-            }];
+            qb.andWhere('svc.faith_engagement = :fe1', { fe1: 110 })
+              .andWhere('svc.service_model LIKE :fm1', { fm1: '%99%' });
+        } else if (faith == 2) {
+            qb.andWhere('svc.faith_engagement = :fe2', { fe2: 109 })
+              .andWhere('svc.service_model LIKE :fm2', { fm2: '%99%' });
+        } else if (faith == 3) {
+            qb.andWhere('svc.service_model NOT LIKE :fm3', { fm3: '%99%' });
         }
-        if (faith == 2) {
-            where = [{
-                ...baseWhere,
-                faith_engagement: 109,
-                service_model: Like('%99%')
-            }];
-        }
-        if (faith == 3) {
-            baseWhere.service_model = Not(Like('%99%'));
-        }
-        //
-        // Living Arrangement
+
+        // Living arrangement
         if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
-            baseWhere.sleeping_arrangement = In(living_arrangement);
+            qb.andWhere('svc.sleeping_arrangement IN (:...livingArr)', { livingArr: living_arrangement });
         }
-        // Guidelines
+
+        // Guidelines (OR across matched IDs)
         if (Array.isArray(guidelines) && guidelines.length > 0) {
-            const mappedGuidelines = guidelines.map((val) => guidelinesMap[val]).filter(Boolean);
-            if (mappedGuidelines.length > 0) {
-                const guidelineConditions = mappedGuidelines.map(id => ({
-                    ...baseWhere,
-                    service_guidelines: Like(`%${id}%`)
+            const mappedGl = guidelines.map((val) => guidelinesMap[val]).filter(Boolean);
+            if (mappedGl.length > 0) {
+                qb.andWhere(new Brackets(qb2 => {
+                    mappedGl.forEach((id, i) => {
+                        const p = `gl${i}`;
+                        i === 0
+                            ? qb2.where(`svc.service_guidelines LIKE :${p}`, { [p]: `%${id}%` })
+                            : qb2.orWhere(`svc.service_guidelines LIKE :${p}`, { [p]: `%${id}%` });
+                    });
                 }));
-                where = guidelineConditions;
             }
         }
-        // Staff Diversity
+
+        // Staff diversity (OR across matched IDs)
         if (Array.isArray(staff_diversity) && staff_diversity.length > 0) {
-            const mappedStaffDiversity = staff_diversity.map((val) => staffDiversityMap[val]).filter(Boolean);
-            if (mappedStaffDiversity.length > 0) {
-                const staffDiversityConditions = mappedStaffDiversity.map(id => ({
-                    ...baseWhere,
-                    teams_diversity: Like(`%${id}%`)
+            const mappedSd = staff_diversity.map((val) => staffDiversityMap[val]).filter(Boolean);
+            if (mappedSd.length > 0) {
+                qb.andWhere(new Brackets(qb2 => {
+                    mappedSd.forEach((id, i) => {
+                        const p = `sdiv${i}`;
+                        i === 0
+                            ? qb2.where(`svc.teams_diversity LIKE :${p}`, { [p]: `%${id}%` })
+                            : qb2.orWhere(`svc.teams_diversity LIKE :${p}`, { [p]: `%${id}%` });
+                    });
                 }));
-                where = staffDiversityConditions;
             }
         }
 
+        const [data, total] = await qb
+            .skip((page_number - 1) * page_size)
+            .take(page_size)
+            .getManyAndCount();
 
-        const [data, total] = await this.serviceDetailsRepository.findAndCount({
-            where,
-            relations: ["organization", "state"],
-            skip: (page_number - 1) * page_size,
-            take: page_size,
-        });
-
-        return {data, total};
+        return { data, total };
     }
 
     async checkIfOrganization(organization_id: number) {

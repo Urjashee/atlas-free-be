@@ -440,20 +440,32 @@ export class ConfigController {
                         name: service.name,
                         organization_id: service.organization.id,
                         organization_name: service.organization.name,
+                        is_organization_address: service.is_organization_address,
+                        service_type_id: serviceType.id,
                         service_type: serviceType.name,
                         service_type_icon: serviceType.icon,
                         address: (!service.disclose_address === false || (!service.is_organization_address === false && !service.organization.disclose_address === false))
-                            ? `${service.zipcode || ""}`
-                            : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
+                            ? `${service.is_organization_address ? (service.organization.zipcode || "") : (service.zipcode || "")}`
+                            : service.is_organization_address
+                                ? `${service.organization.street || ""} ${service.organization.city || ""}, ${service.organization.state?.name || ""} ${service.organization.zipcode || ""}`
+                                : `${service.street || ""} ${service.city || ""}, ${service?.state?.name || ""} ${service.zipcode || ""}`,
                         availability_id: availability,
                         availability: ServiceStatus[availability],
                         waitlist: service.waitlist,
                         total_available_slots: service.total_available_slots,
                         slots_available: service.slots_available,
+                        state_id: service.is_organization_address
+                            ? (service.organization.state?.id || "")
+                            : (service?.state?.id || ""),
+                        service_staffing: service.staffing_level || "",
                         // served_to: service.served_to,
-                        // service_structure: service.service_structure,
-                        // staffing_level: service.staffing_level,
-                        // entry_requirement: service.entry_requirement,
+                        service_structure: service.service_structure || "",
+                        staffing_level: service.staffing_level || "",
+                        entry_requirement: service.entry_requirement || "",
+                        staff_diversity: service.teams_diversity || "",
+                        living_arrangement: service.sleeping_arrangement || "",
+                        faith: service.faith_engagement || "",
+                        staffing_guideline: service.service_guidelines || ""
                     });
                 }
             }
