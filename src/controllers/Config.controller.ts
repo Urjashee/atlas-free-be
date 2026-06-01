@@ -399,8 +399,8 @@ export class ConfigController {
             // const structure = req.query.structure
             const children = req.query.children as string
 
-            const substance = req.query.substance
-            const faith = req.query.faith
+            const substance = req.query.substance_recovery
+            const faith = req.query.faith_based
             // const living_arrangement = req.query.living_arrangement
             // const guidelines = req.query.guidelines
             // const staff_diversity = req.query.staff_diversity
@@ -413,7 +413,7 @@ export class ConfigController {
                     ? [Number(structureRaw)]
                     : [];
 
-            const staffingRaw = req.query.staffing;
+            const staffingRaw = req.query.staffing_level;
             const staffing = Array.isArray(staffingRaw)
                 ? staffingRaw.map(Number)
                 : staffingRaw

@@ -607,10 +607,6 @@ export class OrganizationService {
             }
         }
 
-        console.log("Staffing:", staffing);
-        console.log("Is Array:", Array.isArray(staffing));
-        // console.log("Length:", staffing?.length);
-        console.log("Type:", typeof staffing);
         // Staffing
         if (Array.isArray(staffing) && staffing.length > 0) {
             console.log("Staffing", staffing)
