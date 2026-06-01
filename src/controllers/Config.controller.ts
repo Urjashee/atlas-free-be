@@ -396,14 +396,50 @@ export class ConfigController {
             const city = req.query.city as string;
             const zipcode = req.query.zipcode as string
             const availability = req.query.availability as string
-            const structure = req.query.structure
+            // const structure = req.query.structure
             const children = req.query.children as string
-            const staffing = parseInt(req.query.staffing as string)
+
             const substance = req.query.substance
             const faith = req.query.faith
-            const living_arrangement = req.query.living_arrangement
-            const guidelines = req.query.guidelines
-            const staff_diversity = req.query.staff_diversity
+            // const living_arrangement = req.query.living_arrangement
+            // const guidelines = req.query.guidelines
+            // const staff_diversity = req.query.staff_diversity
+
+
+            const structureRaw = req.query.structure;
+            const structure = Array.isArray(structureRaw)
+                ? structureRaw.map(Number)
+                : structureRaw
+                    ? [Number(structureRaw)]
+                    : [];
+
+            const staffingRaw = req.query.staffing;
+            const staffing = Array.isArray(staffingRaw)
+                ? staffingRaw.map(Number)
+                : staffingRaw
+                    ? [Number(staffingRaw)]
+                    : [];
+
+            const livingArrangementRaw = req.query.living_arrangement;
+            const living_arrangement = Array.isArray(livingArrangementRaw)
+                ? livingArrangementRaw.map(Number)
+                : livingArrangementRaw
+                    ? [Number(livingArrangementRaw)]
+                    : [];
+
+            const guidelinesRaw = req.query.guidelines;
+            const guidelines = Array.isArray(guidelinesRaw)
+                ? guidelinesRaw.map(Number)
+                : guidelinesRaw
+                    ? [Number(guidelinesRaw)]
+                    : [];
+
+            const staffDiversityRaw = req.query.staff_diversity;
+            const staff_diversity = Array.isArray(staffDiversityRaw)
+                ? staffDiversityRaw.map(Number)
+                : staffDiversityRaw
+                    ? [Number(staffDiversityRaw)]
+                    : [];
 
             if (!service_type)
                 return ResponseFormatter.errorResponse(res, 'Service type is required');
