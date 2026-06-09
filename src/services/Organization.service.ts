@@ -531,7 +531,7 @@ export class OrganizationService {
 
     async getServices(page_number: number, page_size: number, service_type: any,
                       state: number, city: string, zipcode: string, availability: string, structure: any,
-                      staffing: number, substance: any, children: string, faith: any, living_arrangement: any,
+                      staffing: any, substance: any, children: string, faith: any, living_arrangement: any,
                       guidelines: any, staff_diversity: any) {
 
         const structureMap = {
@@ -609,6 +609,7 @@ export class OrganizationService {
 
         // Staffing
         if (Array.isArray(staffing) && staffing.length > 0) {
+            console.log("Staffing", staffing)
             qb.andWhere('svc.staffing_level IN (:...staffingLevels)', { staffingLevels: staffing });
         }
 
