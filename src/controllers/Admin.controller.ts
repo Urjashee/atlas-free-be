@@ -36,6 +36,12 @@ import {AdvocateService} from "../services/Advocate.service";
 import {addClientService} from "../util/Common.util"
 import {AnalyticsService} from "../services/Analytics.service";
 import {DeleteOrganizationService} from "../services/DeleteOrganization.service";
+import {NLSQLAgentService} from "../services/NLSQLAgent.service";
+
+const nlQuerySchema = Joi.object({
+    question: Joi.string().min(3).max(1000).required(),
+    context: Joi.string().valid("analytics", "general").optional(),
+});
 
 const adminOrgEditSchema = Joi.object({
     organization_id: Joi.number().required(),
@@ -63,6 +69,7 @@ export class AdminController {
     private clientService = new ClientService();
     private analyticService = new AnalyticsService();
     private deleteOrganizationService = new DeleteOrganizationService();
+    private nlSQLAgentService = new NLSQLAgentService();
 
     @Get("/organization/list/:filter")
     @UseBefore(authMiddleware)
@@ -927,6 +934,31 @@ export class AdminController {
             return ResponseFormatter.successResponse(res, "Organization list", customResponse)
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
+
+    @Post("/nl-query")
+    @UseBefore(authMiddleware)
+    @UseBefore(adminMiddleware)
+    async naturalLanguageQuery(@Req() req: Request, @Res() res: Response) {
+        try {
+            if (!req.body) {
+                return ResponseFormatter.errorResponse(res, "Request body is required.");
+            }
+            const { error } = nlQuerySchema.validate(req.body);
+            if (error) {
+                return ResponseFormatter.errorResponse(res, error.details[0].message);
+            }
+
+            const { question, context } = req.body as { question: string; context?: "analytics" | "general" };
+            const result = await this.nlSQLAgentService.runQuery(question, context);
+
+            return ResponseFormatter.successResponse(res, "Query completed", {
+                answer: result.answer,
+                sql_executed: result.sql_executed,
+            });
+        } catch (error: any) {
+            return ResponseFormatter.serverErrorResponse(res, error.message || "Agent query failed");
         }
     }
 

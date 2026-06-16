@@ -3,7 +3,10 @@
     "module": "commonjs",
     "target": "ES2016",
     "outDir": "./dist",
-    //    "baseUrl": "./",
+    "baseUrl": "./",
+    "paths": {
+      "@langchain/langgraph/prebuilt": ["./node_modules/@langchain/langgraph/dist/prebuilt/index.d.cts"]
+    },
     "strict": false,
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
