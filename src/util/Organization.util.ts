@@ -343,7 +343,7 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
     if (!service) throw new Error("Service request not found");
 
     const user = await userService.findById(service.user.id);
-    const clients = await advocateService.getClientsById(service.id);
+    const clients = await advocateService.getClientsById(service.client_service.id);
     const type = roleTypeMap[user.role.id];
 
     const base = {
@@ -378,7 +378,7 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
 
     const form = await getClientDetails(
         clients,
-        isSurvivor ? Constants.ROLE_SURVIVOR : (Constants.ROLE_ADVOCATE || Constants.ROLE_ORGANIZATION_ADMIN),
+        isSurvivor ? Constants.ROLE_SURVIVOR : Constants.ROLE_ADVOCATE
     );
 
     return {
