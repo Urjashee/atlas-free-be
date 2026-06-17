@@ -12,7 +12,7 @@ const organizationService = new OrganizationService();
 const configService = new ConfigService();
 
 export async function getClientDetails(clientsDetails: any, role?: number) {
-    if (role === Constants.ROLE_ADVOCATE) {
+    if (role === Constants.ROLE_ADVOCATE || role === Constants.ROLE_ORGANIZATION_ADMIN) {
         return await Promise.all(
             clientsDetails.map(async (clients: any) => {
                 return {

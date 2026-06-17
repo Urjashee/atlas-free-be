@@ -378,7 +378,7 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
 
     const form = await getClientDetails(
         clients,
-        isSurvivor ? Constants.ROLE_SURVIVOR : (Constants.ROLE_ADVOCATE || Constants.ROLE_ORGANIZATION_ADMIN)
+        isSurvivor ? Constants.ROLE_SURVIVOR : (Constants.ROLE_ADVOCATE || Constants.ROLE_ORGANIZATION_ADMIN),
     );
 
     return {
