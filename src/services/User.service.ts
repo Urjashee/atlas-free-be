@@ -639,7 +639,7 @@ export class UserService {
         });
     }
 
-    async updateUserProfile(user_id: number, username: string, email: string, safe_exit: string) {
+    async updateUserProfile(user_id: number, username: string, email: string, safe_exit: string, receive_service_status_emails: string) {
         const user = await this.userRepository.findOne({
             where: {
                 id: user_id
@@ -648,6 +648,7 @@ export class UserService {
         if (user) {
             user.user_name = username;
             user.safe_exit = safe_exit;
+            user.receive_service_status_emails = receive_service_status_emails == "true" ? true : false;
             return await this.userRepository.save(user);
         }
         return null;

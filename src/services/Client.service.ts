@@ -404,7 +404,7 @@ export class ClientService {
             };
             await this.mailerService.sendEmail(mailOptions);
         }
-        if (serviceRequest.client_service && serviceRequest.client_service.client && serviceRequest.client_service.client.email) {
+        if (serviceRequest.client_service && serviceRequest.client_service.client && serviceRequest.client_service.client.email && serviceRequest.client_service.client.receive_service_status_emails) {
             const name = serviceRequest.client_service.client.user_name
             const organization_name = serviceRequest.organization.name
             const service_name = serviceRequest.service.name

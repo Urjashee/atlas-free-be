@@ -64,6 +64,9 @@ export class Users {
     @Column({ nullable: false, default: true })
     is_first_login!: boolean; //check if the user has done a first login
 
+    @Column({ nullable: false, default: true })
+    receive_service_status_emails!: boolean;
+
     @ManyToOne(() => UserRole, { eager: true })
     @JoinColumn({ name: 'role_id' })
     role!: UserRole;
