@@ -636,7 +636,7 @@ export class OrganizationService {
             qb.andWhere('svc.faith_engagement = :fe1', { fe1: 110 })
               .andWhere('svc.service_model LIKE :fm1', { fm1: '%99%' });
         } else if (faith == 2) {
-            qb.andWhere('svc.faith_engagement = :fe2', { fe2: 109 })
+            qb.andWhere('svc.faith_engagement IN (:...fe2)', { fe2: [107, 108, 109] })
               .andWhere('svc.service_model LIKE :fm2', { fm2: '%99%' });
         } else if (faith == 3) {
             qb.andWhere('svc.service_model NOT LIKE :fm3', { fm3: '%99%' });

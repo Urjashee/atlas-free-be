@@ -58,6 +58,14 @@ export const CreatePassword = (name: string, email: string, token: string, type:
             <p>Wayplace Team</p>
             
         </div>
+        <div class="content">
+            <p>
+            If the above button or link doesn't work you can copy the link below and paste it in your web browser
+            </p>
+            <p>
+            ${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}
+            </p>
+        </div>
         <div class="footer">
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
             <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
@@ -366,6 +374,14 @@ export const PasswordResetEmail = (email: string, token: string, type: number, r
                     style="text-decoration:none;color: #2954FF;">
                 Reset Password</a></button>
         </div>
+        <div class="content">
+            <p>
+            If the above button or link doesn't work you can copy the link below and paste it in your web browser
+            </p>
+            <p>
+            ${process.env.SITE_NAME}/reset-password?token=${token}&type=${type}&role=${role}
+            </p>
+        </div>
         <div class="footer">
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
             <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
@@ -495,6 +511,14 @@ export const SendInvitationEmail = (email: string, token: string, type: number, 
                     style="text-decoration:none;color: #2954FF;">
                 Set Up User Account</a></button>
         </div>
+        <div class="content">
+            <p>
+            If the above button or link doesn't work you can copy the link below and paste it in your web browser
+            </p>
+            <p>
+            ${process.env.SITE_NAME}/signup?token=${token}&type=${type}&email=${email}&role=${role}
+            </p>
+        </div>
         <div class="footer">
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
             <p style="margin: 0">Copyright © 2026 Atlas Free, all rights reserved.</p>
@@ -556,6 +580,14 @@ export const VerifyEmail = (username: string, user_id: number, token: string, ty
             <a href='${process.env.SITE_NAME}/verify-email?token=${token}&user_id=${user_id}&type=${type}&role=${role}' 
                     style="text-decoration:none;color: #2954FF;">
                 Click here to verify your email address</a></button>
+        </div>
+        <div class="content">
+            <p>
+            If the above button or link doesn't work you can copy the link below and paste it in your web browser
+            </p>
+            <p>
+            ${process.env.SITE_NAME}/verify-email?token=${token}&user_id=${user_id}&type=${type}&role=${role}
+            </p>
         </div>
         <div class="footer">
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
@@ -811,6 +843,14 @@ export const ServiceSettingReminder = (email: string, service_name: string) => `
                     style="text-decoration:none;color: #2954FF;">
                 ${process.env.SITE_NAME}</a>
             
+        </div>
+        <div class="content">
+            <p>
+            If the above button or link doesn't work you can copy the link below and paste it in your web browser
+            </p>
+            <p>
+            ${process.env.SITE_NAME}
+            </p>
         </div>
         <div class="footer">
             <img src="https://atlas-free.s3.us-east-1.amazonaws.com/logo-main-blue.png" alt="logo" width="30" height="30">
