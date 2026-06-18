@@ -23,6 +23,8 @@ export class Constants {
     static CANCELLED = 5
     static ACCEPTED = 3
 
+    static SERVICE_REQUEST_STATUS_NOTIFICATION = 1
+
     static MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
 
 }

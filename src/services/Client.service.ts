@@ -19,6 +19,7 @@ import {
 } from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
 import {In, Not} from "typeorm";
+import {NotificationService} from "./Notification.service";
 
 export class ClientService {
     private userRepository = AppDataSource.getRepository(Users);
@@ -29,6 +30,7 @@ export class ClientService {
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
     private reportServiceRepository = AppDataSource.getRepository(ReportService);
     private mailerService = new EmailService();
+    private notificationService = new NotificationService();
 
     async findExistingServices(organization_id: number,) {
         const services = await this.assignedServiceRepository.find({})
@@ -404,7 +406,7 @@ export class ClientService {
             };
             await this.mailerService.sendEmail(mailOptions);
         }
-        if (serviceRequest.client_service && serviceRequest.client_service.client && serviceRequest.client_service.client.email && serviceRequest.client_service.client.receive_service_status_emails) {
+        if (serviceRequest.client_service && serviceRequest.client_service.client && serviceRequest.client_service.client.email) {
             const name = serviceRequest.client_service.client.user_name
             const organization_name = serviceRequest.organization.name
             const service_name = serviceRequest.service.name
@@ -469,15 +471,20 @@ export class ClientService {
                 contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
             }
 
+            const emailBody = `${emailTemplate_line1}\n\n${emailTemplate_line2}`;
             // Emails
-            const emailContent = SendServiceRequestClient(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);
-            const mailOptions = {
-                from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
-                to: serviceRequest.client_service.client.email,
-                subject: subject,
-                html: emailContent
-            };
-            await this.mailerService.sendEmail(mailOptions);
+            if (serviceRequest.client_service.client.receive_service_status_emails) {
+                const emailContent = SendServiceRequestClient(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);
+                const mailOptions = {
+                    from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                    to: serviceRequest.client_service.client.email,
+                    subject: subject,
+                    html: emailContent
+                };
+                await this.mailerService.sendEmail(mailOptions);
+            }
+            await this.notificationService.add(subject, emailBody, Constants.SERVICE_REQUEST_STATUS_NOTIFICATION, serviceRequest.client_service.client.id)
+
         }
         } catch (err) {
             console.error("updateServiceRequestStatus notification failed:", err);
