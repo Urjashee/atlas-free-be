@@ -471,7 +471,7 @@ export class ClientService {
                 contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
             }
 
-            const emailBody = `${emailTemplate_line1}\n\n${emailTemplate_line2}`;
+            const emailBody = `${emailTemplate_line1}\n${emailTemplate_line2}\n${contact_email}\n${contact_phone}`;
             // Emails
             if (serviceRequest.client_service.client.receive_service_status_emails) {
                 const emailContent = SendServiceRequestClient(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);

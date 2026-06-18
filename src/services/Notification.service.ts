@@ -14,4 +14,14 @@ export class NotificationService {
 
         return this.notificationRepository.save(createNotification);
     }
+
+    async get(user_id: number) {
+        return await this.notificationRepository.find({
+            where: {
+                user: {id: user_id}
+            }
+        })
+
+        // return notification;
+    }
 }
