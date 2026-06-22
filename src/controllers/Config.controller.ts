@@ -320,7 +320,7 @@ export class ConfigController {
             "structure": structureArray,
             "staffing_level": staffingLevelArray,
             "substance_recovery": substanceRecoveryArray,
-            "faith": faithArray,
+            "faith_based": faithArray,
             "living_arrangement": sleepingArrangementArray,
             "guidelines": guidelinesArray,
             "staff_diversity": staffDiversityArray,
@@ -501,7 +501,8 @@ export class ConfigController {
                         staff_diversity: service.teams_diversity || "",
                         living_arrangement: service.sleeping_arrangement || "",
                         faith: service.faith_engagement || "",
-                        staffing_guideline: service.service_guidelines || ""
+                        staffing_guideline: service.service_guidelines || "",
+                        service_model: service.service_model || "",
                     });
                 }
             }
