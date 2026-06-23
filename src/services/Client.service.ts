@@ -447,8 +447,8 @@ export class ClientService {
                 emailTemplate_line2 = `Your service request for ${service_name} was just <b>waitlisted</b> in Wayplace. 
                 Below is the information for the service. Please reach out to discuss potential placement.`
                 subject = `Update on your service request`
-                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
-                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email || ""}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone || ""}`
             }
 
             if (status == Constants.CANCELLED) {
@@ -467,8 +467,8 @@ export class ClientService {
                 emailTemplate_line2 = `Your service request for ${service_name} was just <b>matched</b> in Wayplace. 
                 Below is the information for the service. Please reach out to discuss potential placement.`
                 subject = `Update on your service request`
-                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
-                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email || ""}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone || ""}`
             }
 
             const emailBody = `${emailTemplate_line1}\n${emailTemplate_line2}\n${contact_email}\n${contact_phone}`;
