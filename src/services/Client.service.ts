@@ -423,7 +423,7 @@ export class ClientService {
 
             if (status == Constants.PLACED) {
                 emailTemplate_line1 = `Congratulations on starting your healing journey! `
-                emailTemplate_line2 = `Your service request for ${service_name} was just switched to <b>matched</b> in Wayplace. This means that you have begun receiving services. 
+                emailTemplate_line2 = `Your service request for ${service_name} was just switched to <b>placed</b> in Wayplace. This means that you have begun receiving services. 
                 If you have not started to receive services, please reach out to: wayplace@atlasfree.org.`
                 emailTemplate_line3 = `Please know if you ever need more support, we are here to help. `
                 subject = `Update on your service request`
