@@ -18,10 +18,11 @@ export class NotificationService {
     async get(user_id: number) {
         return await this.notificationRepository.find({
             where: {
-                user: {id: user_id}
+                user: { id: user_id }
+            },
+            order: {
+                createdAt: "DESC"
             }
-        })
-
-        // return notification;
+        });
     }
 }

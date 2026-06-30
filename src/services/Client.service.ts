@@ -423,7 +423,7 @@ export class ClientService {
 
             if (status == Constants.PLACED) {
                 emailTemplate_line1 = `Congratulations on starting your healing journey! `
-                emailTemplate_line2 = `Your service request for ${service_name} was just switched to <b>matched</b> in Wayplace. This means that you have begun receiving services. 
+                emailTemplate_line2 = `Your service request for ${service_name} was just switched to <b>placed</b> in Wayplace. This means that you have begun receiving services. 
                 If you have not started to receive services, please reach out to: wayplace@atlasfree.org.`
                 emailTemplate_line3 = `Please know if you ever need more support, we are here to help. `
                 subject = `Update on your service request`
@@ -434,7 +434,7 @@ export class ClientService {
             if (status == Constants.UNABLE_TO_SERVE) {
                 emailTemplate_line1 = `We would like to acknowledge your strength and persistence in reaching out for help. 
                 It takes courage to seek assistance in regards to the events you’ve experienced.`
-                emailTemplate_line2 = `Your service request for ${service_name} was switched to unable to serve in Wayplace. 
+                emailTemplate_line2 = `Your service request for ${service_name} was switched to <b>unable to serve</b> in Wayplace. 
                 This means that they do not feel they could provide you with the support you deserve. 
                 We recommend reviewing your filters and consider sending your service request to other services.`
                 subject = `Update on your service request`
@@ -444,17 +444,17 @@ export class ClientService {
 
             if (status == Constants.WAITLISTED) {
                 emailTemplate_line1 = `We admire your strength in finding programs that can support you. `
-                emailTemplate_line2 = `Your service request for ${service_name} was just matched in Wayplace. 
+                emailTemplate_line2 = `Your service request for ${service_name} was just <b>waitlisted</b> in Wayplace. 
                 Below is the information for the service. Please reach out to discuss potential placement.`
                 subject = `Update on your service request`
-                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
-                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email || ""}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone || ""}`
             }
 
             if (status == Constants.CANCELLED) {
                 emailTemplate_line1 = `We would like to acknowledge your strength and persistence in reaching out for help. 
                 It takes courage to seek assistance in regards to the events you’ve experienced.`
-                emailTemplate_line2 = `According to our system, you canceled your service request for ${service_name} in Wayplace. 
+                emailTemplate_line2 = `According to our system, you <b>canceled</b> your service request for ${service_name} in Wayplace. 
                 This means that the organization cannot respond to your request. 
                 If you change your mind, you may resubmit a new service request for this service. `
                 subject = `Update on your canceled service request`
@@ -464,11 +464,11 @@ export class ClientService {
 
             if (status == Constants.ACCEPTED) {
                 emailTemplate_line1 = `We admire your strength in finding programs that can support you. `
-                emailTemplate_line2 = `Your service request for ${service_name} was just matched in Wayplace. 
+                emailTemplate_line2 = `Your service request for ${service_name} was just <b>matched</b> in Wayplace. 
                 Below is the information for the service. Please reach out to discuss potential placement.`
                 subject = `Update on your service request`
-                contact_email = `Contact email: ${serviceRequest.service?.contact_email}; `
-                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
+                contact_email = `Contact email: ${serviceRequest.service?.contact_email || ""}; `
+                contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone || ""}`
             }
 
             const emailBody = `${emailTemplate_line1}\n${emailTemplate_line2}\n${contact_email}\n${contact_phone}`;
