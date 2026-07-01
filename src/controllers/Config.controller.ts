@@ -167,12 +167,38 @@ export class ConfigController {
                 name: item.name,
             }
         })
-        const physicalAccommodationsArray = physicalAccommodations.map((item) => {
-            return {
-                id: item.id,
-                name: item.name,
-            }
-        })
+        const physicalAccommodationsArray = [
+            ...physicalAccommodations
+                .filter(item => ![87, 171, 174, 175].includes(item.id))
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+
+            // Add these before None and Other
+            ...physicalAccommodations
+                .filter(item => [174, 175].includes(item.id))
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+
+            // None
+            ...physicalAccommodations
+                .filter(item => item.id === 87)
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+
+            // Other
+            ...physicalAccommodations
+                .filter(item => item.id === 171)
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+        ];
         const smokingAllowedArray = smokingAllowed.map((item) => {
             return {
                 id: item.id,
@@ -401,10 +427,14 @@ export class ConfigController {
 
             const substance = req.query.substance_recovery
             const faith = req.query.faith_based
-            // const living_arrangement = req.query.living_arrangement
-            // const guidelines = req.query.guidelines
-            // const staff_diversity = req.query.staff_diversity
+            const dob = req.query.dob
 
+            // dob as age
+            // gender as array
+            // pregnant
+            // children_accompany
+            // preferred_language
+            // medications as array
 
             const structureRaw = req.query.structure;
             const structure = Array.isArray(structureRaw)
