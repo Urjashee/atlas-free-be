@@ -429,12 +429,40 @@ export class ConfigController {
             const faith = req.query.faith_based
             const dob = req.query.dob
 
-            // dob as age
-            // gender as array
-            // pregnant
-            // children_accompany
-            // preferred_language
-            // medications as array
+            const dobDate = dob ? new Date(dob as string) : null;
+            const age = dobDate ? Math.floor((Date.now() - dobDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : null;
+
+            const pregnant = req.query.pregnant as string;
+            const children_accompany = req.query.children_accompany as string;
+            const language = req.query.language ? parseInt(req.query.language as string) : null;
+
+            const genderRaw = req.query.gender;
+            const gender = Array.isArray(genderRaw)
+                ? genderRaw.map(Number)
+                : genderRaw
+                    ? [Number(genderRaw)]
+                    : [];
+
+            const medicationsRaw = req.query.medications;
+            const medications = Array.isArray(medicationsRaw)
+                ? medicationsRaw.map(Number)
+                : medicationsRaw
+                    ? [Number(medicationsRaw)]
+                    : [];
+
+            const mentalHealthRaw = req.query.mental_health;
+            const mental_health = Array.isArray(mentalHealthRaw)
+                ? mentalHealthRaw.map(Number)
+                : mentalHealthRaw
+                    ? [Number(mentalHealthRaw)]
+                    : [];
+
+            const physicalAccommodationsRaw = req.query.physical_accommodations;
+            const physical_accommodations = Array.isArray(physicalAccommodationsRaw)
+                ? physicalAccommodationsRaw.map(Number)
+                : physicalAccommodationsRaw
+                    ? [Number(physicalAccommodationsRaw)]
+                    : [];
 
             const structureRaw = req.query.structure;
             const structure = Array.isArray(structureRaw)
@@ -476,7 +504,8 @@ export class ConfigController {
             // console.log("Service type", service_type);
             const { data, total } = await this.organizationService.getServices(page_number, page_size,
                 service_type, state, city, zipcode, availability, structure, staffing, substance, children,
-                faith, living_arrangement, guidelines, staff_diversity);
+                faith, living_arrangement, guidelines, staff_diversity,
+                age, gender, pregnant, children_accompany, language, medications, mental_health, physical_accommodations);
 
             const customResponse = [];
 
