@@ -485,6 +485,11 @@ export class OrganizationService {
     }
 
     async resendInvitation(user_id: number, email: string, role: number, organization_id: number, organization_name: string) {
+        await this.passwordResetRepository.update(
+            {user: {id: user_id}, type: In([Constants.SEND_INVITATION, Constants.RESEND_INVITATION]), active: true},
+            {active: false}
+        );
+
         const token = randomBytes(32).toString('hex');
         const password_reset_request = this.passwordResetRepository.create({
             email: email,
