@@ -239,6 +239,7 @@ export async function getUserDetails(user: any) {
                 dob: new Date(item.client_service.dob).toISOString().split('T')[0],
                 zipcode: item.client_service.zipcode,
             }))),
+            user_setup: user.password != null ? true : false,
             created_at: new Date(user.created_at).toISOString().split('T')[0],
         }
     }
