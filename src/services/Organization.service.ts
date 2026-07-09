@@ -489,12 +489,12 @@ export class OrganizationService {
         const password_reset_request = this.passwordResetRepository.create({
             email: email,
             token,
-            type: Constants.SEND_INVITATION,
+            type: Constants.RESEND_INVITATION,
             user: {id: user_id}
         })
         const password_resets = await this.passwordResetRepository.save(password_reset_request)
         if (password_resets) {
-            const emailContent = SendInvitationEmail(email, token, Constants.SEND_INVITATION, role, organization_name, roleTypeMap[role].replace("_", " "));
+            const emailContent = SendInvitationEmail(email, token, Constants.RESEND_INVITATION, role, organization_name, roleTypeMap[role].replace("_", " "));
             const mailOptions = {
                 from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
                 to: email,
@@ -512,7 +512,7 @@ export class OrganizationService {
                 organization: {id: organization_id},
                 // is_active: true,
                 is_status: true,
-                emailVerifiedAt: Not(IsNull()),
+                // emailVerifiedAt: Not(IsNull()),
             },
             order: {created_at: "DESC"}
         })

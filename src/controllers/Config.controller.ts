@@ -562,6 +562,8 @@ export class ConfigController {
                         faith: service.faith_engagement || "",
                         staffing_guideline: service.service_guidelines || "",
                         service_model: service.service_model || "",
+                        service_minimum_age: service.minimum_age || "",
+                        service_maximum_age: service.maximum_age || "",
                     });
                 }
             }
