@@ -55,6 +55,6 @@ pipelines:
                 - ssh-add keys/atlas-production.pem
                 # SSH into the server and deploy the application
                 - ssh -i keys/atlas-production.pem $REMOTE_USER@$PROD_REMOTE_HOST "
-                  cd /var/www/atlas-free-be && git stash && git pull bitbucket production && yarn install && yarn build:ubuntu && pm2 reload atlas-free-be "
+                  cd /var/www/atlas-free-be && git stash && git pull bitbucket production && yarn install && yarn build:ubuntu && npx typeorm-ts-node-commonjs migration:run -d dist/ormconfig.js && pm2 reload atlas-free-be "
                 # Clean up the key after usage
                 - rm -f keys/atlas-production.pem
