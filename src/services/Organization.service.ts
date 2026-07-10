@@ -687,83 +687,83 @@ export class OrganizationService {
         }
 
         // Pre-filter: Age
-        if (age !== null) {
-            qb.andWhere('(svc.minimum_age IS NULL OR svc.minimum_age <= :age)', { age })
-              .andWhere('(svc.maximum_age IS NULL OR svc.maximum_age >= :age)');
-        }
-
-        // Pre-filter: Gender (at least one match)
-        if (gender.length > 0) {
-            qb.andWhere(new Brackets(qb2 => {
-                gender.forEach((gId, i) => {
-                    const p = `gend${i}`;
-                    i === 0
-                        ? qb2.where(`svc.genders_served LIKE :${p}`, { [p]: `%${gId}%` })
-                        : qb2.orWhere(`svc.genders_served LIKE :${p}`, { [p]: `%${gId}%` });
-                });
-            }));
-        }
-
-        // Pre-filter: Pregnancy — only restrict if user is pregnant
-        if (pregnant === "true" || pregnant === "1") {
-            qb.andWhere('svc.served_to LIKE :pregId', { pregId: '%17%' });
-        }
-
-        // Pre-filter: Children — only restrict if user must bring children
-        if (children_accompany === "1") {
-            qb.andWhere(new Brackets(qb2 => {
-                qb2.where('svc.served_to LIKE :par1', { par1: '%18%' })
-                   .orWhere('svc.served_to LIKE :par2', { par2: '%20%' });
-            }));
-        }
-
-        // Pre-filter: Language (speaking ability 1=Fluent→24, 2=Limited→25, 3=None→26)
-        const langMap: Record<number, number> = { 1: 24, 2: 25, 3: 26 };
-        if (language !== null && langMap[language]) {
-            qb.andWhere('svc.language_requirement LIKE :langId', { langId: `%${langMap[language]}%` });
-        }
-
-        // Pre-filter: Medications (ignore "Not taking any"=55, "Other"=67)
-        const IGNORE_MEDS = [55, 67];
-        const filteredMeds = medications.filter(id => !IGNORE_MEDS.includes(id));
-        if (filteredMeds.length > 0) {
-            qb.andWhere(new Brackets(qb2 => {
-                filteredMeds.forEach((mId, i) => {
-                    const p = `med${i}`;
-                    i === 0
-                        ? qb2.where(`svc.medications LIKE :${p}`, { [p]: `%${mId}%` })
-                        : qb2.orWhere(`svc.medications LIKE :${p}`, { [p]: `%${mId}%` });
-                });
-            }));
-        }
-
-        // Pre-filter: Mental Health (ignore "None"=78, "Other"=79)
-        const IGNORE_MH = [78, 79];
-        const filteredMH = mental_health.filter(id => !IGNORE_MH.includes(id));
-        if (filteredMH.length > 0) {
-            qb.andWhere(new Brackets(qb2 => {
-                filteredMH.forEach((mhId, i) => {
-                    const p = `mh${i}`;
-                    i === 0
-                        ? qb2.where(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` })
-                        : qb2.orWhere(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` });
-                });
-            }));
-        }
-
-        // Pre-filter: Physical Accommodations (ignore "None"=87, "Other"=171)
-        const IGNORE_PA = [87, 171];
-        const filteredPA = physical_accommodations_filter.filter(id => !IGNORE_PA.includes(id));
-        if (filteredPA.length > 0) {
-            qb.andWhere(new Brackets(qb2 => {
-                filteredPA.forEach((paId, i) => {
-                    const p = `pa${i}`;
-                    i === 0
-                        ? qb2.where(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` })
-                        : qb2.orWhere(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` });
-                });
-            }));
-        }
+        // if (age !== null) {
+        //     qb.andWhere('(svc.minimum_age IS NULL OR svc.minimum_age <= :age)', { age })
+        //       .andWhere('(svc.maximum_age IS NULL OR svc.maximum_age >= :age)');
+        // }
+        //
+        // // Pre-filter: Gender (at least one match)
+        // if (gender.length > 0) {
+        //     qb.andWhere(new Brackets(qb2 => {
+        //         gender.forEach((gId, i) => {
+        //             const p = `gend${i}`;
+        //             i === 0
+        //                 ? qb2.where(`svc.genders_served LIKE :${p}`, { [p]: `%${gId}%` })
+        //                 : qb2.orWhere(`svc.genders_served LIKE :${p}`, { [p]: `%${gId}%` });
+        //         });
+        //     }));
+        // }
+        //
+        // // Pre-filter: Pregnancy — only restrict if user is pregnant
+        // if (pregnant === "true" || pregnant === "1") {
+        //     qb.andWhere('svc.served_to LIKE :pregId', { pregId: '%17%' });
+        // }
+        //
+        // // Pre-filter: Children — only restrict if user must bring children
+        // if (children_accompany === "1") {
+        //     qb.andWhere(new Brackets(qb2 => {
+        //         qb2.where('svc.served_to LIKE :par1', { par1: '%18%' })
+        //            .orWhere('svc.served_to LIKE :par2', { par2: '%20%' });
+        //     }));
+        // }
+        //
+        // // Pre-filter: Language (speaking ability 1=Fluent→24, 2=Limited→25, 3=None→26)
+        // const langMap: Record<number, number> = { 1: 24, 2: 25, 3: 26 };
+        // if (language !== null && langMap[language]) {
+        //     qb.andWhere('svc.language_requirement LIKE :langId', { langId: `%${langMap[language]}%` });
+        // }
+        //
+        // // Pre-filter: Medications (ignore "Not taking any"=55, "Other"=67)
+        // const IGNORE_MEDS = [55, 67];
+        // const filteredMeds = medications.filter(id => !IGNORE_MEDS.includes(id));
+        // if (filteredMeds.length > 0) {
+        //     qb.andWhere(new Brackets(qb2 => {
+        //         filteredMeds.forEach((mId, i) => {
+        //             const p = `med${i}`;
+        //             i === 0
+        //                 ? qb2.where(`svc.medications LIKE :${p}`, { [p]: `%${mId}%` })
+        //                 : qb2.orWhere(`svc.medications LIKE :${p}`, { [p]: `%${mId}%` });
+        //         });
+        //     }));
+        // }
+        //
+        // // Pre-filter: Mental Health (ignore "None"=78, "Other"=79)
+        // const IGNORE_MH = [78, 79];
+        // const filteredMH = mental_health.filter(id => !IGNORE_MH.includes(id));
+        // if (filteredMH.length > 0) {
+        //     qb.andWhere(new Brackets(qb2 => {
+        //         filteredMH.forEach((mhId, i) => {
+        //             const p = `mh${i}`;
+        //             i === 0
+        //                 ? qb2.where(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` })
+        //                 : qb2.orWhere(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` });
+        //         });
+        //     }));
+        // }
+        //
+        // // Pre-filter: Physical Accommodations (ignore "None"=87, "Other"=171)
+        // const IGNORE_PA = [87, 171];
+        // const filteredPA = physical_accommodations_filter.filter(id => !IGNORE_PA.includes(id));
+        // if (filteredPA.length > 0) {
+        //     qb.andWhere(new Brackets(qb2 => {
+        //         filteredPA.forEach((paId, i) => {
+        //             const p = `pa${i}`;
+        //             i === 0
+        //                 ? qb2.where(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` })
+        //                 : qb2.orWhere(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` });
+        //         });
+        //     }));
+        // }
 
         const [data, total] = await qb
             .skip((page_number - 1) * page_size)
