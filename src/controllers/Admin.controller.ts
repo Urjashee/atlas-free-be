@@ -252,6 +252,7 @@ export class AdminController {
                         email: users.email,
                         role_id: users.role.id,
                         role_name: users.role.name == 'organization' ? 'Organization Admin' : users.role.name == 'service_manager' ? 'Service Manager' : users.role.name == 'advocate' ? 'Advocate' : users.role.name,
+                        user_setup: users.password != null ? true : false,
                     }
                 })
             )

@@ -641,6 +641,8 @@ const service_details_options: ServiceDetailsOptions[] = [
     {id: 169, name: 'Support Groups', type: 'support_offered', serviceHeading: heading_offerings, icon: ""},
     {id: 170, name: 'None', type: 'legal', serviceHeading: heading_eligibility, icon: ""},
     {id: 171, name: 'Other', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
+    {id: 174, name: 'Emotional Support Animal (ESA)', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
+    {id: 175, name: 'Service animal', type: 'physical_accommodations', serviceHeading: heading_eligibility, icon: ""},
     {id: 172, name: 'None', type: 'health_needs', serviceHeading: heading_eligibility, icon: ""},
     {id: 173, name: 'None', type: 'service_model', serviceHeading: heading_eligibility, icon: ""},
 ];

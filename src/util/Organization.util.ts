@@ -232,6 +232,7 @@ export async function getUserDetails(user: any) {
             phone_no: user.mobile,
             country_code: user.country_code,
             role: user.role.name == 'organization' ? 'Organization Admin' : user.role.name == 'service_manager' ? 'Service Manager' : user.role.name == 'advocate' ? 'Advocate' : user.role.name,
+            role_id: user.role.id,
             client: await Promise.all(getClients.map((item) => ({
                 id: item.id,
                 client_number: item.case_no,
@@ -239,6 +240,7 @@ export async function getUserDetails(user: any) {
                 dob: new Date(item.client_service.dob).toISOString().split('T')[0],
                 zipcode: item.client_service.zipcode,
             }))),
+            user_setup: user.password != null ? true : false,
             created_at: new Date(user.created_at).toISOString().split('T')[0],
         }
     }
@@ -253,6 +255,7 @@ export async function getUserDetails(user: any) {
             phone_no: user.mobile,
             country_code: user.country_code,
             role: user.role.name == 'organization' ? 'Organization Admin' : user.role.name == 'service_manager' ? 'Service Manager' : user.role.name == 'advocate' ? 'Advocate' : user.role.name,
+            role_id: user.role.id,
             services: await Promise.all(
                 getServices.map(async (item) => ({
                     id: item.id,
@@ -261,6 +264,7 @@ export async function getUserDetails(user: any) {
                     address: !item.disclose_address == true ? `${item.address} ${item.street} ${item.city} ${item.state != null ? item.state.name : ""} ${item.zipcode}` : "",
                 }))
             ),
+            user_setup: user.password != null ? true : false,
             created_at: new Date(user.created_at).toISOString().split('T')[0],
         }
     }
@@ -273,6 +277,8 @@ export async function getUserDetails(user: any) {
         phone_no: user.mobile,
         country_code: user.country_code,
         role: user.role.name == 'organization' ? 'Organization Admin' : user.role.name == 'service_manager' ? 'Service Manager' : user.role.name == 'advocate' ? 'Advocate' : user.role.name,
+        role_id: user.role.id,
+        user_setup: user.password != null ? true : false,
         created_at: new Date(user.created_at).toISOString().split('T')[0],
     }
 }

@@ -167,12 +167,38 @@ export class ConfigController {
                 name: item.name,
             }
         })
-        const physicalAccommodationsArray = physicalAccommodations.map((item) => {
-            return {
-                id: item.id,
-                name: item.name,
-            }
-        })
+        const physicalAccommodationsArray = [
+            ...physicalAccommodations
+                .filter(item => ![87, 171, 174, 175].includes(item.id))
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+
+            // Add these before None and Other
+            ...physicalAccommodations
+                .filter(item => [174, 175].includes(item.id))
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+
+            // None
+            ...physicalAccommodations
+                .filter(item => item.id === 87)
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+
+            // Other
+            ...physicalAccommodations
+                .filter(item => item.id === 171)
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                })),
+        ];
         const smokingAllowedArray = smokingAllowed.map((item) => {
             return {
                 id: item.id,
@@ -401,10 +427,42 @@ export class ConfigController {
 
             const substance = req.query.substance_recovery
             const faith = req.query.faith_based
-            // const living_arrangement = req.query.living_arrangement
-            // const guidelines = req.query.guidelines
-            // const staff_diversity = req.query.staff_diversity
+            const dob = req.query.dob
 
+            const dobDate = dob ? new Date(dob as string) : null;
+            const age = dobDate ? Math.floor((Date.now() - dobDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : null;
+
+            const pregnant = req.query.pregnant as string;
+            const children_accompany = req.query.children_accompany as string;
+            const language = req.query.language ? parseInt(req.query.language as string) : null;
+
+            const genderRaw = req.query.gender;
+            const gender = Array.isArray(genderRaw)
+                ? genderRaw.map(Number)
+                : genderRaw
+                    ? [Number(genderRaw)]
+                    : [];
+
+            const medicationsRaw = req.query.medications;
+            const medications = Array.isArray(medicationsRaw)
+                ? medicationsRaw.map(Number)
+                : medicationsRaw
+                    ? [Number(medicationsRaw)]
+                    : [];
+
+            const mentalHealthRaw = req.query.mental_health;
+            const mental_health = Array.isArray(mentalHealthRaw)
+                ? mentalHealthRaw.map(Number)
+                : mentalHealthRaw
+                    ? [Number(mentalHealthRaw)]
+                    : [];
+
+            const physicalAccommodationsRaw = req.query.physical_accommodations;
+            const physical_accommodations = Array.isArray(physicalAccommodationsRaw)
+                ? physicalAccommodationsRaw.map(Number)
+                : physicalAccommodationsRaw
+                    ? [Number(physicalAccommodationsRaw)]
+                    : [];
 
             const structureRaw = req.query.structure;
             const structure = Array.isArray(structureRaw)
@@ -446,7 +504,8 @@ export class ConfigController {
             // console.log("Service type", service_type);
             const { data, total } = await this.organizationService.getServices(page_number, page_size,
                 service_type, state, city, zipcode, availability, structure, staffing, substance, children,
-                faith, living_arrangement, guidelines, staff_diversity);
+                faith, living_arrangement, guidelines, staff_diversity,
+                age, gender, pregnant, children_accompany, language, medications, mental_health, physical_accommodations);
 
             const customResponse = [];
 
@@ -503,6 +562,8 @@ export class ConfigController {
                         faith: service.faith_engagement || "",
                         staffing_guideline: service.service_guidelines || "",
                         service_model: service.service_model || "",
+                        service_minimum_age: service.minimum_age || "",
+                        service_maximum_age: service.maximum_age || "",
                     });
                 }
             }
