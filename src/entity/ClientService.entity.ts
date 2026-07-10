@@ -42,7 +42,7 @@ export class ClientService {
     @Column({ nullable: true })
     zipcode!: string;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'date', nullable: true })
     dob!: Date | null
 
     @Column({ nullable: true })
