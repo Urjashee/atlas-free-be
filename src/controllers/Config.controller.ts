@@ -434,7 +434,9 @@ export class ConfigController {
 
             const pregnant = req.query.pregnant as string;
             const children_accompany = req.query.children_accompany as string;
-            const language = req.query.language ? parseInt(req.query.language as string) : null;
+            const language = req.query.preferred_language ? parseInt(req.query.preferred_language as string) : null;
+
+            // console.log("Language", language);
 
             const genderRaw = req.query.gender;
             const gender = Array.isArray(genderRaw)
@@ -566,6 +568,7 @@ export class ConfigController {
                         service_maximum_age: service.maximum_age || "",
                         gender: service.genders_served || "",
                         medications: service.medications || "",
+                        english_speaking: service.language_requirement || ""
                     });
                 }
             }

@@ -718,10 +718,11 @@ export class OrganizationService {
         // }
         //
         // // Pre-filter: Language (speaking ability 1=Fluent→24, 2=Limited→25, 3=None→26)
-        // const langMap: Record<number, number> = { 1: 24, 2: 25, 3: 26 };
-        // if (language !== null && langMap[language]) {
-        //     qb.andWhere('svc.language_requirement LIKE :langId', { langId: `%${langMap[language]}%` });
-        // }
+        const langMap: Record<number, number> = { 1: 24, 2: 25, 3: 26 };
+        if (language !== null && langMap[language]) {
+            // console.log(langMap[language]);
+            qb.andWhere('svc.language_requirement LIKE :langId', { langId: `%${langMap[language]}%` });
+        }
         //
         // // Pre-filter: Medications (ignore "Not taking any"=55, "Other"=67)
         const IGNORE_MEDS = [55, 67];
