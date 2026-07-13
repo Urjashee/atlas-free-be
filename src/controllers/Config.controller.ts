@@ -564,6 +564,8 @@ export class ConfigController {
                         service_model: service.service_model || "",
                         service_minimum_age: service.minimum_age || "",
                         service_maximum_age: service.maximum_age || "",
+                        gender: service.genders_served || "",
+                        medications: service.medications || "",
                     });
                 }
             }
