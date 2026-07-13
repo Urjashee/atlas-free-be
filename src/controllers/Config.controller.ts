@@ -568,7 +568,8 @@ export class ConfigController {
                         service_maximum_age: service.maximum_age || "",
                         gender: service.genders_served || "",
                         medications: service.medications || "",
-                        english_speaking: service.language_requirement || ""
+                        english_speaking: service.language_requirement || "",
+                        pregnant: service.served_to || "",
                     });
                 }
             }

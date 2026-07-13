@@ -705,17 +705,17 @@ export class OrganizationService {
         }
         //
         // // Pre-filter: Pregnancy — only restrict if user is pregnant
-        // if (pregnant === "true" || pregnant === "1") {
-        //     qb.andWhere('svc.served_to LIKE :pregId', { pregId: '%17%' });
-        // }
+        if (pregnant === "true" || pregnant === "1") {
+            qb.andWhere('svc.served_to LIKE :pregId', { pregId: '%17%' });
+        }
         //
         // // Pre-filter: Children — only restrict if user must bring children
-        // if (children_accompany === "1") {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         qb2.where('svc.served_to LIKE :par1', { par1: '%18%' })
-        //            .orWhere('svc.served_to LIKE :par2', { par2: '%20%' });
-        //     }));
-        // }
+        if (children_accompany === "1" || children_accompany == "true") {
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('svc.served_to LIKE :par1', { par1: '%18%' })
+                   .orWhere('svc.served_to LIKE :par2', { par2: '%20%' });
+            }));
+        }
         //
         // // Pre-filter: Language (speaking ability 1=Fluent→24, 2=Limited→25, 3=None→26)
         const langMap: Record<number, number> = { 1: 24, 2: 25, 3: 26 };
