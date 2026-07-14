@@ -27,6 +27,6 @@ pipelines:
                 - ssh-add keys/family-defender.pem
                 # SSH into the server and deploy the application
                 - ssh -i keys/family-defender.pem $REMOTE_USER@$REMOTE_HOST "
-                  cd /var/www/atlas-free-be && git stash && git pull bitbucket staging && yarn install && yarn build:ubuntu && npx typeorm-ts-node-commonjs migration:run -d dist/ormconfig.js && /home/ubuntu/.yarn/bin/pm2 reload kah "
+                  cd /var/www/atlas-free-be && git stash && git pull bitbucket staging && yarn install && yarn build:ubuntu && npx typeorm-ts-node-commonjs migration:run -d dist/ormconfig.js && /home/ubuntu/.yarn/bin/pm2 reload atlas "
                 # Clean up the key after usage
                 - rm -f keys/family-defender.pem
