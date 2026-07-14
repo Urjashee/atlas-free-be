@@ -89,7 +89,7 @@ export class ClientService {
             case_no
         })
 
-        // await this.updateServiceRequestStatus(addService.id, Constants.PENDING);
+        await this.updateServiceRequestStatus(addService.id, Constants.PENDING);
 
         return await this.assignedServiceRepository.save(addService)
     }
@@ -347,10 +347,10 @@ export class ClientService {
             let subject = ""
 
             if (status == Constants.PENDING) {
-                emailTemplate_line1 = `Success! `
-                emailTemplate_line2 = `A service request for ${service_name} was just <b>requested</b> in Wayplace.`
-                emailTemplate_line3 = `If this is incorrect, please reach out to wayplace@atlasfree.org`
-                subject = `An individual has made a request for ${service_name} in Wayplace`
+                emailTemplate_line1 = `Hi ${name} `
+                emailTemplate_line2 = `A service request for ${service_name} was just <b>made</b> in Wayplace. Please review the information provided in the system and select a response option.`
+                emailTemplate_line3 = `If the contact information or availability above needs to be updated, please edit that in the service settings for ${service_name} in Wayplace`
+                subject = `A service request has been made for ${service_name} in Wayplace`
                 contact_email = ""
                 contact_phone = ""
             }
@@ -432,14 +432,14 @@ export class ClientService {
             let emailTemplate_line4: string = ""
             let subject = ""
 
-            if (status == Constants.PENDING) {
-                emailTemplate_line1 = `Thank you for reaching out to us! `
-                emailTemplate_line2 = `We will review your service request and get back to you soon.`
-                emailTemplate_line3 = ``
-                subject = `New service request`
-                contact_email = ""
-                contact_phone = ""
-            }
+            // if (status == Constants.PENDING) {
+            //     emailTemplate_line1 = `Thank you for reaching out to us! `
+            //     emailTemplate_line2 = `We will review your service request and get back to you soon.`
+            //     emailTemplate_line3 = ``
+            //     subject = `New service request`
+            //     contact_email = ""
+            //     contact_phone = ""
+            // }
 
             if (status == Constants.PLACED) {
                 emailTemplate_line1 = `Congratulations on starting your healing journey! `
