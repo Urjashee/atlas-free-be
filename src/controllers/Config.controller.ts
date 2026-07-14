@@ -570,6 +570,8 @@ export class ConfigController {
                         medications: service.medications || "",
                         english_speaking: service.language_requirement || "",
                         pregnant: service.served_to || "",
+                        mental_health: service.mental_health_diagnoses || "",
+                        physical_accommodations: service.physical_accommodations || "",
                     });
                 }
             }

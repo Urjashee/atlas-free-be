@@ -779,32 +779,32 @@ export class OrganizationService {
         }
         //
         // // Pre-filter: Mental Health (ignore "None"=78, "Other"=79)
-        // const IGNORE_MH = [78, 79];
-        // const filteredMH = mental_health.filter(id => !IGNORE_MH.includes(id));
-        // if (filteredMH.length > 0) {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         filteredMH.forEach((mhId, i) => {
-        //             const p = `mh${i}`;
-        //             i === 0
-        //                 ? qb2.where(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` })
-        //                 : qb2.orWhere(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` });
-        //         });
-        //     }));
-        // }
+        const IGNORE_MH = [78, 79];
+        const filteredMH = mental_health.filter(id => !IGNORE_MH.includes(id));
+        if (filteredMH.length > 0) {
+            qb.andWhere(new Brackets(qb2 => {
+                filteredMH.forEach((mhId, i) => {
+                    const p = `mh${i}`;
+                    i === 0
+                        ? qb2.where(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` })
+                        : qb2.orWhere(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` });
+                });
+            }));
+        }
         //
         // // Pre-filter: Physical Accommodations (ignore "None"=87, "Other"=171)
-        // const IGNORE_PA = [87, 171];
-        // const filteredPA = physical_accommodations_filter.filter(id => !IGNORE_PA.includes(id));
-        // if (filteredPA.length > 0) {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         filteredPA.forEach((paId, i) => {
-        //             const p = `pa${i}`;
-        //             i === 0
-        //                 ? qb2.where(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` })
-        //                 : qb2.orWhere(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` });
-        //         });
-        //     }));
-        // }
+        const IGNORE_PA = [87, 171];
+        const filteredPA = physical_accommodations_filter.filter(id => !IGNORE_PA.includes(id));
+        if (filteredPA.length > 0) {
+            qb.andWhere(new Brackets(qb2 => {
+                filteredPA.forEach((paId, i) => {
+                    const p = `pa${i}`;
+                    i === 0
+                        ? qb2.where(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` })
+                        : qb2.orWhere(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` });
+                });
+            }));
+        }
 
         const [data, total] = await qb
             .skip((page_number - 1) * page_size)
