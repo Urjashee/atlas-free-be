@@ -347,7 +347,7 @@ export class ClientService {
             let subject = ""
 
             if (status == Constants.PENDING) {
-                emailTemplate_line1 = `Hi ${name} `
+                emailTemplate_line1 = ``
                 emailTemplate_line2 = `A service request for ${service_name} was just <b>made</b> in Wayplace. Please review the information provided in the system and select a response option.`
                 emailTemplate_line3 = `If the contact information or availability above needs to be updated, please edit that in the service settings for ${service_name} in Wayplace`
                 subject = `A service request has been made for ${service_name} in Wayplace`
