@@ -171,8 +171,8 @@ export async function getOrganizationsDetails(organization: any, filter?: string
         address: organization.organization.address,
         street: organization.organization.street,
         city: organization.organization.city,
-        state_id: organization.organization.state?.id,
-        state: organization.organization.state?.name,
+        state_id: organization.organization.state?.id || "",
+        state: organization.organization.state?.name || "",
         primary_purpose: purposes.map(purpose => ({
             id: purpose.id,
             name: purpose.name,

@@ -70,7 +70,13 @@ export class AdminController {
     async getOrganizationList(@Req() req: Request, @Res() res: Response, @Param("filter") filter: string) {
         try {
             const search = req.query.search as string
-            const organizations = await this.organizationService.getOrganizations(filter, search)
+            const stateRaw = req.query.states;
+            const state = Array.isArray(stateRaw)
+                ? stateRaw.map(Number)
+                : stateRaw
+                    ? [Number(stateRaw)]
+                    : [];
+            const organizations = await this.organizationService.getOrganizations(filter, search, state)
             const customResponse = await Promise.all(
                 organizations.map(async (organization: any) => {
                     return await getOrganizationsDetails(organization, filter, Constants.ROLE_ADMIN);

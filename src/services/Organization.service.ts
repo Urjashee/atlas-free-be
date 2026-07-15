@@ -12,7 +12,19 @@ import {
 } from "../helper/Emails.helper";
 import {type} from "node:os";
 import {EmailService} from "./Email.service";
-import {Brackets, Equal, FindOptionsWhere, In, IsNull, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, Raw} from "typeorm";
+import {
+    Brackets,
+    Equal,
+    FindOptionsWhere,
+    In,
+    IsNull,
+    LessThanOrEqual,
+    Like,
+    MoreThan,
+    MoreThanOrEqual,
+    Not,
+    Raw
+} from "typeorm";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import Joi from "joi";
 import {Organization} from "../entity/Organization.entity";
@@ -38,13 +50,14 @@ export class OrganizationService {
     private affiliationRepository = AppDataSource.getRepository(Affiliations);
     private mailerService = new EmailService();
 
-    async getOrganizations(filter: string, search?: string) {
+    async getOrganizations(filter: string, search?: string, state?: any) {
         if (filter === "active") {
             const query = this.userRepository
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .leftJoinAndSelect('organization.state', 'state')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: false});
@@ -56,9 +69,19 @@ export class OrganizationService {
                 );
             }
 
+            if (state?.length) {
+                console.log(
+                    "State active:", state
+                )
+                query.andWhere("organization.state_id IN (:...stateIds)", {
+                    stateIds: state,
+                });
+            }
+
             const users = await query
                 .orderBy('user.created_at', 'DESC')
                 .getMany();
+
             const seen = new Set<number>();
             return users.filter(user => {
                 if (!user.organization || seen.has(user.organization.id)) return false;
@@ -68,17 +91,27 @@ export class OrganizationService {
 
         }
         if (filter === "inactive") {
-            const users = await this.userRepository
+            const query = this.userRepository
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .leftJoinAndSelect('organization.state', 'state')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .andWhere('organization.under_review = :underReview', {underReview: false})
-                .orderBy('user.created_at', 'DESC')
-                // .andWhere('user.is_active = :userActive', {userActive: true})
-                .getMany();
+                .orderBy('user.created_at', 'DESC');
+            // .andWhere('user.is_active = :userActive', {userActive: true})
+            if (state?.length) {
+                console.log(
+                    "State inactive:", state
+                )
+                query.andWhere("organization.state_id IN (:...stateIds)", {
+                    stateIds: state,
+                });
+            }
+            const users = await query.getMany();
+
             const seen = new Set<number>();
             return users.filter(user => {
                 if (!user.organization || seen.has(user.organization.id)) return false;
@@ -87,17 +120,27 @@ export class OrganizationService {
             });
         }
         if (filter === "pending") {
-            const users = await this.userRepository
+            const query = this.userRepository
                 .createQueryBuilder('user')
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .leftJoinAndSelect('organization.state', 'state')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: true})
                 .orderBy('user.created_at', 'DESC')
-                // .andWhere('user.is_active = :userActive', {userActive: true})
-                .getMany();
+            // .andWhere('user.is_active = :userActive', {userActive: true})
+            if (state?.length) {
+                console.log(
+                    "State pending:", state
+                )
+                query.andWhere("organization.state_id IN (:...stateIds)", {
+                    stateIds: state,
+                });
+            }
+            const users = await query.getMany();
+
             const seen = new Set<number>();
             return users.filter(user => {
                 if (!user.organization || seen.has(user.organization.id)) return false;
@@ -369,9 +412,9 @@ export class OrganizationService {
             getService.mental_health_diagnoses = body.mental_health_diagnoses || null
             getService.physical_accommodations = body.physical_accommodations || null
             getService.medication_others = body.medication_others || null,
-            getService.mental_health_diagnoses_others = body.mental_health_diagnoses_others || null,
-            getService.physical_accommodation_others = body.physical_accommodation_others || null,
-            getService.smoking_allowed = body.smoking_allowed || null
+                getService.mental_health_diagnoses_others = body.mental_health_diagnoses_others || null,
+                getService.physical_accommodation_others = body.physical_accommodation_others || null,
+                getService.smoking_allowed = body.smoking_allowed || null
             getService.entry_requirement = body.entry_requirement || null
             getService.days_sober = body.days_sober
 
@@ -566,44 +609,44 @@ export class OrganizationService {
             .leftJoinAndSelect('org.state', 'orgState');
 
         // Baseline filters
-        qb.andWhere('svc.is_submitted = :submitted', { submitted: true })
-          .andWhere('org.is_active = :isActive', { isActive: true })
-          .andWhere('org.under_review = :underReview', { underReview: false });
+        qb.andWhere('svc.is_submitted = :submitted', {submitted: true})
+            .andWhere('org.is_active = :isActive', {isActive: true})
+            .andWhere('org.under_review = :underReview', {underReview: false});
 
         // Service type
         if (Array.isArray(service_type) && service_type.length > 0) {
-            qb.andWhere('svc.service_type IN (:...serviceTypes)', { serviceTypes: service_type.map(Number) });
+            qb.andWhere('svc.service_type IN (:...serviceTypes)', {serviceTypes: service_type.map(Number)});
         } else if (service_type) {
-            qb.andWhere('svc.service_type = :serviceType', { serviceType: Number(service_type) });
+            qb.andWhere('svc.service_type = :serviceType', {serviceType: Number(service_type)});
         }
 
         // State — use org state when is_organization_address = true
         if (state) {
             qb.andWhere(new Brackets(qb2 => {
-                qb2.where('(svc.is_organization_address = false AND svcState.id = :stateId)', { stateId: state })
-                   .orWhere('(svc.is_organization_address = true AND orgState.id = :stateId)', { stateId: state });
+                qb2.where('(svc.is_organization_address = false AND svcState.id = :stateId)', {stateId: state})
+                    .orWhere('(svc.is_organization_address = true AND orgState.id = :stateId)', {stateId: state});
             }));
         }
 
         // City — use org city when is_organization_address = true
         if (city) {
             qb.andWhere(new Brackets(qb2 => {
-                qb2.where('(svc.is_organization_address = false AND svc.city = :city)', { city })
-                   .orWhere('(svc.is_organization_address = true AND org.city = :city)', { city });
+                qb2.where('(svc.is_organization_address = false AND svc.city = :city)', {city})
+                    .orWhere('(svc.is_organization_address = true AND org.city = :city)', {city});
             }));
         }
 
         // Zipcode — use org zipcode when is_organization_address = true
         if (zipcode) {
             qb.andWhere(new Brackets(qb2 => {
-                qb2.where('(svc.is_organization_address = false AND svc.zipcode = :zipcode)', { zipcode })
-                   .orWhere('(svc.is_organization_address = true AND org.zipcode = :zipcode)', { zipcode });
+                qb2.where('(svc.is_organization_address = false AND svc.zipcode = :zipcode)', {zipcode})
+                    .orWhere('(svc.is_organization_address = true AND org.zipcode = :zipcode)', {zipcode});
             }));
         }
 
         // Availability
         if (availability === "true" || availability === "1") {
-            qb.andWhere('svc.slots_available > :minSlots', { minSlots: 0 });
+            qb.andWhere('svc.slots_available > :minSlots', {minSlots: 0});
         }
 
         // Structure
@@ -612,48 +655,48 @@ export class OrganizationService {
                 .flatMap((val) => structureMap[val] || [])
                 .filter(Boolean);
             if (mappedStructures.length > 0) {
-                qb.andWhere('svc.service_structure IN (:...structures)', { structures: mappedStructures });
+                qb.andWhere('svc.service_structure IN (:...structures)', {structures: mappedStructures});
             }
         }
 
         // Staffing
         if (Array.isArray(staffing) && staffing.length > 0) {
             console.log("Staffing", staffing)
-            qb.andWhere('svc.staffing_level IN (:...staffingLevels)', { staffingLevels: staffing });
+            qb.andWhere('svc.staffing_level IN (:...staffingLevels)', {staffingLevels: staffing});
         }
 
         // Substance
         if (substance == 1) {
             qb.andWhere(new Brackets(qb2 => {
-                qb2.where('svc.entry_requirement LIKE :s1a', { s1a: '%93%' })
-                   .orWhere('svc.entry_requirement LIKE :s1b', { s1b: '%94%' });
+                qb2.where('svc.entry_requirement LIKE :s1a', {s1a: '%93%'})
+                    .orWhere('svc.entry_requirement LIKE :s1b', {s1b: '%94%'});
             }));
         } else if (substance == 2) {
-            qb.andWhere('svc.entry_requirement LIKE :s2', { s2: '%95%' });
+            qb.andWhere('svc.entry_requirement LIKE :s2', {s2: '%95%'});
         }
 
         // Children
         if (children === "true" || children === "1") {
             qb.andWhere(new Brackets(qb2 => {
-                qb2.where('svc.served_to LIKE :ch1', { ch1: '%17%' })
-                   .orWhere('svc.served_to LIKE :ch2', { ch2: '%18%' });
+                qb2.where('svc.served_to LIKE :ch1', {ch1: '%17%'})
+                    .orWhere('svc.served_to LIKE :ch2', {ch2: '%18%'});
             }));
         }
 
         // Faith
         if (faith == 1) {
-            qb.andWhere('svc.faith_engagement = :fe1', { fe1: 110 })
-              .andWhere('svc.service_model LIKE :fm1', { fm1: '%99%' });
+            qb.andWhere('svc.faith_engagement = :fe1', {fe1: 110})
+                .andWhere('svc.service_model LIKE :fm1', {fm1: '%99%'});
         } else if (faith == 2) {
-            qb.andWhere('svc.faith_engagement IN (:...fe2)', { fe2: [107, 108, 109] })
-              .andWhere('svc.service_model LIKE :fm2', { fm2: '%99%' });
+            qb.andWhere('svc.faith_engagement IN (:...fe2)', {fe2: [107, 108, 109]})
+                .andWhere('svc.service_model LIKE :fm2', {fm2: '%99%'});
         } else if (faith == 3) {
-            qb.andWhere('svc.service_model NOT LIKE :fm3', { fm3: '%99%' });
+            qb.andWhere('svc.service_model NOT LIKE :fm3', {fm3: '%99%'});
         }
 
         // Living arrangement
         if (Array.isArray(living_arrangement) && living_arrangement.length > 0) {
-            qb.andWhere('svc.sleeping_arrangement IN (:...livingArr)', { livingArr: living_arrangement });
+            qb.andWhere('svc.sleeping_arrangement IN (:...livingArr)', {livingArr: living_arrangement});
         }
 
         // Guidelines (OR across matched IDs)
@@ -664,8 +707,8 @@ export class OrganizationService {
                     mappedGl.forEach((id, i) => {
                         const p = `gl${i}`;
                         i === 0
-                            ? qb2.where(`svc.service_guidelines LIKE :${p}`, { [p]: `%${id}%` })
-                            : qb2.orWhere(`svc.service_guidelines LIKE :${p}`, { [p]: `%${id}%` });
+                            ? qb2.where(`svc.service_guidelines LIKE :${p}`, {[p]: `%${id}%`})
+                            : qb2.orWhere(`svc.service_guidelines LIKE :${p}`, {[p]: `%${id}%`});
                     });
                 }));
             }
@@ -679,98 +722,99 @@ export class OrganizationService {
                     mappedSd.forEach((id, i) => {
                         const p = `sdiv${i}`;
                         i === 0
-                            ? qb2.where(`svc.teams_diversity LIKE :${p}`, { [p]: `%${id}%` })
-                            : qb2.orWhere(`svc.teams_diversity LIKE :${p}`, { [p]: `%${id}%` });
+                            ? qb2.where(`svc.teams_diversity LIKE :${p}`, {[p]: `%${id}%`})
+                            : qb2.orWhere(`svc.teams_diversity LIKE :${p}`, {[p]: `%${id}%`});
                     });
                 }));
             }
         }
 
         // Pre-filter: Age
-        // if (age !== null) {
-        //     qb.andWhere('(svc.minimum_age IS NULL OR svc.minimum_age <= :age)', { age })
-        //       .andWhere('(svc.maximum_age IS NULL OR svc.maximum_age >= :age)');
-        // }
+        if (age !== null) {
+            qb.andWhere('(svc.minimum_age IS NULL OR svc.minimum_age <= :age)', {age})
+                .andWhere('(svc.maximum_age IS NULL OR svc.maximum_age >= :age)');
+        }
         //
         // // Pre-filter: Gender (at least one match)
-        // if (gender.length > 0) {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         gender.forEach((gId, i) => {
-        //             const p = `gend${i}`;
-        //             i === 0
-        //                 ? qb2.where(`svc.genders_served LIKE :${p}`, { [p]: `%${gId}%` })
-        //                 : qb2.orWhere(`svc.genders_served LIKE :${p}`, { [p]: `%${gId}%` });
-        //         });
-        //     }));
-        // }
+        if (gender.length > 0) {
+            qb.andWhere(new Brackets(qb2 => {
+                gender.forEach((gId, i) => {
+                    const p = `gend${i}`;
+                    i === 0
+                        ? qb2.where(`svc.genders_served LIKE :${p}`, {[p]: `%${gId}%`})
+                        : qb2.orWhere(`svc.genders_served LIKE :${p}`, {[p]: `%${gId}%`});
+                });
+            }));
+        }
         //
         // // Pre-filter: Pregnancy — only restrict if user is pregnant
-        // if (pregnant === "true" || pregnant === "1") {
-        //     qb.andWhere('svc.served_to LIKE :pregId', { pregId: '%17%' });
-        // }
+        if (pregnant === "true" || pregnant === "1") {
+            qb.andWhere('svc.served_to LIKE :pregId', {pregId: '%17%'});
+        }
         //
         // // Pre-filter: Children — only restrict if user must bring children
-        // if (children_accompany === "1") {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         qb2.where('svc.served_to LIKE :par1', { par1: '%18%' })
-        //            .orWhere('svc.served_to LIKE :par2', { par2: '%20%' });
-        //     }));
-        // }
+        if (children_accompany === "1" || children_accompany == "true") {
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('svc.served_to LIKE :par1', {par1: '%18%'})
+                    .orWhere('svc.served_to LIKE :par2', {par2: '%20%'});
+            }));
+        }
         //
         // // Pre-filter: Language (speaking ability 1=Fluent→24, 2=Limited→25, 3=None→26)
-        // const langMap: Record<number, number> = { 1: 24, 2: 25, 3: 26 };
-        // if (language !== null && langMap[language]) {
-        //     qb.andWhere('svc.language_requirement LIKE :langId', { langId: `%${langMap[language]}%` });
-        // }
+        const langMap: Record<number, number> = {1: 24, 2: 25, 3: 26};
+        if (language !== null && langMap[language]) {
+            // console.log(langMap[language]);
+            qb.andWhere('svc.language_requirement LIKE :langId', {langId: `%${langMap[language]}%`});
+        }
         //
         // // Pre-filter: Medications (ignore "Not taking any"=55, "Other"=67)
-        // const IGNORE_MEDS = [55, 67];
-        // const filteredMeds = medications.filter(id => !IGNORE_MEDS.includes(id));
-        // if (filteredMeds.length > 0) {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         filteredMeds.forEach((mId, i) => {
-        //             const p = `med${i}`;
-        //             i === 0
-        //                 ? qb2.where(`svc.medications LIKE :${p}`, { [p]: `%${mId}%` })
-        //                 : qb2.orWhere(`svc.medications LIKE :${p}`, { [p]: `%${mId}%` });
-        //         });
-        //     }));
-        // }
+        const IGNORE_MEDS = [55, 67];
+        const filteredMeds = medications.filter(id => !IGNORE_MEDS.includes(id));
+        if (filteredMeds.length > 0) {
+            qb.andWhere(new Brackets(qb2 => {
+                filteredMeds.forEach((mId, i) => {
+                    const p = `med${i}`;
+                    i === 0
+                        ? qb2.where(`svc.medications LIKE :${p}`, {[p]: `%${mId}%`})
+                        : qb2.orWhere(`svc.medications LIKE :${p}`, {[p]: `%${mId}%`});
+                });
+            }));
+        }
         //
         // // Pre-filter: Mental Health (ignore "None"=78, "Other"=79)
-        // const IGNORE_MH = [78, 79];
-        // const filteredMH = mental_health.filter(id => !IGNORE_MH.includes(id));
-        // if (filteredMH.length > 0) {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         filteredMH.forEach((mhId, i) => {
-        //             const p = `mh${i}`;
-        //             i === 0
-        //                 ? qb2.where(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` })
-        //                 : qb2.orWhere(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` });
-        //         });
-        //     }));
-        // }
+        const IGNORE_MH = [78, 79];
+        const filteredMH = mental_health.filter(id => !IGNORE_MH.includes(id));
+        if (filteredMH.length > 0) {
+            qb.andWhere(new Brackets(qb2 => {
+                filteredMH.forEach((mhId, i) => {
+                    const p = `mh${i}`;
+                    i === 0
+                        ? qb2.where(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` })
+                        : qb2.orWhere(`svc.mental_health_diagnoses LIKE :${p}`, { [p]: `%${mhId}%` });
+                });
+            }));
+        }
         //
         // // Pre-filter: Physical Accommodations (ignore "None"=87, "Other"=171)
-        // const IGNORE_PA = [87, 171];
-        // const filteredPA = physical_accommodations_filter.filter(id => !IGNORE_PA.includes(id));
-        // if (filteredPA.length > 0) {
-        //     qb.andWhere(new Brackets(qb2 => {
-        //         filteredPA.forEach((paId, i) => {
-        //             const p = `pa${i}`;
-        //             i === 0
-        //                 ? qb2.where(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` })
-        //                 : qb2.orWhere(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` });
-        //         });
-        //     }));
-        // }
+        const IGNORE_PA = [87, 171];
+        const filteredPA = physical_accommodations_filter.filter(id => !IGNORE_PA.includes(id));
+        if (filteredPA.length > 0) {
+            qb.andWhere(new Brackets(qb2 => {
+                filteredPA.forEach((paId, i) => {
+                    const p = `pa${i}`;
+                    i === 0
+                        ? qb2.where(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` })
+                        : qb2.orWhere(`svc.physical_accommodations LIKE :${p}`, { [p]: `%${paId}%` });
+                });
+            }));
+        }
 
         const [data, total] = await qb
             .skip((page_number - 1) * page_size)
             .take(page_size)
             .getManyAndCount();
 
-        return { data, total };
+        return {data, total};
     }
 
     async checkIfOrganization(organization_id: number) {
