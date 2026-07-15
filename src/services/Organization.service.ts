@@ -57,6 +57,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .leftJoinAndSelect('organization.state', 'state')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: false});
@@ -95,6 +96,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .leftJoinAndSelect('organization.state', 'state')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .andWhere('organization.under_review = :underReview', {underReview: false})
@@ -123,6 +125,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('user.organization', 'organization')
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+                .leftJoinAndSelect('organization.state', 'state')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: true})
