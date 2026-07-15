@@ -168,7 +168,7 @@ export async function getOrganizationsDetails(organization: any, filter?: string
         zipcode: organization.organization.zipcode,
         website: organization.organization.website,
         year: organization.organization.year,
-        address: organization.organization.address,
+        address: `${organization.organization?.street}, ${organization.organization?.city}, ${organization.organization.state?.name}, ${organization.organization?.zipcode}` ,
         street: organization.organization.street,
         city: organization.organization.city,
         state_id: organization.organization.state?.id || "",
