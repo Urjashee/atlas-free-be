@@ -1087,7 +1087,7 @@ export class OrganizationService {
             where: {
                 organization: {id: organization_id},
             },
-            relations: ["organization", "organization.affiliations"]
+            relations: ["organization", "organization.affiliations", "organization.state"]
         })
     }
 

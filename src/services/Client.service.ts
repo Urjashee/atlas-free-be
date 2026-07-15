@@ -330,7 +330,7 @@ export class ClientService {
         const saved = await this.assignedServiceRepository.save(serviceRequest);
 
         try {
-        if (serviceRequest.user?.role?.id == Constants.ROLE_ORGANIZATION_ADMIN || serviceRequest.user?.role?.id == Constants.ROLE_ADVOCATE ) {
+        if (serviceRequest.user?.role?.id == Constants.ROLE_ADVOCATE || serviceRequest.user?.role?.id == Constants.ROLE_ORGANIZATION_ADMIN ) {
 
             const name = serviceRequest.user.email || `${serviceRequest.user.first_name} ${serviceRequest.user.last_name}`
             const organization_name = serviceRequest.organization.name
