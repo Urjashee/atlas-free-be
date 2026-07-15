@@ -319,7 +319,7 @@ export class ClientService {
     async updateServiceRequestStatus(id: number, status: ClientStatus) {
         const serviceRequest = await this.assignedServiceRepository.findOne({
             where: { id },
-            relations: ["user", "client_service", "organization", "service", "client_service.client"]
+            relations: ["user", "user.role", "client_service", "organization", "service", "client_service.client"]
         });
         console.log("serviceRequest:", serviceRequest)
         if (!serviceRequest) {
