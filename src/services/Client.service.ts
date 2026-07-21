@@ -89,9 +89,12 @@ export class ClientService {
             case_no
         })
 
-        await this.updateServiceRequestStatus(addService.id, Constants.PENDING);
+        const saveAssignedService = await this.assignedServiceRepository.save(addService)
+        // console.log("saveAssignedService: ", saveAssignedService.id);
 
-        return await this.assignedServiceRepository.save(addService)
+        await this.updateServiceRequestStatus(saveAssignedService.id, Constants.PENDING);
+
+        return saveAssignedService
     }
 
     async getServiceRequests(user_id: number, page_number = 1, page_size = 10, status?: number) {
@@ -319,9 +322,9 @@ export class ClientService {
     async updateServiceRequestStatus(id: number, status: ClientStatus) {
         const serviceRequest = await this.assignedServiceRepository.findOne({
             where: { id },
-            relations: ["user", "client_service", "organization", "service", "client_service.client"]
+            relations: ["user", "user.role", "client_service", "organization", "service", "client_service.client"]
         });
-        console.log("serviceRequest:", serviceRequest)
+
         if (!serviceRequest) {
             throw new Error("Service request not found");
         }
