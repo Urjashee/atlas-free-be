@@ -127,6 +127,14 @@ export class AdvocateService {
         })
     }
 
+    async getClientsByIdForServiceManager(id: number) {
+        return await this.clientServiceRepository.find({
+            where: {
+                id
+            }
+        })
+    }
+
     async checkIfAdvocate(advocate_id: number) {
         return await this.userRepository.findOne({
             where: {
