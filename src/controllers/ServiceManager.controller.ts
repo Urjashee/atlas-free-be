@@ -199,14 +199,14 @@ export class ServiceManagerController {
                 if (user.role.id != Constants.ROLE_SURVIVOR) {
                     customResponse.push({
                         type: "user",
-                        id: service.id,
+                        id: service.client_service.id,
                         service_id: service.service.id,
                         service: service.service.name,
                         case_no: service.case_no,
                         requested_by: `${user.first_name} ${user.last_name}`,
                         date_time: service.created_at,
                         service_request: service.status,
-                        client_service_id: service.client_service.id,
+                        client_service_id: service.id,
                         user: service.user.id
                     });
                 }
@@ -214,14 +214,14 @@ export class ServiceManagerController {
                 if (user.role.id == Constants.ROLE_SURVIVOR) {
                     customResponse.push({
                         type: "survivor",
-                        id: service.id,
+                        id: service.client_service.id,
                         service_id: service.service.id,
                         service: service.service.name,
                         client_name: `${user.user_name}`,
                         client_email: user.email,
                         date_time: service.created_at,
                         service_request: service.status,
-                        client_service_id: service.client_service.id,
+                        client_service_id: service.id,
                         user: service.user.id
                     });
                 }
@@ -257,6 +257,7 @@ export class ServiceManagerController {
                     id: getServiceRequest.id,
                     service_id: getServiceRequest.service.id,
                     service: getServiceRequest.service.name,
+                    user_email: getServiceRequest?.user?.email,
                     case_no: getServiceRequest.case_no,
                     requested_by: `${user.first_name} ${user.last_name}`,
                     date_time: getServiceRequest.created_at,
