@@ -257,7 +257,7 @@ export class ServiceManagerController {
                     id: getServiceRequest.id,
                     service_id: getServiceRequest.service.id,
                     service: getServiceRequest.service.name,
-                    user_email: getServiceRequest.user.email,
+                    requested_email: getServiceRequest.user.email,
                     case_no: getServiceRequest.case_no,
                     requested_by: `${user.first_name} ${user.last_name}`,
                     date_time: getServiceRequest.created_at,
