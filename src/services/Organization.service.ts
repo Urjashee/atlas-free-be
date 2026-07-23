@@ -271,6 +271,7 @@ export class OrganizationService {
             if (body.state == 0 || body.state == null)
                 throw new Error("Please enter your service state")
         }
+        console.log("Body: ", body);
         const addService = await this.serviceDetailsRepository.create({
             organization: {id: organization_id},
             name: body.name,
@@ -347,16 +348,16 @@ export class OrganizationService {
                 organization: {id: organization_id},
             }
         })
-
-        // console.log("org address check:", body.is_organization_address)
-        // console.log("org address:", checkIfValidOrganization?.street)
+        // console.log("Body: ", body);
+        // console.log("checkIfValidOrganization: ", checkIfValidOrganization)
+        // console.log("org address state: ", checkIfValidOrganization?.state?.id)
         if (getService) {
             const isOrgAddress = body.is_organization_address === true || body.is_organization_address === 'true';
             if (!isOrgAddress) {
                 if (body.state == 0 || body.state == null)
                     throw new Error("Please enter your service state")
             }
-            console.log("isOrgAddress: ", isOrgAddress)
+            // console.log("isOrgAddress: ", isOrgAddress)
             getService.name = body.name
             getService.street = isOrgAddress
                 ? checkIfValidOrganization?.street
@@ -443,7 +444,8 @@ export class OrganizationService {
             where: {
                 id: id,
                 organization: {id: organization_id}
-            }
+            },
+            relations: ["organization.state"]
         })
     }
 
@@ -821,7 +823,8 @@ export class OrganizationService {
         return await this.organizationRepository.findOne({
             where: {
                 id: organization_id,
-            }
+            },
+            relations: ['state'],
         })
     }
 
