@@ -441,7 +441,7 @@ export class AdminController {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
 
-            const getOrganization = await this.organizationService.checkIfOrganization(req.user.organization_id)
+            const getOrganization = await this.organizationService.checkIfOrganization(req.body.organization_id)
 
             if (req.body.id) {
                 const checkIfValidOrganization = await this.organizationService.checkIfValidOrganization(req.body.id, req.body.organization_id);

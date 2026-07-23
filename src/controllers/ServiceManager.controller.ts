@@ -250,13 +250,14 @@ export class ServiceManagerController {
             }
             let client, form
             const user = await this.userService.findById(getServiceRequest.user.id);
-            const getClients = await this.advocateService.getClientsById(getServiceRequest.id);
+            const getClients = await this.advocateService.getClientsByIdForServiceManager(getServiceRequest.client_service.id);
             if (user.role.id != Constants.ROLE_SURVIVOR) {
                 client = {
                     type: "user",
                     id: getServiceRequest.id,
                     service_id: getServiceRequest.service.id,
                     service: getServiceRequest.service.name,
+                    user_email: getServiceRequest.user.email,
                     case_no: getServiceRequest.case_no,
                     requested_by: `${user.first_name} ${user.last_name}`,
                     date_time: getServiceRequest.created_at,
