@@ -141,7 +141,7 @@ export class AuthController {
                 if (existingUser.emailVerifiedAt != null) {
                     return ResponseFormatter.errorResponse(res, 'Email already in use');
                 }
-                const sendEmail = await this.userService.sendEmail(req.body.email, existingUser.user_name, existingUser.id)
+                const sendEmail = await this.userService.sendEmail(req.body.email, req.body.password, req.body.username, existingUser.id)
                 if (sendEmail) {
                     return ResponseFormatter.successResponse(res, 'Verification email sent');
                 }

@@ -250,7 +250,16 @@ export class UserService {
         return saved_user
     }
 
-    async sendEmail(email: string, username: string, user_id: number) {
+    async sendEmail(email: string, password: string, username: string, user_id: number) {
+        const user = await this.userRepository.findOne({
+            where: { email: email },
+        })
+        // console.log("User: ", user)
+        if (user) {
+            user.user_name = username;
+            user.password = await bcrypt.hash(password, 10);
+            await this.userRepository.save(user);
+        }
         const token = randomBytes(32).toString('hex');
         const password_reset_request = this.passwordResetRepository.create({
             email: email,
