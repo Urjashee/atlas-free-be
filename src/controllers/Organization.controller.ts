@@ -324,7 +324,13 @@ export class AuthController {
     @UseBefore(organizationMiddleware)
     async getOrganizationUser(@Req() req: Request, @Res() res: Response) {
         try {
-            const getUsers = await this.organizationService.getOrgUsers(req.user.organization_id);
+            let getUsers = []
+            const role = parseInt(req.query.role as string);
+            if (role) {
+                getUsers = await this.organizationService.getOrgAdminUsers(req.user.organization_id, role);
+            } else {
+                getUsers = await this.organizationService.getOrgUsers(req.user.organization_id);
+            }
             const customResponse = await Promise.all(
                 getUsers.map(async (users: any) => {
                     return {

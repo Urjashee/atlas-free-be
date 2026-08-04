@@ -568,6 +568,21 @@ export class OrganizationService {
         })
     }
 
+    async getOrgAdminUsers(organization_id: number, role: number) {
+        return await this.userRepository.find({
+            where: {
+                organization: {id: organization_id},
+                is_active: true,
+                is_status: true,
+                emailVerifiedAt: Not(IsNull()),
+                role: {
+                    id: role
+                }
+            },
+            order: {created_at: "DESC"}
+        })
+    }
+
     async getOrgUsersDetails(organization_id: number) {
         return await this.userRepository.find({
             where: {
