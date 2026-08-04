@@ -169,6 +169,9 @@ export class UserService {
 
             const savedUser = await queryRunner.manager.save(user);
 
+            org.default_user = {id: savedUser.id} as Users;
+            await queryRunner.manager.save(org);
+
             if (body.affiliations && body.affiliations !== "") {
                 const affiliations = JSON.parse(body.affiliations);
 

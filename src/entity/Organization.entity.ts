@@ -63,6 +63,10 @@ export class Organization {
     @Column()
     platform_purpose!: number
 
+    @ManyToOne(() => Users, { nullable: true })
+    @JoinColumn({ name: "default_user_id" })
+    default_user!: Users;
+
     @CreateDateColumn()
     created_at!: Date;
 
