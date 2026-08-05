@@ -288,6 +288,12 @@ export class UserService {
             where: {organization: {id: organization_id}}
         });
 
+        // const default_user = await this.userRepository.findOne({
+        //     where: {
+        //         id: body.user_id,
+        //     }
+        // })
+
         if (user) {
             user.country_code = body.country_code;
             user.mobile = body.mobile;
@@ -310,6 +316,7 @@ export class UserService {
         organization.website = body.website;
         organization.ein = body.ein || null;
         organization.tax_exemption = body.tax_exemption === "1";
+        organization.users = body.user_id
         organization.primary_purpose = body.primary_purpose;
 
         /* ================= AFFILIATIONS ================= */
@@ -630,6 +637,20 @@ export class UserService {
                         Constants.ROLE_ORGANIZATION_ADMIN,
                     ]),
                 },
+            }
+        });
+    }
+
+    async checkIfOrgAdmin(user_id: number, organization_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {id: Constants.ROLE_ORGANIZATION_ADMIN},
+                is_active: true,
+                emailVerifiedAt: Not(IsNull()),
+                organization: {
+                    id: organization_id,
+                }
             }
         });
     }
