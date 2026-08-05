@@ -316,7 +316,9 @@ export class UserService {
         organization.website = body.website;
         organization.ein = body.ein || null;
         organization.tax_exemption = body.tax_exemption === "1";
-        organization.users = body.user_id
+        if (body.user_id) {
+            organization.default_user = {id: Number(body.user_id)} as Users;
+        }
         organization.primary_purpose = body.primary_purpose;
 
         /* ================= AFFILIATIONS ================= */
