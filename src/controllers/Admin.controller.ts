@@ -53,6 +53,7 @@ const adminOrgEditSchema = Joi.object({
     ein: Joi.string().optional().allow(""),
     primary_purpose: Joi.array().items(Joi.number()).required(),
     affiliations: Joi.string().optional(),
+    user_id: Joi.number().required(),
 });
 
 @JsonController("/api/admin")
@@ -101,6 +102,13 @@ export class AdminController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
+            const existingEin = await this.userService.findByEinExceptOwn(req.body.ein, req.body.organization_id);
+            if (existingEin) {
+                return ResponseFormatter.errorResponse(res, 'EIN already exist');
+            }
+            const checkEmail = await this.userService.checkIfOrgAdmin(req.body.user_id, req.body.organization_id)
+            if (!checkEmail)
+                return ResponseFormatter.errorResponse(res, "Not an active admin account");
             const user = await this.userService.updateUser(req.body.organization_id, req.body, req.user.role);
             if (!user)
                 return ResponseFormatter.successResponse(res, 'User not updated')
@@ -248,7 +256,14 @@ export class AdminController {
     @UseBefore(adminMiddleware)
     async getOrganizationUser(@Req() req: Request, @Res() res: Response, @Param("organizationId") organization_id: number) {
         try {
-            const getUsers = await this.organizationService.getOrgUsers(organization_id);
+            let getUsers = []
+            const role = parseInt(req.query.role as string);
+            if (role) {
+                getUsers = await this.organizationService.getOrgAdminUsers(organization_id, role);
+            } else {
+                getUsers = await this.organizationService.getOrgUsers(organization_id);
+            }
+            // const getUsers = await this.organizationService.getOrgUsers(organization_id);
             const customResponse = await Promise.all(
                 getUsers.map(async (users: any) => {
                     return {
