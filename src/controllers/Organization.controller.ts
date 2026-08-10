@@ -349,6 +349,17 @@ export class AuthController {
                     }
                 })
             )
+            if(role && role == Constants.ROLE_ORGANIZATION_ADMIN) {
+                customResponse.push({
+                    id: null,
+                    first_name: "None",
+                    last_name: "",
+                    email: "",
+                    role_id: "",
+                    role_name: "None",
+                    user_setup: false,
+                });
+            }
             return ResponseFormatter.successResponse(res, 'Users found', customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
