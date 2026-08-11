@@ -49,7 +49,7 @@ const organizationEditSchema = Joi.object({
     ein: Joi.string().optional().allow(""),
     primary_purpose: Joi.array().items(Joi.number()).required(),
     affiliations: Joi.string().optional(),
-    user_id: Joi.number().required(),
+    user_id: Joi.required(),
 });
 
 @JsonController("/api/organization")
@@ -254,9 +254,11 @@ export class AuthController {
             if (existingEin) {
                 return ResponseFormatter.errorResponse(res, 'EIN already exist');
             }
-            const checkEmail = await this.userService.checkIfOrgAdmin(req.body.user_id, req.user.organization_id)
-            if (!checkEmail)
-                return ResponseFormatter.errorResponse(res, "Not an active admin account");
+            if (req.body.user_id != "null") {
+                const checkEmail = await this.userService.checkIfOrgAdmin(req.body.user_id, req.user.organization_id)
+                if (!checkEmail)
+                    return ResponseFormatter.errorResponse(res, "Not an active admin account");
+            }
 
             const user = await this.userService.updateUser(req.user.organization_id, req.body, req.user.role);
             if (!user)

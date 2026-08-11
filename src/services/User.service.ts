@@ -316,8 +316,10 @@ export class UserService {
         organization.website = body.website;
         organization.ein = body.ein || null;
         organization.tax_exemption = body.tax_exemption === "1";
-        if (body.user_id) {
+        if (body.user_id != "null") {
             organization.default_user = {id: Number(body.user_id)} as Users;
+        } else {
+            organization.default_user = null;
         }
         organization.primary_purpose = body.primary_purpose;
 

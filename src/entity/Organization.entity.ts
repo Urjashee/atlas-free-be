@@ -65,7 +65,7 @@ export class Organization {
 
     @ManyToOne(() => Users, { nullable: true })
     @JoinColumn({ name: "default_user_id" })
-    default_user!: Users;
+    default_user!: Users | null;
 
     @CreateDateColumn()
     created_at!: Date;
