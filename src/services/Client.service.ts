@@ -434,8 +434,9 @@ export class ClientService {
 
             // console.log("Client service user", serviceRequest?.client_service?.user?.id)
             // console.log("Client service client", serviceRequest?.client_service)
-            // console.log("Client service", serviceRequest)
+            // console.log("Client service", serviceRequest.client_service)
             if ((serviceRequest.client_service.user) || (serviceRequest.client_service && serviceRequest.client_service.client && serviceRequest.client_service.client.email)) {
+
                 let name = ""
                 let email = ""
                 if (serviceRequest.client_service.user != null) {
@@ -459,14 +460,14 @@ export class ClientService {
                 let emailTemplate_line4: string = ""
                 let subject = ""
 
-                if (status == Constants.PENDING) {
-                    emailTemplate_line1 = `Thank you for reaching out to us! `
-                    emailTemplate_line2 = `We will review your service request and get back to you soon.`
-                    emailTemplate_line3 = ``
-                    subject = `New service request`
-                    contact_email = ""
-                    contact_phone = ""
-                }
+                // if (status == Constants.PENDING) {
+                //     emailTemplate_line1 = `Thank you for reaching out to us! `
+                //     emailTemplate_line2 = `We will review your service request and get back to you soon.`
+                //     emailTemplate_line3 = ``
+                //     subject = `New service request`
+                //     contact_email = ""
+                //     contact_phone = ""
+                // }
 
                 if (status == Constants.PLACED) {
                     emailTemplate_line1 = `Congratulations on starting your healing journey! `
@@ -520,7 +521,8 @@ export class ClientService {
 
                 const emailBody = `${emailTemplate_line1}\n${emailTemplate_line2}\n${contact_email}\n${contact_phone}`;
                 // Emails
-                if (serviceRequest.client_service.client != null && serviceRequest.client_service.client.receive_service_status_emails) {
+                // console.log(serviceRequest.client_service.client, serviceRequest.client_service.client.receive_service_status_emails, status)
+                if (serviceRequest.client_service.client != null && serviceRequest.client_service.client.receive_service_status_emails && status != Constants.PENDING) {
                     const emailContent = SendServiceRequestClient(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
@@ -530,7 +532,7 @@ export class ClientService {
                     };
                     await this.mailerService.sendEmail(mailOptions);
                 }
-                if (serviceRequest.client_service.user != null) {
+                if (serviceRequest.client_service.user != null && status != Constants.PENDING) {
                     const emailContent = SendServiceRequestClient(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);
                     const mailOptions = {
                         from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
