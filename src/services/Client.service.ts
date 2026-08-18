@@ -542,7 +542,7 @@ export class ClientService {
                     };
                     await this.mailerService.sendEmail(mailOptions);
                 }
-                if (serviceRequest.client_service.client != null) {
+                if (serviceRequest.client_service.client != null && status != Constants.PENDING) {
                     await this.notificationService.add(subject, emailBody, Constants.SERVICE_REQUEST_STATUS_NOTIFICATION, serviceRequest.client_service.client.id)
                 }
 
