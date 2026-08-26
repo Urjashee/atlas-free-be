@@ -620,4 +620,33 @@ export class ConfigController {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
         }
     }
+
+    @Post("/service-reminder-email")
+    async service_reminder_email(@Req() req: Request, @Res() res: Response) {
+        try {
+            const apiKey = req.headers["x-api-key"];
+            if (apiKey !== process.env.INTERNAL_API_KEY) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+
+            const dueReminders = await this.configService.getDueEmailReminders(new Date());
+
+            if (!dueReminders || dueReminders.length === 0) {
+                return ResponseFormatter.successResponse(res, "No reminders due", []);
+            }
+
+            const results = await Promise.allSettled(
+                dueReminders.map(reminder => this.configService.sendReminderEmail(reminder))
+            );
+            const formattedResults = results.map((result, index) => ({
+                email: dueReminders[index].email,
+                service_id: dueReminders[index].service?.id,
+                status: result.status,
+                error: result.status === 'rejected' ? (result as PromiseRejectedResult).reason?.message : null
+            }));
+            return ResponseFormatter.successResponse(res, "Successful", formattedResults);
+        } catch (error: any) {
+            return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');
+        }
+    }
 }
