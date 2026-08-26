@@ -443,10 +443,12 @@ export class ClientService {
                     name = serviceRequest.client_service.user.first_name + " " + serviceRequest.client_service.user.last_name
                     email = serviceRequest.client_service.user.email
                 }
+                // console.log("first user", serviceRequest.client_service.user.id)
                 if (serviceRequest.client_service.client != null) {
                     name = serviceRequest.client_service.client.user_name
                     email = serviceRequest.client_service.client.email
                 }
+                // console.log("second user", serviceRequest.client_service.client.id)
                 const organization_name = serviceRequest.organization.name
                 const service_name = serviceRequest.service.name
 
@@ -460,14 +462,14 @@ export class ClientService {
                 let emailTemplate_line4: string = ""
                 let subject = ""
 
-                // if (status == Constants.PENDING) {
-                //     emailTemplate_line1 = `Thank you for reaching out to us! `
-                //     emailTemplate_line2 = `We will review your service request and get back to you soon.`
-                //     emailTemplate_line3 = ``
-                //     subject = `New service request`
-                //     contact_email = ""
-                //     contact_phone = ""
-                // }
+                if (status == Constants.PENDING) {
+                    emailTemplate_line1 = `Thank you for reaching out to us! `
+                    emailTemplate_line2 = `We will review your service request and get back to you soon.`
+                    emailTemplate_line3 = ``
+                    subject = `New service request`
+                    contact_email = ""
+                    contact_phone = ""
+                }
 
                 if (status == Constants.PLACED) {
                     emailTemplate_line1 = `Congratulations on starting your healing journey! `
@@ -542,7 +544,7 @@ export class ClientService {
                     };
                     await this.mailerService.sendEmail(mailOptions);
                 }
-                if (serviceRequest.client_service.client != null && status != Constants.PENDING) {
+                if (serviceRequest.client_service.client != null) {
                     await this.notificationService.add(subject, emailBody, Constants.SERVICE_REQUEST_STATUS_NOTIFICATION, serviceRequest.client_service.client.id)
                 }
 
