@@ -346,7 +346,7 @@ export class ClientService {
 
                 // console.log(getDefaultOrgAdmin);
 
-                const name = `${getDefaultOrgAdmin.organization.default_user.first_name} ${getDefaultOrgAdmin.organization.default_user.last_name}`
+                const name = `${getDefaultOrgAdmin.organization.default_user.first_name || ``} ${getDefaultOrgAdmin.organization.default_user.last_name || ``}`
                 const organization_name = getDefaultOrgAdmin.organization.name
                 const service_name = serviceRequest.service.name
 
@@ -440,7 +440,7 @@ export class ClientService {
                 let name = ""
                 let email = ""
                 if (serviceRequest.client_service.user != null) {
-                    name = serviceRequest.client_service.user.first_name + " " + serviceRequest.client_service.user.last_name
+                    name = serviceRequest.client_service.user.first_name || `` + " " + serviceRequest.client_service.user.last_name || ``
                     email = serviceRequest.client_service.user.email
                 }
                 // console.log("first user", serviceRequest.client_service.user.id)
