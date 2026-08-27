@@ -337,17 +337,6 @@ export class ClientService {
 
         try {
             if (serviceRequest.organization ) {
-                const getDefaultOrgAdmin = await this.userRepository.findOne({
-                    where: {
-                        id: serviceRequest.organization.default_user.id,
-                    },
-                    relations: ["organization.default_user", "role"]
-                })
-
-                console.log(getDefaultOrgAdmin);
-
-                const name = `${getDefaultOrgAdmin.organization.default_user.first_name || ``} ${getDefaultOrgAdmin.organization.default_user.last_name || ``}`
-                const organization_name = getDefaultOrgAdmin.organization.name
                 const service_name = serviceRequest.service.name
 
                 let contact_email = serviceRequest.service?.contact_email || ""
@@ -424,7 +413,7 @@ export class ClientService {
                 const getAllOrgAdmin = await this.userRepository.find({
                     where: {
                         organization: {
-                            id: getDefaultOrgAdmin.organization.id
+                            id: serviceRequest.organization.id
                         },
                         role: {
                             id: Constants.ROLE_ORGANIZATION_ADMIN
