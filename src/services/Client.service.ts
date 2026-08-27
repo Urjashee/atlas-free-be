@@ -421,20 +421,79 @@ export class ClientService {
                     contact_phone = `Contact phone: ${serviceRequest.service?.contact_phone}`
                 }
 
-                // Emails
-                const emailContent = SendServiceRequest(name, emailTemplate_line1, emailTemplate_line2, emailTemplate_line3, contact_email, contact_phone);
-                const mailOptions = {
-                    from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
-                    to: getDefaultOrgAdmin.organization.default_user.email,
-                    subject: subject,
-                    html: emailContent
-                };
-                await this.mailerService.sendEmail(mailOptions);
+                const getAllOrgAdmin = await this.userRepository.find({
+                    where: {
+                        organization: {
+                            id: getDefaultOrgAdmin.organization.id
+                        },
+                        role: {
+                            id: Constants.ROLE_ORGANIZATION_ADMIN
+                        }
+                    }
+                });
+
+                const getServiceManagers = await this.serviceDetailsRepository.findOne({
+                    where: {
+                        id: serviceRequest.service?.id
+                    }
+                });
+
+                if (!getServiceManagers) {
+                    throw new Error('Service not found');
+                }
+
+                const serviceManagerIds = getServiceManagers?.service_manager ?? [];
+
+                await Promise.all(
+                    serviceManagerIds.map(async (id) => {
+                        const getUser = await this.userRepository.findOne({
+                            where: {
+                                id: id
+                            }
+                        })
+                        const emailContent = SendServiceRequest(
+                            `${getUser.first_name || ``} ${getUser.last_name || ``}`,
+                            emailTemplate_line1,
+                            emailTemplate_line2,
+                            emailTemplate_line3,
+                            contact_email,
+                            contact_phone
+                        );
+
+                        const mailOptions = {
+                            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                            to: getUser.email,
+                            subject: subject,
+                            html: emailContent
+                        };
+
+                        await this.mailerService.sendEmail(mailOptions);
+                    })
+                )
+
+                await Promise.all(
+                    getAllOrgAdmin.map(async (orgAdmin) => {
+                        const emailContent = SendServiceRequest(
+                            `${orgAdmin.first_name || ``} ${orgAdmin.last_name || ``}`,
+                            emailTemplate_line1,
+                            emailTemplate_line2,
+                            emailTemplate_line3,
+                            contact_email,
+                            contact_phone
+                        );
+
+                        const mailOptions = {
+                            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+                            to: orgAdmin.email,
+                            subject: subject,
+                            html: emailContent
+                        };
+
+                        await this.mailerService.sendEmail(mailOptions);
+                    })
+                );
             }
 
-            // console.log("Client service user", serviceRequest?.client_service?.user?.id)
-            // console.log("Client service client", serviceRequest?.client_service)
-            // console.log("Client service", serviceRequest.client_service)
             if ((serviceRequest.client_service.user) || (serviceRequest.client_service && serviceRequest.client_service.client && serviceRequest.client_service.client.email)) {
 
                 let name = ""
