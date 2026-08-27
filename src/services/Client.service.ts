@@ -18,7 +18,7 @@ import {
     SurvivorReportReceipt
 } from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
-import {In, Not} from "typeorm";
+import {In, IsNull, Not} from "typeorm";
 import {NotificationService} from "./Notification.service";
 
 export class ClientService {
@@ -344,7 +344,7 @@ export class ClientService {
                     relations: ["organization.default_user", "role"]
                 })
 
-                // console.log(getDefaultOrgAdmin);
+                console.log(getDefaultOrgAdmin);
 
                 const name = `${getDefaultOrgAdmin.organization.default_user.first_name || ``} ${getDefaultOrgAdmin.organization.default_user.last_name || ``}`
                 const organization_name = getDefaultOrgAdmin.organization.name
@@ -428,7 +428,9 @@ export class ClientService {
                         },
                         role: {
                             id: Constants.ROLE_ORGANIZATION_ADMIN
-                        }
+                        },
+                        is_active: true,
+                        password: Not(IsNull())
                     }
                 });
 
@@ -451,6 +453,7 @@ export class ClientService {
                                 id: id
                             }
                         })
+                        // console.log("Service manager: ", getUser)
                         const emailContent = SendServiceRequest(
                             `${getUser.first_name || ``} ${getUser.last_name || ``}`,
                             emailTemplate_line1,
