@@ -58,6 +58,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .leftJoinAndSelect('organization.state', 'state')
+                .leftJoinAndSelect('organization.default_user', 'default_user')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: false});
@@ -97,6 +98,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .leftJoinAndSelect('organization.state', 'state')
+                .leftJoinAndSelect('organization.default_user', 'default_user')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: false})
                 .andWhere('organization.under_review = :underReview', {underReview: false})
@@ -126,6 +128,7 @@ export class OrganizationService {
                 .leftJoinAndSelect('organization.affiliations', 'affiliations')
                 .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
                 .leftJoinAndSelect('organization.state', 'state')
+                .leftJoinAndSelect('organization.default_user', 'default_user')
                 .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
                 .andWhere('organization.is_active = :orgActive', {orgActive: true})
                 .andWhere('organization.under_review = :underReview', {underReview: true})
@@ -486,6 +489,7 @@ export class OrganizationService {
             .leftJoinAndSelect('organization.state', 'state') // ✅ include state relation
             .leftJoinAndSelect('organization.affiliations', 'affiliations')
             .leftJoinAndSelect('affiliations.affiliation', 'registrationOption')
+            .leftJoinAndSelect('organization.default_user', 'default_user')
             .andWhere('user.role_id = :roleId', {roleId: Constants.ROLE_ORGANIZATION_ADMIN})
             .andWhere('organization.id = :orgId', {orgId: id})
             .getOne();
@@ -563,6 +567,21 @@ export class OrganizationService {
                 // is_active: true,
                 is_status: true,
                 // emailVerifiedAt: Not(IsNull()),
+            },
+            order: {created_at: "DESC"}
+        })
+    }
+
+    async getOrgAdminUsers(organization_id: number, role: number) {
+        return await this.userRepository.find({
+            where: {
+                organization: {id: organization_id},
+                is_active: true,
+                is_status: true,
+                emailVerifiedAt: Not(IsNull()),
+                role: {
+                    id: role
+                }
             },
             order: {created_at: "DESC"}
         })
@@ -1090,7 +1109,7 @@ export class OrganizationService {
             where: {
                 organization: {id: organization_id},
             },
-            relations: ["organization", "organization.affiliations", "organization.state"]
+            relations: ["organization", "organization.affiliations", "organization.state", "organization.default_user"]
         })
     }
 

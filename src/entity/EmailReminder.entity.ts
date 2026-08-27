@@ -28,6 +28,15 @@ export enum TimeZone {
     "Hawaii-Aleutian Standard Time (GMT-10)" = 6,
 }
 
+export const TimeZoneUtcOffset: Record<number, number> = {
+    [TimeZone["Eastern Standard Time (GMT-4)"]]: -4,
+    [TimeZone["Central Standard Time (GMT-5)"]]: -5,
+    [TimeZone["Mountain Standard Time (GMT-6)"]]: -6,
+    [TimeZone["Pacific Standard Time (GMT-7)"]]: -7,
+    [TimeZone["Alaska Standard Time (GMT-8)"]]: -8,
+    [TimeZone["Hawaii-Aleutian Standard Time (GMT-10)"]]: -10,
+};
+
 @Entity()
 export class EmailReminder {
     @PrimaryGeneratedColumn()

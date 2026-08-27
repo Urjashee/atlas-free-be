@@ -49,6 +49,7 @@ const organizationEditSchema = Joi.object({
     ein: Joi.string().optional().allow(""),
     primary_purpose: Joi.array().items(Joi.number()).required(),
     affiliations: Joi.string().optional(),
+    user_id: Joi.required(),
 });
 
 @JsonController("/api/organization")
@@ -253,6 +254,12 @@ export class AuthController {
             if (existingEin) {
                 return ResponseFormatter.errorResponse(res, 'EIN already exist');
             }
+            if (req.body.user_id != "null") {
+                const checkEmail = await this.userService.checkIfOrgAdmin(req.body.user_id, req.user.organization_id)
+                if (!checkEmail)
+                    return ResponseFormatter.errorResponse(res, "Not an active admin account");
+            }
+
             const user = await this.userService.updateUser(req.user.organization_id, req.body, req.user.role);
             if (!user)
                 return ResponseFormatter.successResponse(res, 'User not updated')
@@ -324,7 +331,13 @@ export class AuthController {
     @UseBefore(organizationMiddleware)
     async getOrganizationUser(@Req() req: Request, @Res() res: Response) {
         try {
-            const getUsers = await this.organizationService.getOrgUsers(req.user.organization_id);
+            let getUsers = []
+            const role = parseInt(req.query.role as string);
+            if (role) {
+                getUsers = await this.organizationService.getOrgAdminUsers(req.user.organization_id, role);
+            } else {
+                getUsers = await this.organizationService.getOrgUsers(req.user.organization_id);
+            }
             const customResponse = await Promise.all(
                 getUsers.map(async (users: any) => {
                     return {
@@ -338,6 +351,17 @@ export class AuthController {
                     }
                 })
             )
+            if(role && role == Constants.ROLE_ORGANIZATION_ADMIN) {
+                customResponse.push({
+                    id: null,
+                    first_name: "None",
+                    last_name: "",
+                    email: "",
+                    role_id: "",
+                    role_name: "None",
+                    user_setup: false,
+                });
+            }
             return ResponseFormatter.successResponse(res, 'Users found', customResponse);
         } catch (error: any) {
             return ResponseFormatter.errorResponse(res, error.message || 'An error occurred');

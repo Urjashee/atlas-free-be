@@ -8,6 +8,7 @@ import {ServiceSetting} from "../entity/ServiceSetting.entity";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import {ServiceSettingReminder} from "../helper/Emails.helper";
 import {EmailService} from "./Email.service";
+import {DaysOfWeek, EmailReminder, TimeZoneUtcOffset} from "../entity/EmailReminder.entity";
 
 export class ConfigService {
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
@@ -15,6 +16,7 @@ export class ConfigService {
     private registrationOptionRepository = AppDataSource.getRepository(RegistrationOption);
     private advocateServiceRepository = AppDataSource.getRepository(AdvocateService);
     private stateRepository = AppDataSource.getRepository(State);
+    private emailReminderRepository = AppDataSource.getRepository(EmailReminder);
     private mailerService = new EmailService();
 
     async getState() {
@@ -93,6 +95,41 @@ export class ConfigService {
         const mailOptions = {
             from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
             to: email,
+            subject: "Update your service availability in Wayplace",
+            html: emailContent
+        };
+
+        return await this.mailerService.sendEmail(mailOptions);
+    }
+
+    async getDueEmailReminders(currentUtc: Date) {
+        const reminders = await this.emailReminderRepository.find({
+            relations: ["service"]
+        });
+        // console.log(currentUtc)
+
+        return reminders.filter((reminder) => {
+            const offset = TimeZoneUtcOffset[reminder.time_zone];
+            if (offset === undefined || !reminder.time || !reminder.day_of_week) {
+                return false;
+            }
+
+            const localDate = new Date(currentUtc.getTime() + offset * 60 * 60 * 1000);
+            const localDay = localDate.getUTCDay() + 1; // Sunday = 1 to match DaysOfWeek enum
+            const localHour = localDate.getUTCHours();
+
+            const reminderHour = parseInt(reminder.time.split(":")[0], 10);
+
+            return reminder.day_of_week.map(Number).includes(localDay as DaysOfWeek)
+                && reminderHour === localHour;
+        });
+    }
+
+    async sendReminderEmail(reminder: EmailReminder) {
+        const emailContent = ServiceSettingReminder(reminder.email, reminder.service?.name);
+        const mailOptions = {
+            from: `"${process.env.MAIL_FROM_NAME}" <${process.env.MAIL_FROM_ADDRESS}>`,
+            to: reminder.email,
             subject: "Update your service availability in Wayplace",
             html: emailContent
         };

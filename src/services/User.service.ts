@@ -169,6 +169,9 @@ export class UserService {
 
             const savedUser = await queryRunner.manager.save(user);
 
+            org.default_user = {id: savedUser.id} as Users;
+            await queryRunner.manager.save(org);
+
             if (body.affiliations && body.affiliations !== "") {
                 const affiliations = JSON.parse(body.affiliations);
 
@@ -250,7 +253,16 @@ export class UserService {
         return saved_user
     }
 
-    async sendEmail(email: string, username: string, user_id: number) {
+    async sendEmail(email: string, password: string, username: string, user_id: number) {
+        const user = await this.userRepository.findOne({
+            where: { email: email },
+        })
+        // console.log("User: ", user)
+        if (user) {
+            user.user_name = username;
+            user.password = await bcrypt.hash(password, 10);
+            await this.userRepository.save(user);
+        }
         const token = randomBytes(32).toString('hex');
         const password_reset_request = this.passwordResetRepository.create({
             email: email,
@@ -276,6 +288,12 @@ export class UserService {
             where: {organization: {id: organization_id}}
         });
 
+        // const default_user = await this.userRepository.findOne({
+        //     where: {
+        //         id: body.user_id,
+        //     }
+        // })
+
         if (user) {
             user.country_code = body.country_code;
             user.mobile = body.mobile;
@@ -298,6 +316,11 @@ export class UserService {
         organization.website = body.website;
         organization.ein = body.ein || null;
         organization.tax_exemption = body.tax_exemption === "1";
+        if (body.user_id != "null") {
+            organization.default_user = {id: Number(body.user_id)} as Users;
+        } else {
+            organization.default_user = null;
+        }
         organization.primary_purpose = body.primary_purpose;
 
         /* ================= AFFILIATIONS ================= */
@@ -618,6 +641,20 @@ export class UserService {
                         Constants.ROLE_ORGANIZATION_ADMIN,
                     ]),
                 },
+            }
+        });
+    }
+
+    async checkIfOrgAdmin(user_id: number, organization_id: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {id: Constants.ROLE_ORGANIZATION_ADMIN},
+                is_active: true,
+                emailVerifiedAt: Not(IsNull()),
+                organization: {
+                    id: organization_id,
+                }
             }
         });
     }
