@@ -118,10 +118,15 @@ export class ConfigService {
             const localDay = localDate.getUTCDay() + 1; // Sunday = 1 to match DaysOfWeek enum
             const localHour = localDate.getUTCHours();
 
-            const reminderHour = parseInt(reminder.time.split(":")[0], 10);
+            const [reminderHour, reminderMinute] = reminder.time
+                .split(":")
+                .map(Number);
+
+            const localMinute = localDate.getUTCMinutes();
 
             return reminder.day_of_week.map(Number).includes(localDay as DaysOfWeek)
-                && reminderHour === localHour;
+                && reminderHour === localHour
+                && reminderMinute === localMinute;
         });
     }
 
