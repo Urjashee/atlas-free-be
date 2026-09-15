@@ -544,9 +544,9 @@ export class AuthController {
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const {user_id, organization_id} = req.body;
+            const {user_id} = req.body;
 
-            const checkIfValidOrganizationServiceManager = await this.organizationService.checkIfOrganizationRoleUser(user_id, organization_id, Constants.ROLE_SERVICE_MANAGER);
+            const checkIfValidOrganizationServiceManager = await this.organizationService.checkIfOrganizationRoleUser(user_id, req.user.organization_id, Constants.ROLE_SERVICE_MANAGER);
             if (!checkIfValidOrganizationServiceManager)
                 return ResponseFormatter.errorResponse(res, "Not a valid organization user");
 
