@@ -1068,11 +1068,21 @@ export class OrganizationService {
         })
     }
 
-    async checkIfOrganizationRoleUser(user_id: number, role: number) {
+    async checkIfValidRoleUser(user_id: number, role: number) {
         return await this.userRepository.findOne({
             where: {
                 id: user_id,
                 role: {id: role},
+            }
+        })
+    }
+
+    async checkIfOrganizationRoleUser(user_id: number, organization_id: number, role: number) {
+        return await this.userRepository.findOne({
+            where: {
+                id: user_id,
+                role: {id: role},
+                organization: {id: organization_id}
             }
         })
     }
@@ -1319,6 +1329,24 @@ export class OrganizationService {
             }
             return true;
         }
+    }
+
+    async deleteServiceManager(user_id: number) {
+        const user = await this.userRepository.findOne({
+            where: {
+                id: user_id
+            }
+        })
+        if (!user) {
+            throw new Error('Invalid user');
+        }
+        if (user) {
+            user.email = "deleteduser@servicemanager.com"
+            user.is_active = false
+            await this.userRepository.save(user);
+            return true
+        }
+        return false
     }
 
     async removeUserClients(service_manager_id: number, assigned_user_id: any) {

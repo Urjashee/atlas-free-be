@@ -107,3 +107,8 @@ export const removeUserSchema = Joi.object({
     user_id: Joi.number().required(),
     email: Joi.string().email().required(),
 })
+
+export const removeServiceManagerSchema = Joi.object({
+    organization_id: Joi.number().optional(),
+    user_id: Joi.number().required(),
+})
