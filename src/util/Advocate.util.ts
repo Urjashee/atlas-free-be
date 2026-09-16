@@ -20,38 +20,38 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     services: await Promise.all((clients.service ?? []).map(async (item) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     client_nick_name: clients.client_nick_name,
                     zipcode: clients.zipcode,
                     dob: new Date(clients.dob).toISOString().split('T')[0],
                     english_speaking_ability_id: clients.english_speaking_ability,
-                    english_speaking_ability: (await configService.getAdvocateServiceById(clients.english_speaking_ability)).name,
+                    english_speaking_ability: (await configService.getAdvocateServiceById(clients.english_speaking_ability))?.name ?? null,
                     preferred_language: clients.preferred_language,
                     gender: await Promise.all((clients.gender ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     race: await Promise.all((clients.race ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getAdvocateServiceById(item)).name
+                            name: (await configService.getAdvocateServiceById(item))?.name ?? null
                         }
                     })),
-                    citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status)).name,
+                    citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status))?.name ?? null,
                     citizenship_status_id: clients.citizenship_status,
                     client_experienced: await Promise.all((clients.client_experienced ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     pregnant: clients.pregnant == true ? "Yes" : "No",
                     pregnant_months: clients.pregnant == true ? `${clients.pregnant_months} months` : "",
-                    birthdate_status: clients.birthdate_status == null ? null : (await configService.getAdvocateServiceById(clients.birthdate_status)).name,
+                    birthdate_status: clients.birthdate_status == null ? null : (await configService.getAdvocateServiceById(clients.birthdate_status))?.name ?? null,
                     birthdate_status_id: clients.birthdate_status || null,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_accompany_id: clients.children_accompany,
@@ -60,20 +60,20 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     criteria_add: await safeOptionsArray(clients.criteria_add),
                     // criteria_add: await Promise.all((clients.criteria_add ?? []).map(async (item: number) => {
                     //     return {
                     //         id: item,
-                    //         name: (await configService.getServiceOptionsById(item)).name
+                    //         name: (await configService.getServiceOptionsById(item))?.name ?? null
                     //     }
                     // })),
                     medications: await Promise.all((clients.medications ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     medications_other: clients.medications_other,
@@ -81,19 +81,19 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     mental_health_diagnoses: await Promise.all((clients.mental_health_diagnoses ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     physical_accommodation: await Promise.all((clients.physical_accommodation ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     nicotine_products: await Promise.all((clients.nicotine_products ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     specify_physical_accommodation: clients.specify_physical_accommodation
@@ -109,37 +109,37 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     services: await Promise.all((clients.service ?? []).map(async (item) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     zipcode: clients.zipcode,
                     dob: new Date(clients.dob).toISOString().split('T')[0],
                     english_speaking_ability_id: clients.english_speaking_ability,
-                    english_speaking_ability: (await configService.getAdvocateServiceById(clients.english_speaking_ability)).name,
+                    english_speaking_ability: (await configService.getAdvocateServiceById(clients.english_speaking_ability))?.name ?? null,
                     preferred_language: clients.preferred_language,
                     gender: await Promise.all((clients.gender ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     race: await Promise.all((clients.race ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getAdvocateServiceById(item)).name
+                            name: (await configService.getAdvocateServiceById(item))?.name ?? null
                         }
                     })),
-                    citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status)).name,
+                    citizenship_status: (await configService.getAdvocateServiceById(clients.citizenship_status))?.name ?? null,
                     citizenship_status_id: clients.citizenship_status,
                     client_experienced: await Promise.all((clients.client_experienced ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     pregnant: clients.pregnant == true ? "Yes" : "No",
                     pregnant_months: clients.pregnant == true ? `${clients.pregnant_months} months` : "",
-                    birthdate_status: clients.birthdate_status == null ? null : (await configService.getAdvocateServiceById(clients.birthdate_status)).name,
+                    birthdate_status: clients.birthdate_status == null ? null : (await configService.getAdvocateServiceById(clients.birthdate_status))?.name ?? null,
                     birthdate_status_id: clients.birthdate_status || null,
                     children_accompany: ChildrenToAccompany[clients.children_accompany],
                     children_accompany_id: clients.children_accompany,
@@ -148,14 +148,14 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     criteria: await Promise.all((clients.criteria ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     criteria_add: await safeOptionsArray(clients.criteria_add),
                     medications: await Promise.all((clients.medications ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     medications_other: clients.medications_other,
@@ -163,19 +163,19 @@ export async function getClientDetails(clientsDetails: any, role?: number) {
                     mental_health_diagnoses: await Promise.all((clients.mental_health_diagnoses ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     physical_accommodation: await Promise.all((clients.physical_accommodation ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     nicotine_products: await Promise.all((clients.nicotine_products ?? []).map(async (item: number) => {
                         return {
                             id: item,
-                            name: (await configService.getServiceOptionsById(item)).name
+                            name: (await configService.getServiceOptionsById(item))?.name ?? null
                         }
                     })),
                     specify_physical_accommodation: clients.specify_physical_accommodation
