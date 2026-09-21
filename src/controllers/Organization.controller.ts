@@ -14,7 +14,12 @@ import {
     getServiceRequests, getUserDetails, removeOrganizationUser
 } from "../util/Organization.util";
 import {upload} from "../helper/MulterConfig.helper";
-import {clientServiceSchema, removeUserSchema, servicesSchema} from "../schema/Services.schema";
+import {
+    clientServiceSchema,
+    removeServiceManagerSchema,
+    removeUserSchema,
+    servicesSchema
+} from "../schema/Services.schema";
 import {DaysOfWeek, TimeZone} from "../entity/EmailReminder.entity";
 import {Constants} from "../helper/Constants.helper";
 import {advocateMiddleware} from "../middleware/Advocate.middleware";
@@ -535,13 +540,20 @@ export class AuthController {
             if (!req.body) {
                 return ResponseFormatter.errorResponse(res, 'Request body is undefined.');
             }
-            const {error} = removeUserSchema.validate(req.body);
+            const {error} = removeServiceManagerSchema.validate(req.body);
             if (error) {
                 return ResponseFormatter.errorResponse(res, error.details[0].message);
             }
-            const {user_id, email} = req.body;
+            const {user_id} = req.body;
 
-            await removeOrganizationUser(req.user.organization_id, user_id, email, req.user.id, Constants.ROLE_SERVICE_MANAGER);
+            const checkIfValidOrganizationServiceManager = await this.organizationService.checkIfOrganizationRoleUser(user_id, req.user.organization_id, Constants.ROLE_SERVICE_MANAGER);
+            if (!checkIfValidOrganizationServiceManager)
+                return ResponseFormatter.errorResponse(res, "Not a valid organization user");
+
+            const deleteServiceManager = await this.organizationService.deleteServiceManager(user_id);
+
+            if (!deleteServiceManager)
+                return ResponseFormatter.errorResponse(res, error.message || 'An error occurred')
 
             return ResponseFormatter.successResponse(res, 'Service manager deleted');
 
