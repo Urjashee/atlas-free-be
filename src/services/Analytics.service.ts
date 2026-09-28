@@ -60,7 +60,8 @@ export class AnalyticsService {
         const query = this.serviceDetailsRepository
             .createQueryBuilder("service")
             .innerJoin("service.organization", "org")
-            .where("org.is_active = :active", { active: true });
+            .where("org.is_active = :active", {active: true})
+            .andWhere('org.under_review = :underReview', {underReview: false});
 
         if (from_date && to_date) {
             query.andWhere(
@@ -83,9 +84,10 @@ export class AnalyticsService {
             .where("user.role = :type", {type});
 
         if (type === Constants.ROLE_SURVIVOR) {
-            query.andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true });
+            query.andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true});
         } else {
-            query.andWhere("org.is_active = :active", { active: true });
+            query.andWhere("org.is_active = :active", {active: true})
+                .andWhere('org.under_review = :underReview', {underReview: false});
         }
 
         if (from_date && to_date) {
@@ -106,7 +108,8 @@ export class AnalyticsService {
         const query = this.assignedServiceRepository
             .createQueryBuilder("service_request")
             .innerJoin("service_request.organization", "org")
-            .where("org.is_active = :active", { active: true });
+            .where("org.is_active = :active", {active: true})
+            .andWhere('org.under_review = :underReview', {underReview: false});
 
         if (status) {
             query.andWhere("service_request.status = :status", {status});
@@ -136,20 +139,20 @@ export class AnalyticsService {
             .innerJoin("as.organization", "org")
             .select("service.service_type", "data")
             .addSelect("COUNT(as.id)", "count")
-            .where("org.is_active = :active", { active: true });
+            .where("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("as.created_at >= :from_date", { from_date });
+            qb.andWhere("as.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("as.created_at <= :to_date", { to_date });
+            qb.andWhere("as.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "as.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -185,20 +188,20 @@ export class AnalyticsService {
             .select("cs.english_speaking_ability", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.english_speaking_ability IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -219,9 +222,9 @@ export class AnalyticsService {
 
         // Master speaking ability list
         const dataArray = [
-            { id: 1, name: "Fluent" },
-            { id: 2, name: "Limited" },
-            { id: 3, name: "None" },
+            {id: 1, name: "Fluent"},
+            {id: 2, name: "Limited"},
+            {id: 3, name: "None"},
         ];
 
         // Merge + percentage
@@ -235,20 +238,20 @@ export class AnalyticsService {
             .select("cs.gender", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.gender IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -264,11 +267,11 @@ export class AnalyticsService {
         }, {});
 
         const dataArray = [
-            { id: 11, name: "Female" },
-            { id: 12, name: "Male" },
-            { id: 13, name: "Non-Binary" },
-            { id: 14, name: "Transgender" },
-            { id: 15, name: "Two-Spirit" },
+            {id: 11, name: "Female"},
+            {id: 12, name: "Male"},
+            {id: 13, name: "Non-Binary"},
+            {id: 14, name: "Transgender"},
+            {id: 15, name: "Two-Spirit"},
         ];
 
         return returnFormat(dataArray, total, countMap);
@@ -281,20 +284,20 @@ export class AnalyticsService {
             .select("cs.citizenship_status", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.citizenship_status IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -333,20 +336,20 @@ export class AnalyticsService {
             .leftJoin("cs.organization", "org")
             .select("cs.client_experienced", "data")
             .where("cs.client_experienced IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -371,11 +374,11 @@ export class AnalyticsService {
 
 
         const dataArray = [
-            { id: 27, name: "Sex Trafficking" },
-            { id: 28, name: "Labor Trafficking" },
-            { id: 29, name: "Prostitution" },
-            { id: 30, name: "Survival Sex" },
-            { id: 31, name: "Other forms of commercial sex" },
+            {id: 27, name: "Sex Trafficking"},
+            {id: 28, name: "Labor Trafficking"},
+            {id: 29, name: "Prostitution"},
+            {id: 30, name: "Survival Sex"},
+            {id: 31, name: "Other forms of commercial sex"},
         ];
 
         return returnFormat(dataArray, total, countMap);
@@ -388,20 +391,20 @@ export class AnalyticsService {
             .select("cs.pregnant", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.pregnant IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -437,20 +440,20 @@ export class AnalyticsService {
             .select("cs.birthdate_status", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.birthdate_status IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -498,20 +501,20 @@ export class AnalyticsService {
             .select("cs.children_accompany", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.children_accompany IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -550,21 +553,21 @@ export class AnalyticsService {
             .leftJoin("cs.organization", "org")
             .select("cs.criteria", "data")
             .where("cs.criteria IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -637,21 +640,21 @@ export class AnalyticsService {
             .leftJoin("cs.organization", "org")
             .select("cs.race", "data")
             .where("cs.race IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -716,21 +719,21 @@ export class AnalyticsService {
             .leftJoin("cs.organization", "org")
             .select("cs.medications", "data")
             .where("cs.medications IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -819,21 +822,21 @@ export class AnalyticsService {
             .leftJoin("cs.organization", "org")
             .select("cs.physical_accommodation", "data")
             .where("cs.physical_accommodation IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -902,21 +905,21 @@ export class AnalyticsService {
             .leftJoin("cs.organization", "org")
             .select("cs.mental_health_diagnoses", "data")
             .where("cs.mental_health_diagnoses IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1001,21 +1004,21 @@ export class AnalyticsService {
             .leftJoin("cs.organization", "org")
             .select("cs.nicotine_products", "data")
             .where("cs.nicotine_products IS NOT NULL")
-            .andWhere("(org.id IS NULL OR org.is_active = :active)", { active: true })
+            .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
 
         if (from_date) {
-            qb.andWhere("cs.created_at >= :from_date", { from_date });
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("cs.created_at <= :to_date", { to_date });
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "cs.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1071,18 +1074,18 @@ export class AnalyticsService {
             .select("sd.waitlist", "waitlist")
             .addSelect("sd.id", "id")
             .addSelect("sd.total_available_slots", "total_available_slots")
-            .where("org.is_active = :active", { active: true });
+            .where("org.is_active = :active", {active: true});
 
         // Proper date filtering
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         } else if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         } else if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         const raw = await qb.getRawMany();
@@ -1118,9 +1121,9 @@ export class AnalyticsService {
 
         // Static labels
         const dataArray = [
-            { id: 1, name: "Open" },
-            { id: 2, name: "Waitlist" },
-            { id: 3, name: "Full" }
+            {id: 1, name: "Open"},
+            {id: 2, name: "Waitlist"},
+            {id: 3, name: "Full"}
         ];
         const total = raw.length;
         return returnFormat(dataArray, total, countMap);
@@ -1134,20 +1137,20 @@ export class AnalyticsService {
             .select("sd.service_type", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.service_type IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1167,37 +1170,37 @@ export class AnalyticsService {
             {
                 "id": 1,
                 "name": "Advocacy/Case Management",
-                
+
             },
             {
                 "id": 2,
                 "name": "Educational/Vocational Service",
-                
+
             },
             {
                 "id": 3,
                 "name": "Housing, Long-Term (3+ months)",
-                
+
             },
             {
                 "id": 4,
                 "name": "Housing, Short-Term (24 hours up to 3 months)",
-                
+
             },
             {
                 "id": 5,
                 "name": "Legal Advocacy",
-                
+
             },
             {
                 "id": 6,
                 "name": "Mental Health Service",
-                
+
             },
             {
                 "id": 7,
                 "name": "Substance-Use Disorder Service",
-                
+
             }
         ];
 
@@ -1211,21 +1214,21 @@ export class AnalyticsService {
             .select("sd.service_model", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.service_model IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1312,7 +1315,7 @@ export class AnalyticsService {
             .addSelect("AVG(sd.slots_available)", "slots_average")
             .addSelect("COUNT(*)", "count")
             .where("sd.slots_beds IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true })
+            .andWhere("org.is_active = :active", {active: true})
             .groupBy("sd.slots_beds")
             .getRawMany();
 
@@ -1326,21 +1329,21 @@ export class AnalyticsService {
             .select("sd.genders_served", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.genders_served IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1402,20 +1405,20 @@ export class AnalyticsService {
             .select("sd.served_to", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.served_to IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1473,20 +1476,20 @@ export class AnalyticsService {
             .select("sd.citizenship_requirement", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.citizenship_requirement IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1536,20 +1539,20 @@ export class AnalyticsService {
             .select("sd.language_requirement", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.language_requirement IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1599,20 +1602,20 @@ export class AnalyticsService {
             .select("sd.trafficking_status", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.trafficking_status IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1670,20 +1673,20 @@ export class AnalyticsService {
             .select("sd.legal", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.legal IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1757,20 +1760,20 @@ export class AnalyticsService {
             .select("sd.health_needs", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.health_needs IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1864,20 +1867,20 @@ export class AnalyticsService {
             .select("sd.medications", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.medications IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -1967,20 +1970,20 @@ export class AnalyticsService {
             .select("sd.mental_health_diagnoses", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.mental_health_diagnoses IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2066,20 +2069,20 @@ export class AnalyticsService {
             .select("sd.physical_accommodations", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.physical_accommodations IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2149,20 +2152,20 @@ export class AnalyticsService {
             .select("sd.entry_requirement", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.entry_requirement IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2217,20 +2220,20 @@ export class AnalyticsService {
             .select("sd.faith_engagement", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.faith_engagement IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2275,20 +2278,20 @@ export class AnalyticsService {
             .select("sd.service_structure", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.service_structure IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2329,20 +2332,20 @@ export class AnalyticsService {
             .select("sd.sleeping_arrangement", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.sleeping_arrangement IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2383,20 +2386,20 @@ export class AnalyticsService {
             .select("sd.staffing_level", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.staffing_level IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2437,20 +2440,20 @@ export class AnalyticsService {
             .select("sd.teams_diversity", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.teams_diversity IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2512,20 +2515,20 @@ export class AnalyticsService {
             .select("sd.service_guidelines", "data")
             .addSelect("COUNT(*)", "count")
             .where("sd.service_guidelines IS NOT NULL")
-            .andWhere("org.is_active = :active", { active: true });
+            .andWhere("org.is_active = :active", {active: true});
 
         if (from_date) {
-            qb.andWhere("sd.created_at >= :from_date", { from_date });
+            qb.andWhere("sd.created_at >= :from_date", {from_date});
         }
 
         if (to_date) {
-            qb.andWhere("sd.created_at <= :to_date", { to_date });
+            qb.andWhere("sd.created_at <= :to_date", {to_date});
         }
 
         if (from_date && to_date) {
             qb.andWhere(
                 "sd.created_at BETWEEN :from_date AND :to_date",
-                { from_date, to_date }
+                {from_date, to_date}
             );
         }
 
@@ -2597,10 +2600,10 @@ const returnFormat = (data: any, total: number, countMap: Record<string, number>
 const formatSlotsBeds = (rows: any[]) => {
     // console.log("Rows: ", rows);
     const result = {
-        beds: { count: 0, total: 0 },
-        slots: { count: 0, total: 0 },
-        beds_available: { count: 0, total: 0 },
-        slots_available: { count: 0, total: 0 },
+        beds: {count: 0, total: 0},
+        slots: {count: 0, total: 0},
+        beds_available: {count: 0, total: 0},
+        slots_available: {count: 0, total: 0},
     };
 
     for (const row of rows) {
