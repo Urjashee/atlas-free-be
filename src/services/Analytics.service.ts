@@ -205,7 +205,7 @@ export class AnalyticsService {
             .groupBy("cs.english_speaking_ability")
             .getRawMany();
 
-        console.log("English speaking: ", raw)
+        // console.log("English speaking: ", raw)
 
         // Total count
         const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
@@ -2594,7 +2594,7 @@ const returnFormat = (data: any, total: number, countMap: Record<string, number>
 }
 
 const formatSlotsBeds = (rows: any[]) => {
-    console.log("Rows: ", rows);
+    // console.log("Rows: ", rows);
     const result = {
         beds: { count: 0, total: 0 },
         slots: { count: 0, total: 0 },
