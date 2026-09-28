@@ -39,6 +39,7 @@ export class AnalyticsService {
         const query = this.organizationRepository
             .createQueryBuilder("org")
             .where('org.is_active = :orgActive', {orgActive: true})
+            .andWhere('org.under_review = :underReview', {underReview: false})
         ;
 
         if (from_date && to_date) {
