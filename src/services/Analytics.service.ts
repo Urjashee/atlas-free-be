@@ -40,6 +40,7 @@ export class AnalyticsService {
             .createQueryBuilder("org")
             .where('org.is_active = :orgActive', {orgActive: true})
             .andWhere('org.under_review = :underReview', {underReview: false})
+            .andWhere('org.platform_purpose = :platformPurpose', {platformPurpose: 13})
         ;
 
         if (from_date && to_date) {
@@ -85,6 +86,8 @@ export class AnalyticsService {
 
         if (type === Constants.ROLE_SURVIVOR) {
             query.andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true});
+        } else if (type === Constants.ROLE_ADVOCATE) {
+            query.andWhere('org.platform_purpose = :platformPurpose', {platformPurpose: 14})
         } else {
             query.andWhere("org.is_active = :active", {active: true})
                 .andWhere('org.under_review = :underReview', {underReview: false});
