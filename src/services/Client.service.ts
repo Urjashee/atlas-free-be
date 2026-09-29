@@ -4,6 +4,7 @@ import {Organization} from "../entity/Organization.entity";
 import {PasswordReset} from "../entity/PasswordReset.entity";
 import {ServiceDetails} from "../entity/ServiceDetails.entity";
 import {AssignedServices, ClientStatus} from "../entity/AssignedServices.entity";
+import {ServiceRequestStatusHistory} from "../entity/ServiceRequestStatusHistory.entity";
 import {ReportService} from "../entity/ReportService.entity";
 import {DeviceToken} from "../entity/DeviceToken.entity";
 import {Affiliations} from "../entity/Affiliations.entity";
@@ -28,6 +29,7 @@ export class ClientService {
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
     private clientServiceRepository = AppDataSource.getRepository(ClientServiceEntity);
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
+    private serviceRequestStatusHistoryRepository = AppDataSource.getRepository(ServiceRequestStatusHistory);
     private reportServiceRepository = AppDataSource.getRepository(ReportService);
     private mailerService = new EmailService();
     private notificationService = new NotificationService();
@@ -332,8 +334,21 @@ export class ClientService {
             throw new Error("Service request not found");
         }
 
+        const previousStatus = serviceRequest.status;
         serviceRequest.status = status;
         const saved = await this.assignedServiceRepository.save(serviceRequest);
+
+        const hasHistory = await this.serviceRequestStatusHistoryRepository.exist({
+            where: {assigned_service: {id}}
+        });
+        if (!hasHistory || previousStatus !== status) {
+            await this.serviceRequestStatusHistoryRepository.save(
+                this.serviceRequestStatusHistoryRepository.create({
+                    assigned_service: {id},
+                    status,
+                })
+            );
+        }
 
         try {
             if (serviceRequest.organization ) {

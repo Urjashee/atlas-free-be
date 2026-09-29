@@ -20,6 +20,7 @@ import {ResponseFormatter} from "../helper/ResponseFormatter.helper";
 import {ServiceSetting} from "../entity/ServiceSetting.entity";
 import {EmailReminder} from "../entity/EmailReminder.entity";
 import {AssignedServices, ClientStatus} from "../entity/AssignedServices.entity";
+import {ServiceRequestStatusHistory} from "../entity/ServiceRequestStatusHistory.entity";
 import {ReportUser} from "../entity/ReportUser";
 import {ClientService} from "../entity/ClientService.entity";
 import {ReportService} from "../entity/ReportService.entity";
@@ -31,6 +32,7 @@ export class AnalyticsService {
     private organizationRepository = AppDataSource.getRepository(Organization);
     private serviceDetailsRepository = AppDataSource.getRepository(ServiceDetails);
     private assignedServiceRepository = AppDataSource.getRepository(AssignedServices);
+    private serviceRequestStatusHistoryRepository = AppDataSource.getRepository(ServiceRequestStatusHistory);
     private clientServiceRepository = AppDataSource.getRepository(ClientService);
     private configService = new ConfigService();
 
@@ -108,19 +110,38 @@ export class AnalyticsService {
     }
 
     async getServiceRequestCount(status?: number, from_date?: string, to_date?: string) {
-        const query = this.assignedServiceRepository
-            .createQueryBuilder("service_request")
+        if (!status) {
+            // console.log("Status: ", status)
+            const query = this.assignedServiceRepository
+                .createQueryBuilder("service_request")
+                .innerJoin("service_request.organization", "org")
+                .where("org.is_active = :active", {active: true})
+                .andWhere('org.under_review = :underReview', {underReview: false});
+
+            if (from_date && to_date) {
+                query.andWhere(
+                    "service_request.created_at BETWEEN :from AND :to",
+                    {
+                        from: new Date(from_date),
+                        to: new Date(to_date),
+                    }
+                );
+            }
+
+            return await query.getCount();
+        }
+        // console.log("Status: ", status)
+        const query = this.serviceRequestStatusHistoryRepository
+            .createQueryBuilder("history")
+            .innerJoin("history.assigned_service", "service_request")
             .innerJoin("service_request.organization", "org")
             .where("org.is_active = :active", {active: true})
-            .andWhere('org.under_review = :underReview', {underReview: false});
-
-        if (status) {
-            query.andWhere("service_request.status = :status", {status});
-        }
+            .andWhere('org.under_review = :underReview', {underReview: false})
+            .andWhere("history.status = :status", {status});
 
         if (from_date && to_date) {
             query.andWhere(
-                "service_request.created_at BETWEEN :from AND :to",
+                "history.created_at BETWEEN :from AND :to",
                 {
                     from: new Date(from_date),
                     to: new Date(to_date),
@@ -129,7 +150,6 @@ export class AnalyticsService {
         }
 
         return await query.getCount();
-        // return count;
     }
 
     // Survivor demographics
