@@ -566,6 +566,7 @@ export class OrganizationService {
                 organization: {id: organization_id},
                 // is_active: true,
                 is_status: true,
+                email: (Not("deleteuser@servicemanager.com"))
                 // emailVerifiedAt: Not(IsNull()),
             },
             order: {created_at: "DESC"}
