@@ -307,9 +307,15 @@ export async function getServiceRequests(organization_id: number, page_number: n
         const user = await userService.findById(service.user.id);
         const type = roleTypeMap[user.role.id];
 
+        console.log("service", service);
+
         const base = {
             type,
             id: service.id,
+            organization: {
+                id: service?.organization?.id,
+                name: service?.organization?.name
+            },
             service_id: service.service.id,
             service: service.service.name,
             date_time: service.created_at,
@@ -356,6 +362,10 @@ export async function getServiceRequestDetails(serviceRequestsId: number) {
     const base = {
         type,
         id: service.id,
+        organization: {
+            id: service?.organization?.id,
+            name: service?.organization?.name
+        },
         service_id: service.service.id,
         service: service.service.name,
         date_time: service.created_at,

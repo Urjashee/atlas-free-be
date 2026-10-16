@@ -200,6 +200,10 @@ export class ServiceManagerController {
                     customResponse.push({
                         type: "user",
                         id: service.id,
+                        organization: {
+                            id: service?.organization?.id,
+                            name: service?.organization?.name
+                        },
                         service_id: service.service.id,
                         service: service.service.name,
                         case_no: service.case_no,
@@ -215,6 +219,10 @@ export class ServiceManagerController {
                     customResponse.push({
                         type: "survivor",
                         id: service.id,
+                        organization: {
+                            id: service?.organization?.id,
+                            name: service?.organization?.name
+                        },
                         service_id: service.service.id,
                         service: service.service.name,
                         client_name: `${user.user_name}`,
@@ -255,6 +263,10 @@ export class ServiceManagerController {
                 client = {
                     type: "user",
                     id: getServiceRequest.id,
+                    organization: {
+                        id: getServiceRequest?.organization?.id,
+                        name: getServiceRequest?.organization?.name
+                    },
                     service_id: getServiceRequest.service.id,
                     service: getServiceRequest.service.name,
                     requested_email: getServiceRequest.user.email,

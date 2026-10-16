@@ -167,6 +167,10 @@ export class AdvocateController {
 
                 customResponse.push({
                     id: service.id,
+                    organization: {
+                        id: service?.organization?.id,
+                        name: service?.organization?.name
+                    },
                     service_id: service.service.id,
                     service: service.service.name,
                     service_type: serviceOption.name,

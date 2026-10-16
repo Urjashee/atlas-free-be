@@ -190,6 +190,10 @@ export class AdvocateController {
 
             const customResponse = data.map(service => ({
                 id: service.id,
+                organization: {
+                    id: service?.organization?.id,
+                    name: service?.organization?.name
+                },
                 service_id: service.service.id,
                 service: service.service.name,
                 client_id: service.client_service.id,
