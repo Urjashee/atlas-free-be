@@ -193,6 +193,10 @@ export async function getServiceRequestsUser(serviceRequests: any) {
     if (!requestsArray) {
         return {
             client_id: serviceRequests?.id ?? null,
+            organization: {
+                id: serviceRequests?.organization?.id ?? null,
+                name: serviceRequests?.organization?.name ?? null,
+            },
             service_status_id: serviceRequests?.status ?? null,
             service_status: serviceRequests?.status
                 ? ClientStatus[Number(serviceRequests.status)]
@@ -213,6 +217,10 @@ export async function getServiceRequestsUser(serviceRequests: any) {
         return Promise.all(
             serviceRequests.map(async (serviceRequest: any) => ({
                 client_id: serviceRequest?.id ?? null,
+                organization: {
+                    id: serviceRequest?.organization?.id ?? null,
+                    name: serviceRequest?.organization?.name ?? null,
+                },
                 service_status_id: serviceRequest?.status ?? null,
                 service_status: serviceRequest?.status
                     ? ClientStatus[Number(serviceRequest.status)]
