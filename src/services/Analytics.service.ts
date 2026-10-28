@@ -337,15 +337,15 @@ export class AnalyticsService {
 
         const dataArray = [
             {
-                "id": 10,
+                "id": 11,
                 "name": "US Citizen"
             },
             {
-                "id": 11,
+                "id": 12,
                 "name": "Documented foreign national"
             },
             {
-                "id": 12,
+                "id": 13,
                 "name": "Undocumented foreign national"
             }
         ];
