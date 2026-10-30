@@ -493,23 +493,23 @@ export class AnalyticsService {
 
         const dataArray = [
             {
-                "id": 13,
+                "id": 14,
                 "name": "Emancipated"
             },
             {
-                "id": 14,
+                "id": 15,
                 "name": "Ward of the State"
             },
             {
-                "id": 15,
+                "id": 16,
                 "name": "About to age-out"
             },
             {
-                "id": 16,
+                "id": 17,
                 "name": "Parent or guardian consent"
             },
             {
-                "id": 17,
+                "id": 18,
                 "name": "Determination in Process"
             }
         ];
@@ -651,6 +651,10 @@ export class AnalyticsService {
             {
                 "id": 40,
                 "name": "are registered sex offenders"
+            },
+            {
+                "id": 170,
+                "name": "None"
             }
         ];
 
@@ -914,7 +918,19 @@ export class AnalyticsService {
                 "name": "Specialized equipment (e.g., adjustable tables, assistive technology)"
             },
             {
+                "id": 174,
+                "name": "Emotional Support Animal (ESA)"
+            },
+            {
+                "id": 175,
+                "name": "Service animal"
+            },
+            {
                 "id": 87,
+                "name": "None"
+            },
+            {
+                "id": 171,
                 "name": "Other"
             }
         ];
@@ -1321,6 +1337,10 @@ export class AnalyticsService {
             {
                 "id": 106,
                 "name": "Survivor-Led"
+            },
+            {
+                "id": 173,
+                "name": "None"
             }
         ];
 
@@ -1770,6 +1790,10 @@ export class AnalyticsService {
             {
                 "id": 40,
                 "name": "are registered sex offenders"
+            },
+            {
+                "id": 170,
+                "name": "None"
             }
         ];
 
@@ -2160,8 +2184,20 @@ export class AnalyticsService {
                 "name": "Specialized equipment (e.g., adjustable tables, assistive technology)"
             },
             {
+                "id": 174,
+                "name": "Emotional Support Animal (ESA)"
+            },
+            {
+                "id": 175,
+                "name": "Service animal"
+            },
+            {
                 "id": 87,
                 "name": "None"
+            },
+            {
+                "id": 171,
+                "name": "Other"
             }
         ];
 
