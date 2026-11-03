@@ -183,8 +183,7 @@ export class AnalyticsService {
             .groupBy("service.service_type")
             .getRawMany();
 
-        // Total count
-        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+        // const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
         // Convert raw result to lookup map
         const countMap = raw.reduce<Record<number, number>>((acc, r) => {
@@ -199,6 +198,12 @@ export class AnalyticsService {
             name: item.name,
             icon: item.icon,
         }));
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -234,9 +239,6 @@ export class AnalyticsService {
 
         // console.log("English speaking: ", raw)
 
-        // Total count
-        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
-
         // Convert raw result to lookup map
         const countMap = raw.reduce<Record<number, number>>((acc, r) => {
             acc[Number(r.data)] = Number(r.count);
@@ -250,6 +252,12 @@ export class AnalyticsService {
             {id: 3, name: "None"},
         ];
 
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
+
         // Merge + percentage
         return returnFormat(dataArray, total, countMap);
     }
@@ -261,6 +269,7 @@ export class AnalyticsService {
             .select("cs.gender", "data")
             .addSelect("COUNT(*)", "count")
             .where("cs.gender IS NOT NULL")
+            .andWhere("cs.gender <> :excludedGender", { excludedGender: 10 })
             .andWhere("(org.id IS NULL OR org.is_active = :active)", {active: true})
 
         if (from_date) {
@@ -282,8 +291,6 @@ export class AnalyticsService {
             .groupBy("cs.gender")
             .getRawMany();
 
-        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
-
         const countMap = raw.reduce<Record<number, number>>((acc, r) => {
             acc[Number(r.data)] = Number(r.count); // 🔑 fix
             return acc;
@@ -296,6 +303,11 @@ export class AnalyticsService {
             {id: 14, name: "Transgender"},
             {id: 15, name: "Two-Spirit"},
         ];
+
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -328,7 +340,7 @@ export class AnalyticsService {
             .groupBy("cs.citizenship_status")
             .getRawMany();
 
-        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+        // const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
         const countMap = raw.reduce<Record<number, number>>((acc, r) => {
             acc[Number(r.data)] = Number(r.count); // 🔑 fix
@@ -349,6 +361,12 @@ export class AnalyticsService {
                 "name": "Undocumented foreign national"
             }
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -435,7 +453,7 @@ export class AnalyticsService {
             .groupBy("cs.pregnant")
             .getRawMany();
 
-        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+        // const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
         const countMap = raw.reduce<Record<number, number>>((acc, r) => {
             acc[Number(r.data)] = Number(r.count);
@@ -452,6 +470,12 @@ export class AnalyticsService {
                 "name": "Yes"
             },
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -484,7 +508,7 @@ export class AnalyticsService {
             .groupBy("cs.birthdate_status")
             .getRawMany();
 
-        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+        // const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
         const countMap = raw.reduce<Record<number, number>>((acc, r) => {
             acc[Number(r.data)] = Number(r.count); // 🔑 fix
@@ -513,6 +537,12 @@ export class AnalyticsService {
                 "name": "Determination in Process"
             }
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -545,7 +575,7 @@ export class AnalyticsService {
             .groupBy("cs.children_accompany")
             .getRawMany();
 
-        const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
+        // const total = raw.reduce((sum, r) => sum + Number(r.count), 0);
 
         const countMap = raw.reduce<Record<number, number>>((acc, r) => {
             acc[Number(r.data)] = Number(r.count); // 🔑 fix
@@ -566,6 +596,12 @@ export class AnalyticsService {
                 "name": "Preferred"
             }
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -611,8 +647,8 @@ export class AnalyticsService {
             });
         });
 
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        // const total = Object.values(countMap)
+        //     .reduce((sum, c) => sum + c, 0);
 
 
         const dataArray = [
@@ -653,6 +689,12 @@ export class AnalyticsService {
                 "name": "are registered sex offenders"
             }
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -698,8 +740,8 @@ export class AnalyticsService {
             });
         });
 
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        // const total = Object.values(countMap)
+        //     .reduce((sum, c) => sum + c, 0);
 
 
         const dataArray = [
@@ -732,6 +774,12 @@ export class AnalyticsService {
                 "name": "prefer(s) not to say"
             }
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -777,8 +825,8 @@ export class AnalyticsService {
             });
         });
 
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        // const total = Object.values(countMap)
+        //     .reduce((sum, c) => sum + c, 0);
 
 
         const dataArray = [
@@ -836,6 +884,12 @@ export class AnalyticsService {
             }
         ];
 
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
+
         return returnFormat(dataArray, total, countMap);
     }
 
@@ -880,8 +934,8 @@ export class AnalyticsService {
             });
         });
 
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        // const total = Object.values(countMap)
+        //     .reduce((sum, c) => sum + c, 0);
 
 
         const dataArray = [
@@ -918,6 +972,12 @@ export class AnalyticsService {
                 "name": "Other"
             }
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
@@ -963,8 +1023,8 @@ export class AnalyticsService {
             });
         });
 
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        // const total = Object.values(countMap)
+        //     .reduce((sum, c) => sum + c, 0);
 
 
         const dataArray = [
@@ -1018,6 +1078,12 @@ export class AnalyticsService {
             }
         ];
 
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
+
         return returnFormat(dataArray, total, countMap);
     }
 
@@ -1062,8 +1128,8 @@ export class AnalyticsService {
             });
         });
 
-        const total = Object.values(countMap)
-            .reduce((sum, c) => sum + c, 0);
+        // const total = Object.values(countMap)
+        //     .reduce((sum, c) => sum + c, 0);
 
 
         const dataArray = [
@@ -1084,6 +1150,12 @@ export class AnalyticsService {
                 "name": "None"
             }
         ];
+
+        // Total count
+        const total = dataArray.reduce(
+            (sum, gender) => sum + (countMap[gender.id] || 0),
+            0
+        );
 
         return returnFormat(dataArray, total, countMap);
     }
