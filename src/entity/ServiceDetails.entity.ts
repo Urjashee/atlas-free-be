@@ -192,7 +192,7 @@ export class ServiceDetails {
     @Column({ nullable: true })
     faith_engagement!: number;
 
-    @Column({ nullable: true })
+    @Column({ type: "text", nullable: true })
     faith_engagement_practice!: string;
 
     @Column({ nullable: true })

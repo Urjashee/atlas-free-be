@@ -700,8 +700,8 @@ export class OrganizationService {
         // Children
         if (children === "true" || children === "1") {
             qb.andWhere(new Brackets(qb2 => {
-                qb2.where('svc.served_to LIKE :ch1', {ch1: '%17%'})
-                    .orWhere('svc.served_to LIKE :ch2', {ch2: '%18%'});
+                qb2.where('svc.served_to LIKE :ch1', {ch1: '%18%'})
+                    .orWhere('svc.served_to LIKE :ch2', {ch2: '%20%'});
             }));
         }
 
@@ -774,11 +774,22 @@ export class OrganizationService {
             qb.andWhere('svc.served_to LIKE :pregId', {pregId: '%17%'});
         }
         //
-        // // Pre-filter: Children — only restrict if user must bring children
-        if (children_accompany === "1" || children_accompany == "true") {
+        // // Pre-filter: Children (1 = Yes, 2 = No, 3 = Preferred)
+        // Parent services = Parenting Individuals (18) or Parenting Couples (20)
+        if (children_accompany === "1" || children_accompany === "true") {
+            // Must have children: only services that serve parents
             qb.andWhere(new Brackets(qb2 => {
                 qb2.where('svc.served_to LIKE :par1', {par1: '%18%'})
                     .orWhere('svc.served_to LIKE :par2', {par2: '%20%'});
+            }));
+        } else if (children_accompany === "2") {
+            // No children: hide services that serve parents
+            qb.andWhere(new Brackets(qb2 => {
+                qb2.where('svc.served_to IS NULL')
+                    .orWhere('(svc.served_to NOT LIKE :npar1 AND svc.served_to NOT LIKE :npar2)', {
+                        npar1: '%18%',
+                        npar2: '%20%'
+                    });
             }));
         }
         //

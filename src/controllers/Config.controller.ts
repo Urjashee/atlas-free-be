@@ -432,8 +432,17 @@ export class ConfigController {
             const dobDate = dob ? new Date(dob as string) : null;
             const age = dobDate ? Math.floor((Date.now() - dobDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : null;
 
-            const pregnant = req.query.pregnant as string;
-            const children_accompany = req.query.children_accompany as string;
+            // Frontend sends words (Yes/No/Preferred); accept those as well as 1/2/3
+            const normalizeYesNo = (raw: any, map: Record<string, string>): string | null => {
+                if (raw === undefined || raw === null || raw === "") return null;
+                return map[String(raw).trim().toLowerCase()] ?? null;
+            };
+            const pregnant = normalizeYesNo(req.query.pregnant, {yes: "1", "1": "1", "true": "1"});
+            // children_accompany: 1 = Yes, 2 = No, 3 = Preferred
+            const children_accompany = normalizeYesNo(
+                req.query.children_accompany ?? req.query.children_accompanying,
+                {yes: "1", "1": "1", "true": "1", no: "2", "2": "2", "false": "2", preferred: "3", "3": "3"}
+            );
             const language = req.query.preferred_language ? parseInt(req.query.preferred_language as string) : null;
 
             // console.log("Language", language);
