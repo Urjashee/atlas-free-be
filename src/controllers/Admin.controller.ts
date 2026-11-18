@@ -860,6 +860,7 @@ export class AdminController {
             const serviceRequestWaitlisted = await this.analyticService.getServiceRequestCount(Constants.WAITLISTED, from_date, to_date);
             const serviceRequestCancelled = await this.analyticService.getServiceRequestCount(Constants.CANCELLED, from_date, to_date);
             const serviceRequestAccepted = await this.analyticService.getServiceRequestCount(Constants.ACCEPTED, from_date, to_date);
+            const totalResponses = await this.analyticService.getTotalResponses(from_date, to_date);
             const serviceRequestDemo = await this.analyticService.getServiceRequestDemo(from_date, to_date);
             const serviceRequestSpeakingAbilityDemo = await this.analyticService.getEnglishSpeakingAbilityDistribution(from_date, to_date);
             const serviceRequestGenderDemo = await this.analyticService.getGenderDistribution(from_date, to_date);
@@ -912,6 +913,7 @@ export class AdminController {
                     total_service_requests_accepted: serviceRequestAccepted,
                 },
                 survivor_demographics: {
+                    total_responses: totalResponses,
                     service_requests_demographics: serviceRequestDemo,
                     speaking_ability_demographics: serviceRequestSpeakingAbilityDemo,
                     gender_demographics: serviceRequestGenderDemo,

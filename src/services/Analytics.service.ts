@@ -262,6 +262,38 @@ export class AnalyticsService {
         return returnFormat(dataArray, total, countMap);
     }
 
+    /**
+     * Total profiles (saved survey forms) created in the date range.
+     * Edits update the row in place, so each profile is counted once by its created_at.
+     * Self-made = survivor-created (client_id set); Client = advocate/org-created (user_id set).
+     */
+    async getTotalResponses(from_date?: string, to_date?: string) {
+        const qb = this.clientServiceRepository
+            .createQueryBuilder("cs")
+            .leftJoin("cs.organization", "org")
+            .select("COALESCE(SUM(CASE WHEN cs.client_id IS NOT NULL THEN 1 ELSE 0 END), 0)", "self_made")
+            .addSelect("COALESCE(SUM(CASE WHEN cs.client_id IS NULL AND cs.user_id IS NOT NULL THEN 1 ELSE 0 END), 0)", "client")
+            .where("(org.id IS NULL OR org.is_active = :active)", {active: true});
+
+        if (from_date) {
+            qb.andWhere("cs.created_at >= :from_date", {from_date});
+        }
+
+        if (to_date) {
+            qb.andWhere("cs.created_at <= :to_date", {to_date});
+        }
+
+        const raw = await qb.getRawOne();
+        const selfMade = Number(raw?.self_made || 0);
+        const client = Number(raw?.client || 0);
+
+        return {
+            total_responses: selfMade + client,
+            self_made_profiles: selfMade,
+            client_profiles: client,
+        };
+    }
+
     async getGenderDistribution(from_date?: string, to_date?: string) {
         const qb = this.clientServiceRepository
             .createQueryBuilder("cs")
